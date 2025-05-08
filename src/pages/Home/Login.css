@@ -1,0 +1,236 @@
+/* ====== Container Layout ====== */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #f2f2f2;
+}
+
+/* ====== Login Box ====== */
+.login-box {
+  width: 850px;
+  height: 600px;
+  display: flex;
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* ====== Left Panel ====== */
+.panel {
+  width: 40%;
+  padding: 40px 20px;
+  background: linear-gradient(to right, #f33f3f, #f75555);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.panel h2 {
+  font-size: 24px;
+  margin-bottom: 15px;
+}
+
+.panel p {
+  font-size: 14px;
+  margin-bottom: 30px;
+}
+
+.switch-btn {
+  background: white;
+  color: #f33f3f;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* ====== Form Container ====== */
+.form-container {
+  width: 60%;
+  padding: 40px 30px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.social-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.social-buttons button {
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.small-text {
+  text-align: center;
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 15px;
+}
+
+/* ====== Input Fields ====== */
+.form input,
+.custom-input {
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  width: 100%;
+}
+
+/* ====== Name Row (if needed) ====== */
+.name-row {
+  display: flex;
+  gap: 10px;
+}
+
+.name-row input {
+  flex: 1;
+}
+
+/* ====== Submit Button ====== */
+.submit-btn {
+  background: #f33f3f;
+  color: white;
+  border: none;
+  padding: 12px;
+  font-weight: bold;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.submit-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* ====== Links ====== */
+.link,
+.skip-login {
+  text-align: right;
+  font-size: 12px;
+  color: #007bff;
+  text-decoration: none;
+  margin-top: 5px;
+}
+
+.skip-login {
+  display: block;
+  text-align: center;
+  margin-top: 10px;
+}
+
+/* ====== Google Login Button ====== */
+.google-btn {
+  display: block;
+  margin: 12px auto;
+  padding: 10px 20px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background: white;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+.google-btn:hover {
+  background: #f0f0f0;
+}
+
+/* ====== Password Rules (if any) ====== */
+.password-rules {
+  font-size: 14px;
+  background: #f9f9f9;
+  border-radius: 5px;
+  padding: 12px;
+  margin-top: 10px;
+}
+
+.password-rules p {
+  margin: 6px 0;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.password-rules span {
+  display: inline-block;
+  width: 20px;
+  text-align: center;
+  margin-right: 8px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.passed span {
+  color: green;
+}
+
+.not-passed span {
+  color: gray;
+}
+
+/* ====== Modal Email / Code ====== */
+.modalEmail,
+.modalCode {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+}
+
+.overlayLogin {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.modalEmail-content,
+.modalCode-content {
+  position: relative;
+  max-width: 400px;
+  margin: 100px auto;
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  z-index: 1001;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 0.3s ease;
+}
+
+.modalEmail-content h2,
+.modalCode-content h2 {
+  margin-bottom: 20px;
+  font-size: 18px;
+  text-align: center;
+}
+
+/* ====== Fade In Animation ====== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}

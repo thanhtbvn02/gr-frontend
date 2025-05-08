@@ -1,0 +1,120 @@
+.menu-dropdown { position: relative; }
+.top-nav ul { display: flex; }
+.top-nav li { margin-right:1rem; cursor:pointer; }
+.top-nav li.active { font-weight:bold; }
+.submenu-container {
+  display: flex;
+  position: absolute;
+  top: 100%;        
+  left: 0;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 100;
+  text-align: left;
+  width: 70%;
+}
+.sub-panel { width: 100% }
+.third-grid { display: flex; flex-wrap: wrap; padding: 10px; }
+.third-card {
+  flex: 0 0 120px;
+  margin: 5px;
+  cursor: pointer;
+  text-align: left;
+}
+.home-container {
+  margin: 120px 5%;
+}
+
+/* Bọc tất cả sản phẩm */
+.product-list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 cột */
+  gap: 20px;
+}
+
+.product-card {
+  border: 1px solid #ddd;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.product-card img {
+  width: 150px;
+  height: auto;
+  border: 1px solid #ddd;
+}
+
+.product-info {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.product-info h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+.product-info p {
+  margin: 5px 0;
+}
+
+.product-info .price {
+  font-weight: bold;
+  font-size: 18px;
+  color: #e22323;
+}
+
+.product-actions {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.product-actions button {
+  border: none;
+  padding: 8px 12px;
+  background-color: #186dc8;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.product-actions button a {
+  color: white;
+  text-decoration: none;
+}
+
+.load-more-btn {
+  margin-top: 30px;
+  padding: 10px 20px;
+  background-color: #e22323;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+.child-category-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  border: 1px solid #ddd;
+  padding: 8px;
+  z-index: 1000;
+  box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
+  min-width: 200px;
+}
+
+.child-category-item {
+  padding: 4px 10px;
+  font-size: 14px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.child-category-item:hover {
+  background-color: #f1f1f1;
+}

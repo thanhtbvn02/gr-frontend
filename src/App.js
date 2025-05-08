@@ -1,23 +1,46 @@
-import logo from './logo.svg';
 import './App.css';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { Fragment } from 'react';
+import {
+  SearchResults,
+  Add,
+  Update,
+  Dashboard
+}from './pages/Admin';
+
+import {
+  Home,
+  ProductInformation,
+  Login,
+  Register,
+  LoginSuccess
+} from './pages/Home'
+
+import {
+  Information
+} from './pages/User'
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Fragment> 
+        <BrowserRouter>
+        <Routes>
+          <Route path="/add" element={<Add />} />
+          <Route path="/update/:id" element={<Update />} />
+          <Route path='/productInfor/:id' element={<ProductInformation />} />
+          <Route path='/search' element={<SearchResults />} />
+          {/* <Route path='/home' element={<Main />} /> */}
+          <Route path='/infor/:id' element={<Information />} />
+          <Route path='/' element={<Home />} />
+          <Route path='/login' element={<Login />} />
+          <Route path='/register' element={<Register />} />
+          <Route path='/login-success' element={<LoginSuccess />} />
+          <Route path='/admin' element={<Dashboard />} />
+        </Routes>
+      </BrowserRouter>
+      </Fragment>
+      
     </div>
   );
 }

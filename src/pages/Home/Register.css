@@ -1,0 +1,244 @@
+/* Container tổng */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f2f2f2;
+}
+
+/* Box chính gồm panel và form */
+.login-box {
+  width: 850px;
+  height: 570px;
+  display: flex;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Panel bên trái */
+.panel {
+  width: 40%;
+  padding: 40px 20px;
+  background: linear-gradient(to right, #f33f3f, #f75555);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.panel h2 {
+  font-size: 24px;
+  margin-bottom: 15px;
+}
+
+.panel p {
+  font-size: 14px;
+  margin-bottom: 30px;
+}
+
+.switch-btn {
+  background-color: white;
+  color: #f33f3f;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.switch-btn:hover {
+  background-color: #fff0f0;
+}
+
+/* Form container bên phải */
+.form-container {
+  width: 60%;
+  padding: 40px 30px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.form h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 22px;
+  color: #333;
+}
+
+/* Custom input style */
+.custom-input,
+.form input {
+  padding: 10px;
+  margin-bottom: 12px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Password rules box */
+.password-rules {
+  font-size: 14px;
+  background: #f9f9f9;
+  border-radius: 5px;
+  padding: 12px;
+  margin-top: -6px;
+  margin-bottom: 12px;
+}
+
+.password-rules p {
+  margin: 6px 0;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+}
+
+.password-rules span {
+  display: inline-block;
+  width: 20px;
+  text-align: center;
+  margin-right: 8px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.passed span {
+  color: green;
+}
+
+.not-passed span {
+  color: gray;
+}
+
+/* Nút submit */
+.submit-btn {
+  background-color: #f33f3f;
+  color: white;
+  padding: 12px;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: background-color 0.3s;
+}
+
+.submit-btn:hover {
+  background-color: #d32f2f;
+}
+
+.submit-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Skip link */
+.skip-login {
+  display: block;
+  text-align: center;
+  margin-top: 10px;
+  font-size: 13px;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.skip-login:hover {
+  text-decoration: underline;
+}
+
+/* Google Login */
+.google-login-btn {
+  background-color: white;
+  color: #444;
+  border: 1px solid #ccc;
+  padding: 10px 15px;
+  width: 100%;
+  font-weight: bold;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.google-login-btn:hover {
+  background-color: #f5f5f5;
+}
+
+/* Toggle Password */
+.input-password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.input-password-wrapper input {
+  width: 100%;
+  padding: 10px 40px 10px 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.3s;
+}
+
+.input-password-wrapper input:focus {
+  border-color: #4f46e5;
+}
+
+.toggle-eye {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  font-size: 18px;
+  cursor: pointer;
+  user-select: none;
+  color: #888;
+  transition: color 0.3s;
+}
+
+.toggle-eye:hover {
+  color: #4f46e5;
+}
+
+.passed, .not-passed {
+  font-size: 14px;
+  margin: 4px 0 0 4px;
+}
+
+.passed {
+  color: #16a34a; /* green */
+}
+
+.not-passed {
+  color: #dc2626; /* red */
+}
+
+/* Captcha */
+.captcha-container {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 12px;
+}
+
+.input-group label {
+  font-size: 13px;
+  margin-bottom: 4px;
+  display: block;
+}
+
+.captcha-image svg {
+  width: 100px;
+  height: 40px;
+  cursor: pointer;
+}

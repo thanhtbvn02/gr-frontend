@@ -1,0 +1,92 @@
+.footer-panel {
+    width: 100%;
+    background-color: rgb(238, 230, 230);
+  }
+  
+.footer-1 {
+    background-color: rgb(238, 230, 230);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: rgb(0, 22, 62);
+    margin-left: 3%;
+    margin-right: 3%;
+    flex-wrap: wrap;
+}
+.infor-footer{
+    display: flex;
+    flex-wrap: wrap;
+}
+.infor{
+    margin-top: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
+    
+}
+.infor p{
+    font-size: 18px;
+    font-weight: bold;
+}
+.infor-footer a{
+    display: block;
+    text-align: left;
+    cursor: pointer;
+}
+
+.infor a:hover {
+    color: #fbaf32;
+    letter-spacing: 1px;
+}
+
+.infor a::before {
+    position: relative;
+    font-weight: 900;
+    margin-right: 10px;
+    color: #fbaf32;
+}
+
+.image-container {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .image-container img {
+    margin-bottom: 10px; /* Điều chỉnh khoảng cách giữa hai hình ảnh */
+  }
+
+.shopee{
+    width: 50px;
+    height: 70px;
+    margin-top: 10px;
+}
+
+.connect-ft img{
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.footer-2{
+    display: flex;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    color: white;
+    height: 100px;
+    background-color: rgb(66, 72, 153);
+}
+
+/* responsive */
+@media screen and (max-width:1100px) {
+    .infor{
+        width: 100%;
+        margin-top: 1px;
+    }
+    .image-container img{
+        width: 160px;
+        height: auto;
+    }
+}   
