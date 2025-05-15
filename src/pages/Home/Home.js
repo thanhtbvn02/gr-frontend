@@ -21,6 +21,8 @@ export default function Home() {
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('success');
 
+  const fetchOne = useRef(false);
+
   const fetchProducts = async () => {
     setLoading(true);
     try {
