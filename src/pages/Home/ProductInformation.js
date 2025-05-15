@@ -1,59 +1,139 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
-import './ProductInformation.css'
+import './ProductInformation.css';
+import Header from '../../components/Header/Header';
+import Footer from '../../components/Footer/Footer';
+import { useSelector, useDispatch } from 'react-redux';
+import { addToCart } from '../../redux/addCart';
 
 const ProductInformation = () => {
   const { id } = useParams();
   const [product, setProduct] = useState({});
+  const [images, setImages] = useState([]);
+  const [selectedImage, setSelectedImage] = useState('');
   const [details, setDetails] = useState([]);
   const [ingredients, setIngredients] = useState([]);
   const [activeTab, setActiveTab] = useState('description');
+  const [quantity, setQuantity] = useState(1);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState('success');
+  
+  // Sử dụng Redux thay vì useCart hook
+  const isLoggedIn = useSelector(state => state.cart.isLoggedIn);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/products/${id}`);
-        const productData = res.data;
+        const { data: productData } = await axios.get(`http://localhost:5000/api/products/${id}`);
+        setProduct(productData);
 
-        const imgRes = await axios.get(`http://localhost:5000/api/images?product_id=${productData.id}`);
-        const firstImage = imgRes.data?.[0]?.url || null;
+        const { data: imageData } = await axios.get(
+          `http://localhost:5000/api/images?product_id=${productData.id}`
+        );
+        const urls = imageData.map(img => img.url);
+        setImages(urls);
+        setSelectedImage(urls[0] || '');
 
-        setProduct({ ...productData, image: firstImage });
+        const { data: detailData } = await axios.get(
+          `http://localhost:5000/api/details?product_id=${productData.id}`
+        );
+        setDetails(detailData);
 
-        const detailRes = await axios.get(`http://localhost:5000/api/detail?product_id=${id}`);
-        setDetails(detailRes.data);
-
-        const ingredientRes = await axios.get(`http://localhost:5000/api/ingredient?product_id=${id}`);
-        setIngredients(ingredientRes.data);
-      } catch (err) {
-        console.error('Không thể lấy thông tin sản phẩm:', err);
+        const { data: ingredientData } = await axios.get(
+          `http://localhost:5000/api/ingredients?product_id=${productData.id}`
+        );
+        setIngredients(ingredientData);
+      } catch (error) {
+        console.error('Error fetching product info', error);
       }
     };
-
     fetchProduct();
   }, [id]);
-
-  const handleTabClick = (tab) => {
-    setActiveTab(tab);
+  
+  // Xử lý thay đổi số lượng
+  const handleQuantityChange = (event) => {
+    const value = parseInt(event.target.value);
+    if (value > 0) {
+      setQuantity(value);
+    }
+  };
+  
+  const decreaseQuantity = () => {
+    if (quantity > 1) {
+      setQuantity(quantity - 1);
+    }
+  };
+  
+  const increaseQuantity = () => {
+    setQuantity(quantity + 1);
+  };
+  
+  // Xử lý thêm vào giỏ hàng
+  const handleAddToCart = () => {
+    try {
+      // Sử dụng Redux dispatch trực tiếp
+      dispatch(addToCart({ productId: id, quantity }));
+      
+      setAlertMessage(isLoggedIn 
+        ? 'Thêm vào giỏ hàng thành công!' 
+        : 'Sản phẩm đã được thêm vào giỏ hàng tạm thời');
+      setAlertType('success');
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 2000);
+    } catch (error) {
+      console.error('Lỗi khi thêm vào giỏ hàng:', error);
+      setAlertMessage('Có lỗi xảy ra khi thêm vào giỏ hàng!');
+      setAlertType('error');
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 2000);
+    }
+  };
+  
+  // Format giá tiền
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('vi-VN', { 
+      style: 'currency', 
+      currency: 'VND' 
+    }).format(price);
   };
 
   return (
     <div className="product-detail-container">
+      <Header />
+      
+      {showAlert && (
+        <div className={`alert ${alertType === 'success' ? 'alert-success' : 'alert-error'}`}>
+          {alertMessage}
+        </div>
+      )}
+      
       <div className="product-detail-top">
         <div className="product-detail-images">
-          <img src={product.image || 'https://via.placeholder.com/300'} alt={product.name || 'Ảnh sản phẩm'} />
+          <img
+            src={selectedImage || 'https://via.placeholder.com/300'}
+            alt={product.name}
+            className="main-image"
+          />
+          <div className="thumbnail-container">
+            {images.map((url, idx) => (
+              <img
+                key={idx}
+                src={url}
+                alt={`thumbnail-${idx}`}
+                className={`thumbnail-image ${url === selectedImage ? 'active' : ''}`}
+                onClick={() => setSelectedImage(url)}
+              />
+            ))}
+          </div>
         </div>
-
         <div className="product-detail-info">
           <h1 className="product-title">{product.name}</h1>
           <div className="product-price">
-            {product.price?.toLocaleString()}đ
-            {product.original_price && (
-              <span className="product-original-price">{product.original_price.toLocaleString()}đ</span>
-            )}
+            {product.price && formatPrice(product.price)}
           </div>
-
           <div>
               {details.length > 0 ? (
                 <table className="detail-table">
@@ -74,75 +154,89 @@ const ProductInformation = () => {
                 </table>
               ) : 'Không có thông tin chi tiết'}
             </div>
-
           <div className="quantity-selector">
-            <button>-</button>
-            <input type="text" value="1" readOnly style={{ width: '50px', textAlign: 'center' }} />
-            <button>+</button>
+            <button onClick={decreaseQuantity}>-</button>
+            <input 
+              type="number" 
+              min="1" 
+              value={quantity}
+              onChange={handleQuantityChange}
+            />
+            <button onClick={increaseQuantity}>+</button>
           </div>
-
-          <div>
-            <button className="add-to-cart-btn">Chọn mua</button>
-            <button className="find-at-pharmacy-btn">Tìm nhà thuốc</button>
-          </div>
+          <button className="add-to-cart-btn" onClick={handleAddToCart}>Thêm vào giỏ hàng</button>
+          <button className="find-at-pharmacy-btn">Tìm nhà thuốc</button>
         </div>
       </div>
-
       <div className="product-detail-tabs">
         <div className="tab-buttons">
-          <button className={activeTab === 'description' ? 'active' : ''} onClick={() => handleTabClick('description')}>Mô tả sản phẩm</button>
-          <button className={activeTab === 'ingredients' ? 'active' : ''} onClick={() => handleTabClick('ingredients')}>Thành phần</button>
-          <button className={activeTab === 'uses' ? 'active' : ''} onClick={() => handleTabClick('uses')}>Công dụng</button>
-          <button className={activeTab === 'how_use' ? 'active' : ''} onClick={() => handleTabClick('how_use')}>Cách dùng</button>
-          <button className={activeTab === 'side_effects' ? 'active' : ''} onClick={() => handleTabClick('side_effects')}>Tác dụng phụ</button>
-          <button className={activeTab === 'notes' ? 'active' : ''} onClick={() => handleTabClick('notes')}>Lưu ý</button>
-          <button className={activeTab === 'preserve' ? 'active' : ''} onClick={() => handleTabClick('preserve')}>Bảo quản</button>
+          <button
+            className={activeTab === 'description' ? 'active' : ''}
+            onClick={() => setActiveTab('description')}
+          >
+            Mô tả sản phẩm
+          </button>
+          <button
+            className={activeTab === 'ingredients' ? 'active' : ''}
+            onClick={() => setActiveTab('ingredients')}
+          >
+            Thành phần
+          </button>
+          <button
+            className={activeTab === 'uses' ? 'active' : ''}
+            onClick={() => setActiveTab('uses')}
+          >
+            Công dụng
+          </button>
+          <button
+            className={activeTab === 'directions' ? 'active' : ''}
+            onClick={() => setActiveTab('directions')}
+          >
+            Cách dùng
+          </button>
+          <button
+            className={activeTab === 'sideEffects' ? 'active' : ''}
+            onClick={() => setActiveTab('sideEffects')}
+          >
+            Tác dụng phụ
+          </button>
+          <button
+            className={activeTab === 'storage' ? 'active' : ''}
+            onClick={() => setActiveTab('storage')}
+          >
+            Bảo quản
+          </button>
         </div>
-
         <div className="tab-content">
-        {activeTab === 'description' && (
-            <div>
-                {(product.description || 'Không có mô tả').split('\n').map((line, index) => (
-                <React.Fragment key={index}>
-                    {line}
-                    <br/>
-                </React.Fragment>
-                ))}
-            </div>
-            )}
-
-
+          {activeTab === 'description' && <div><div className='tab-content-title'>Mô tả sản phẩm</div>{product.description}</div>}
           {activeTab === 'ingredients' && (
             <div>
-              {ingredients.length > 0 ? (
-                <table className="ingredient-table">
-                  <thead>
-                    <tr>
-                      <th>Thành phần</th>
-                      <th>Tỉ lệ</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {ingredients.map((ingredient, index) => (
-                      <tr key={index}>
-                        <td>{ingredient.name}</td>
-                        <td>{ingredient.quantity}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              ) : 'Không có thành phần'}
+              <div className='tab-content-title'>Thành phần</div>
+              <table className="ingredient-table">
+                <thead>
+                  <tr>
+                  <th>Thành phần</th>
+                  <th>Số lượng</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ingredients.map((ing, idx) => (
+                  <tr key={idx}>
+                    <td>{ing.name}</td>
+                    <td>{ing.quantity}</td>
+                  </tr>
+                ))}
+                </tbody>
+              </table>
             </div>
           )}
-
-          {activeTab === 'uses' && <div>{product.uses || 'Không có công dụng'}</div>}
-          {activeTab === 'how_use' && <div>{product.how_use || 'Không có hướng dẫn sử dụng'}</div>}
-          {activeTab === 'side_effects' && <div>{product.side_effects || 'Không có thông tin tác dụng phụ'}</div>}
-          {activeTab === 'notes' && <div>{product.notes || 'Không có lưu ý'}</div>}
-          {activeTab === 'preserve' && <div>{product.preserve || 'Không có hướng dẫn bảo quản'}</div>}
-
+          {activeTab === 'uses' && <div><div className='tab-content-title'>Công dụng</div>{product.uses}</div>}
+          {activeTab === 'directions' && <div><div className='tab-content-title'>Cách dùng</div>{product.how_use}</div>}
+          {activeTab === 'sideEffects' && <div><div className='tab-content-title'>Tác dụng phụ</div>{product.side_effects}</div>}
+          {activeTab === 'storage' && <div><div className='tab-content-title'>Bảo quản</div>{product.preserve}</div>}
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

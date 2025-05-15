@@ -1,0 +1,123 @@
+.update-container {
+    padding: 20px;
+    max-width: 900px;
+    margin: auto;
+    background-color: #f9f9f9;
+    border-radius: 12px;
+    box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.1);
+    font-family: inherit;
+}
+
+.update-container h2 {
+    text-align: center;
+    margin-bottom: 24px;
+    font-size: 24px;
+    color: #333;
+}
+
+.tab-nav {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 20px;
+}
+
+.tab-item {
+    flex: 1;
+    padding: 12px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: bold;
+    background-color: #fafafa;
+    transition: background-color 0.3s ease;
+}
+
+.tab-item.active {
+    border-bottom: 2px solid #6200ea;
+    color: #6200ea;
+    background-color: #fff;
+}
+
+.tab-item:hover {
+    background-color: #eaeaea;
+}
+
+.tab-content-container {
+    padding: 24px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #555;
+}
+
+/* Global styling for inputs/textareas */
+.no-border-input {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    background-color: #f1f1f1;
+    border-radius: 6px;
+    outline: none;
+    white-space: pre-wrap;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    font-family: inherit;
+}
+
+.custom-table th,
+.custom-table td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+/* Ensure table inputs get same styling */
+.custom-table input.no-border-input,
+.custom-table textarea.no-border-input {
+    background-color: #f1f1f1;
+}
+
+.delete-icon {
+    cursor: pointer;
+    color: #e74c3c;
+    font-size: 18px;
+    transition: color 0.3s ease;
+}
+
+.delete-icon:hover {
+    color: #c0392b;
+}
+
+.update-button {
+    padding: 12px 24px;
+    background-color: #6200ea;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    display: block;
+    width: 100%;
+    margin-top: 20px;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.update-button:hover {
+    background-color: #7e3ff2;
+}

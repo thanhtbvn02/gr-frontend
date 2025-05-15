@@ -4,11 +4,6 @@
   margin: 0;
   padding: 0;
 }
-body {
-  font-family: "Segoe UI", Roboto, sans-serif;
-  background-color: #f9f9f9;
-  color: #333;
-}
 a {
   text-decoration: none;
   color: inherit;
@@ -32,11 +27,17 @@ button {
   padding: 0 24px;
   background-color: #0052a4;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
+  z-index: 100;
 }
 .header-main.scrolled {
   background-color: #003d82;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+body {
+  font-family: "Segoe UI", Roboto, sans-serif;
+  background-color: #f9f9f9;
+  color: #333;
+  padding-top: 30px;
 }
 
 /* Brand */
@@ -91,9 +92,15 @@ button {
   align-items: center;
   gap: 20px;
 }
+.cart-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
 .cart-link .cart-icon {
   width: 28px;
   height: 28px;
+  filter: brightness(0) invert(1);
 }
 .auth-link {
   font-size: 0.95rem;
@@ -172,4 +179,20 @@ button {
   .right-header {
     gap: 12px;
   }
+}
+
+.output-cart {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: #ff4444;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
 }

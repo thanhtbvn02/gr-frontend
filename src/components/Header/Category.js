@@ -1,122 +1,103 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import './home.css';
+import './Category.css';
 
-const TopNav = ({ items, activeId, onHover, onClick }) => (
-  <nav className="top-nav">
-    <ul>
-      {items.map(item => (
-        <li
-          key={item.id}
-          className={item.id === activeId ? 'active' : ''}
-          onMouseEnter={() => onHover(item.id)}
-          onClick={() => onClick(item.id)}
-        >
-          {item.name}
-        </li>
-      ))}
-    </ul>
-  </nav>
-);
-
-export default function Category() {
-  const [roots, setRoots]             = useState([]);
-  const [subs, setSubs]               = useState([]);
-  const [thirds, setThirds]           = useState([]);
-  const [activeRoot, setActiveRoot]   = useState(null);
-  const [activeSub, setActiveSub]     = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+export default function Category({ onCategorySelect }) {
+  const [tree, setTree] = useState([]);
+  const [activeRoot, setActiveRoot] = useState(null);
+  const [activeSub, setActiveSub] = useState(null);
   const navigate = useNavigate();
 
-  // Load root categories once
+  // 1) Lấy cả cây category cùng counts
   useEffect(() => {
-    axios.get('http://localhost:5000/api/category')
-      .then(res => setRoots(res.data))
-      .catch(err => console.error('Load roots error:', err));
+    const fetchTree = async () => {
+      try {
+        const res = await axios.get('http://localhost:5000/api/category/tree-with-counts');
+        setTree(res.data);
+      } catch (err) {
+        console.error('Error loading category tree:', err);
+      }
+    };
+    fetchTree();
   }, []);
 
-  // Load subs when activeRoot changes
-  useEffect(() => {
-    if (activeRoot == null) {
-      setSubs([]);
-      setActiveSub(null);
-      return;
-    }
-    axios.get(`http://localhost:5000/api/category/${activeRoot}`)
-      .then(res => setSubs(res.data))
-      .catch(err => console.error('Load subs error:', err));
-  }, [activeRoot]);
+  // 2) Tính các cấp con dựa vào activeRoot/activeSub
+  const roots = tree;
+  const subs = activeRoot
+    ? (tree.find(r => r.id === activeRoot)?.children || [])
+    : [];
+  const thirds = activeSub
+    ? (subs.find(s => s.id === activeSub)?.children || [])
+    : [];
 
-  // Load thirds when activeSub changes
-  useEffect(() => {
-    if (activeSub == null) {
-      setThirds([]);
-      return;
+  // 3) Handlers
+  const onRootEnter = id => {
+    setActiveRoot(id);
+    setActiveSub(null);
+  };
+  const onSubEnter = id => setActiveSub(id);
+  const onClickCategory = id => {
+    if (onCategorySelect) {
+      onCategorySelect(id);
+    } else {
+      navigate(`/search?category_id=${id}`);
     }
-    axios.get(`http://localhost:5000/api/category/${activeSub}`)
-      .then(res => setThirds(res.data))
-      .catch(err => console.error('Load thirds error:', err));
-  }, [activeSub]);
-
-  // Handlers
-  const handleRootHover = id => setActiveRoot(id);
-  const handleSubHover  = id => setActiveSub(id);
-  const handleSearch    = id => navigate(`/search?category_id=${id}`);
+  };
 
   return (
-    <div className="home-container">
-      {/* Dropdown wrapper: hover leaves hides all */}
+    <div className="category-menu">
+      {/* Top-level nav */}
+      <ul className="category-top-nav">
+        {roots.map(root => (
+          <li
+            key={root.id}
+            onMouseEnter={() => onRootEnter(root.id)}
+            onClick={() => onClickCategory(root.id)}
+          >
+            <span className="name">{root.name}</span>
+            <i className="arrow" />
+          </li>
+        ))}
+      </ul>
+
+      {/* Dropdown */}
       <div
-        className="menu-dropdown"
+        className={`category-dropdown ${activeRoot ? 'open' : ''}`}
         onMouseLeave={() => {
           setActiveRoot(null);
           setActiveSub(null);
         }}
       >
-        {/* Top-level navigation */}
-        <TopNav
-          items={roots}
-          activeId={activeRoot}
-          onHover={handleRootHover}
-          onClick={handleSearch}
-        />
+        <div className="dropdown-inner">
+          {/* Left panel: second-level */}
+          <nav className="dropdown-left">
+            <ul>
+              {subs.map(sub => (
+                <li
+                  key={sub.id}
+                  onMouseEnter={() => onSubEnter(sub.id)}
+                  onClick={() => onClickCategory(sub.id)}
+                >
+                  {sub.name}
+                </li>
+              ))}
+            </ul>
+          </nav>
 
-        {/* Sub-menu + third-level layout container */}
-        {activeRoot && subs.length > 0 && (
-          <div className="submenu-container">
-            {/* Second level */}
-            <aside className="sub-panel">
-              <ul className="sub-list">
-                {subs.map(sub => (
-                  <li
-                    key={sub.id}
-                    className={sub.id === activeSub ? 'active' : ''}
-                    onMouseEnter={() => handleSubHover(sub.id)}
-                    onClick={() => handleSearch(sub.id)}
-                  >
-                    {sub.name}
-                  </li>
-                ))}
-              </ul>
-            </aside>
-
-            {/* Third level, appears to right of sub-panel */}
-            {activeSub && thirds.length > 0 && (
-              <section className="third-grid">
-                {thirds.map(th => (
-                  <div
-                    key={th.id}
-                    className="third-card"
-                    onClick={() => handleSearch(th.id)}
-                  >
-                    {th.name}
-                  </div>
-                ))}
-              </section>
-            )}
-          </div>
-        )}
+          {/* Right panel: third-level cards */}
+          <section className="dropdown-right">
+            {thirds.map(th => (
+              <div
+                key={th.id}
+                className="third-card"
+                onClick={() => onClickCategory(th.id)}
+              >
+                <span className="third-name">{th.name}</span>
+              </div>
+            ))}
+          </section>
+        </div>
       </div>
     </div>
   );

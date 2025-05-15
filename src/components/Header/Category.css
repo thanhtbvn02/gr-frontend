@@ -1,0 +1,136 @@
+/* container chung */
+.category-menu {
+    position: relative;
+    font-family: sans-serif;
+    margin-top: 10px;
+    z-index: 99;
+  }
+  
+  /* --- Top Nav --- */
+  .category-top-nav {
+    display: flex;
+    background: #3c3333;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  
+  .category-top-nav li {
+    width: 20%;
+    position: relative;
+    padding: 12px 20px;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    user-select: none;
+  }
+  
+  .category-top-nav li:hover {
+    background: #c7b3b3;
+  }
+  
+  .category-top-nav .name {
+    margin-right: 6px;
+  }
+  
+  .category-top-nav .arrow {
+    border: solid #fff;
+    border-width: 0 2px 2px 0;
+    display: inline-block;
+    padding: 4px;
+    transform: rotate(45deg);
+  }
+  
+  /* --- Dropdown chung --- */
+  .category-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 800px; /* điều chỉnh theo layout */
+    background: #6e5757;
+    box-shadow: 0 4px 12px rgba(194, 156, 156, 0.3);
+    z-index: 100;
+  }
+  
+  .category-dropdown.open {
+    display: block;
+    width: 100%;
+  }
+  
+  .dropdown-inner {
+    display: flex;
+    height: 300px; 
+  }
+  
+  /* --- Left panel: sub-categories --- */
+  .dropdown-left {
+    width: 300px;
+    border-right: 1px solid #333;
+    overflow-y: auto;
+  }
+  
+  .dropdown-left ul {
+    list-style: none;
+    margin: 0;
+    padding: 8px 0;
+  }
+  
+  .dropdown-left li {
+    padding: 10px 16px;
+    color: #ccc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+  }
+  
+  .dropdown-left li:hover {
+    background: #d8bbbb;
+    color: #fff;
+  }
+  
+  .dropdown-left .count {
+    background: #3498db;
+    color: #fff;
+    font-size: 0.75rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+  }
+  
+  /* --- Right panel: third-level cards --- */
+  .dropdown-right {
+    flex: 1;
+    padding: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+    overflow-y: auto;
+  }
+  
+  .third-card {
+    background: #9d8888;
+    width: 100%;
+    height: 50px;
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  
+  .third-card:hover {
+    background: #cdbcbc;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  
+  .third-name {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  

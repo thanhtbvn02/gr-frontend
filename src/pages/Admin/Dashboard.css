@@ -1,18 +1,116 @@
-/* Dashboard.css */
+/* src/pages/Admin/Dashboard.css */
 .admin-container {
-    display: flex;
-    height: 100vh;       /* Chiều cao full viewport */
-    overflow: hidden;
-  }
-  
-  .sidebar-wrapper {
-    width: 25%;
-    background-color: #2c3e50;  /* Nếu muốn nền giống Sidebar */
-  }
-  
-  .main-wrapper {
-    width: 75%;
-    padding: 20px;
-    overflow-y: auto;    /* scroll nội dung nếu dài */
-  }
-  
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar-wrapper {
+  width: 240px;
+  background-color: #2c3e50;
+  transition: width 0.2s ease;
+}
+
+.main-wrapper {
+  flex: 1;
+  padding: 24px;
+  background: #f5f7fa;
+  overflow-y: auto;
+  will-change: transform;
+}
+
+/* Loading indicator */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 18px;
+  color: #666;
+}
+
+/* Cards */
+.stats-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #3498db;
+  margin-top: 10px;
+}
+
+/* Category tree styling */
+.category-tree-container {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+}
+
+.category-tree {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.category-item {
+  margin-bottom: 2px;
+}
+
+.category-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.category-header:hover {
+  background-color: #e9ecef;
+}
+
+.category-name {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+.expand-icon {
+  margin-right: 8px;
+  font-size: 12px;
+  color: #6c757d;
+}
+
+.category-count {
+  color: #3498db;
+  font-weight: bold;
+  background-color: #e3f2fd;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.category-children {
+  margin-left: 20px;
+}

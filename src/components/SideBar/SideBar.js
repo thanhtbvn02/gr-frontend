@@ -1,19 +1,28 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import './SideBar.css';
 
 export default function SideBar() {
+  const navigate = useNavigate();
+  
+  const handleNavigate = (path) => {
+    navigate(path);
+  };
+
   return (
     <nav className="sidebar-nav">
-      <div className="sidebar-logo">DRUG STORE</div>
-      <NavLink to="users" className="nav-link">
+      <div className="sidebar-logo" onClick={() => handleNavigate('/admin')}>
+        DRUG STORE
+      </div>
+      <div className="nav-link" onClick={() => handleNavigate('/admin/users')}>
         Manage Users
-      </NavLink>
-      <NavLink to="products" className="nav-link">
+      </div>
+      <div className="nav-link" onClick={() => handleNavigate('/admin/products')}>
         Manage Products
-      </NavLink>
-      {/* Thêm link nếu cần */}
+      </div>
+      <div className="nav-link">
+        Manage Orders
+      </div>
     </nav>
   );
 }
-

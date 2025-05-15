@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ReCAPTCHA from 'react-google-recaptcha';
 import axios from 'axios';
 import './Register.css';
 
 const Register = () => {
   const navigate = useNavigate();
+
+  const recaptchaRef = useRef(null);
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -12,31 +15,32 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false); 
   const [showConfirm, setShowConfirm] = useState(false); 
 
-  const [captchaInput, setCaptchaInput] = useState('');
-  const [captchaImg, setCaptchaImg] = useState('');
+  // const [captchaInput, setCaptchaInput] = useState('');
+  // const [captchaImg, setCaptchaImg] = useState('');
+  const [captchaToken, setCaptchaToken] = useState(null);
 
-  const isRefreshing = useRef(false);
+//   const isRefreshing = useRef(false);
 
-const refreshCaptcha = () => {
-  if (isRefreshing.current) return;
-  isRefreshing.current = true;
+// const refreshCaptcha = () => {
+//   if (isRefreshing.current) return;
+//   isRefreshing.current = true;
 
-  fetch('http://localhost:5000/api/captcha', {
-    credentials: 'include'
-  })
-    .then(res => res.text())
-    .then(setCaptchaImg)
-    .catch(() => setCaptchaImg('<p>Không tải được Captcha</p>'))
-    .finally(() => {
-      setTimeout(() => { isRefreshing.current = false }, 300);
-    });
-};
+//   fetch('http://localhost:5000/api/captcha', {
+//     credentials: 'include'
+//   })
+//     .then(res => res.text())
+//     .then(setCaptchaImg)
+//     .catch(() => setCaptchaImg('<p>Không tải được Captcha</p>'))
+//     .finally(() => {
+//       setTimeout(() => { isRefreshing.current = false }, 300);
+//     });
+// };
   
-  useEffect(() => {
-    if (!captchaImg) {
-      refreshCaptcha();
-    }
-  }, [captchaImg]);
+//   useEffect(() => {
+//     if (!captchaImg) {
+//       refreshCaptcha();
+//     }
+//   }, [captchaImg]);
 
   const handleRegistration = async (e) => {
     e.preventDefault();
@@ -50,37 +54,44 @@ const refreshCaptcha = () => {
       alert('Mật khẩu không khớp!');
       return;
     }
+    if (!captchaToken) {
+      alert('Vui lòng xác nhận bạn không phải robot!');
+      return;
+    }
 
     try {
-      const captchaValidRes = await axios.post(
+      const token = recaptchaRef.current.getValue();
+      
+      if (!token) {
+        alert('Vui lòng xác nhận bạn không phải robot!');
+        return;
+      }
+      
+      // Xác thực reCAPTCHA
+      const verifyRes = await axios.post(
         'http://localhost:5000/api/captcha/verify-captcha',
-        { captcha: captchaInput },
-        { withCredentials: true }
+        { token: captchaToken }
       );
-
-      if (!captchaValidRes.data.success) {
-        alert('Mã xác nhận không đúng!');
-        refreshCaptcha();
+      if (!verifyRes.data.success) {
+        alert('Captcha không hợp lệ');
+        recaptchaRef.current.reset();
+        setCaptchaToken(null);
         return;
       }
 
       const res = await axios.post('http://localhost:5000/api/users/register', {
-        username,
-        password,
-        email: '',
-        full_name: '',
-        birth_date: '',
-        phone: '',
-        address: ''
-      });
+        username, password, captchaToken },
+        { withCredentials: true });
 
       if (res.data.message === 'Đăng ký thành công') {
         alert('Đăng ký thành công! Mời bạn đăng nhập.');
         navigate('/login');
       }
     } catch (err) {
-      console.error('Registration error:', err);
-      alert('Lỗi:', err.message || 'Đăng ký thất bại');
+      console.error('Registration error:', err.response?.data || err.message);
+      alert('Đăng ký thất bại: ' + (err.response?.data?.message || err.message));
+      recaptchaRef.current.reset();
+      setCaptchaToken(null);
     }
   };
 
@@ -165,29 +176,16 @@ const refreshCaptcha = () => {
               </p>
             )}
 
-            <div className="captcha-container">
-              <div className="input-group">
-                <label>Mã xác nhận</label>
-                <input
-                  type="text"
-                  value={captchaInput}
-                  onChange={(e) => setCaptchaInput(e.target.value)}
-                  placeholder="Nhập mã xác nhận"
-                  className="custom-input"
-                />
-              </div>
-              <div
-                className="captcha-image"
-                onClick={refreshCaptcha}
-                dangerouslySetInnerHTML={{ __html: captchaImg }}
-                style={{ cursor: 'pointer' }}
-              />
-            </div>
+            <ReCAPTCHA
+              ref={recaptchaRef}
+              sitekey={process.env.REACT_APP_SITE_KEY}
+              onChange={token => setCaptchaToken(token)}
+            />
 
             <button
               type="submit"
               className="submit-btn"
-              disabled={passedCount < 3 || !requirements.length || !isPasswordMatched}
+              disabled={passedCount < 4 || !requirements.length || !isPasswordMatched}
             >
               SIGN UP
             </button>

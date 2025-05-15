@@ -1,25 +1,34 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import axiosInstance from '../../utils/axiosConfig';
 import { Link, useNavigate } from 'react-router-dom';
 import './home.css';
 import {Header, Footer, ScrollingBar, Category} from '../../components'
+import { useSelector, useDispatch } from 'react-redux';
+import { addToCart } from '../../redux/addCart';
 
 export default function Home() {
   const navigate = useNavigate();
+  
+  // Sử dụng Redux thay vì useCart hook
+  const isLoggedIn = useSelector(state => state.cart.isLoggedIn);
+  const dispatch = useDispatch();
 
   const [products, setProducts] = useState([]);
   const [offset, setOffset] = useState(0);
   const [limit, setLimit] = useState(20);
   const [loading, setLoading] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+  const [alertType, setAlertType] = useState('success');
 
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`http://localhost:5000/api/products/paginate?offset=${offset}&limit=${limit}`);
+      const res = await axiosInstance.get(`http://localhost:5000/api/products/paginated?offset=${offset}&limit=${limit}`);
       const withImages = [];
 
-      for (const product of res.data) {
-        const imgRes = await axios.get(`http://localhost:5000/api/images?product_id=${product.id}`);
+      for (const product of res.data.products) {
+        const imgRes = await axiosInstance.get(`http://localhost:5000/api/images?product_id=${product.id}`);
         const firstImage = imgRes.data?.[0]?.url || null;
         withImages.push({ ...product, image: firstImage });
       }
@@ -39,6 +48,34 @@ export default function Home() {
     }
   };
 
+  const handleAddToCart = (productId) => {
+    if (!productId) return;
+    
+    try {
+      // Sử dụng Redux dispatch trực tiếp
+      dispatch(addToCart(productId, 1));
+
+      setAlertMessage(isLoggedIn
+        ? 'Thêm vào giỏ hàng thành công!'
+        : 'Sản phẩm đã được thêm vào giỏ hàng tạm thời'
+      );
+      setAlertType('success');
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 2000);
+    } catch (error) {
+      console.error('Lỗi khi thêm vào giỏ hàng:', error);
+      if (error.response?.status === 403) {
+        // Phiên hết hạn, chuyển đến trang đăng nhập
+        navigate('/login');
+        setAlertMessage('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại');
+      } else {
+        setAlertMessage('Có lỗi xảy ra khi thêm vào giỏ hàng!');
+      }
+      setAlertType('error');
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 2000);
+    }
+  };
 
   useEffect(() => {
     fetchProducts();
@@ -46,40 +83,46 @@ export default function Home() {
 
   return (
     <div className="home-container">
-
-        <div>
-            <Header />
-            <Category />
+      {showAlert && (
+        <div className={`alert ${alertType === 'success' ? 'alert-success' : 'alert-error'}`}>
+          {alertMessage}
         </div>
+      )}
+
+      <div>
+        <Header />
+      </div>
       <div className="home-container">
-            {/* Tìm kiếm */}
-      
-            {/* Danh sách sản phẩm */}
-            <div className="product-list">
-              {products.map(product => (
-                <div className="product-card" key={product.id}>
-                  {product.image && <img src={product.image} alt={product.name} />}
-                  <div className="product-info">
-                    <h3><Link to={`/productInfor/${product.id}`}>{product.name}</Link></h3>
-                    <p className="price">Giá: {product.price} Đồng / {product.unit}</p>
-                  </div>
-                  <button>
-                    Thêm vào giỏ hàng
-                  </button>
-                </div>
-              ))}
+        <div className="product-list">
+          {products.map(product => (
+            <div className="product-card" key={product.id}>
+              {product.image && <img src={product.image} alt={product.name} />}
+              <div className="product-info">
+                <h3><Link to={`/productInfor/${product.id}`}>{product.name}</Link></h3>
+                <p className="price">
+                  {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
+                </p>
+              </div>
+              <button 
+                className="add-to-cart-btn"
+                onClick={() => handleAddToCart(product.id)}
+              >
+                Thêm vào giỏ hàng
+              </button>
             </div>
-      
-            {/* Nút hiển thị thêm */}
-            <div>
-              {!loading && (
-                <button className="load-more-btn" onClick={fetchProducts}>
-                  Hiển thị thêm
-                </button>
-              )}
-              {loading && <p>Đang tải...</p>}
-            </div>
-          </div>
+          ))}
+        </div>
+
+        {/* Nút hiển thị thêm */}
+        <div className="load-more-container">
+          {!loading && products.length > 0 && (
+            <button className="load-more-btn" onClick={fetchProducts}>
+              Hiển thị thêm
+            </button>
+          )}
+          {loading && <div className="loading">Đang tải...</div>}
+        </div>
+      </div>
       <div>
         <ScrollingBar />
         <Footer />

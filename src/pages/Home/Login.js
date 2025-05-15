@@ -1,20 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import axiosInstance from '../../utils/axiosConfig';
 import { useAuth } from '../../hooks/useAuth';
 import './Login.css';
 import { jwtDecode } from 'jwt-decode';
+import { useDispatch } from 'react-redux';
+import { setLoginStatus, syncCartAfterLogin } from '../../redux/addCart';
 
 const Login = () => {
   const navigate = useNavigate();
-
+  const dispatch = useDispatch();
+  const {login} = useAuth();
   const location = useLocation();
-  const { login } = useAuth();
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const [modalEmail, setModalEmail] = useState(false);
   const [modalCode, setModalCode] = useState(false);
@@ -30,33 +34,42 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!username || !password) {
-      alert('Bạn cần nhập đầy đủ tài khoản và mật khẩu!');
+      setError('Bạn cần nhập đầy đủ tài khoản và mật khẩu!');
       return;
     }
+    
+    setLoading(true);
     try {
-      const res = await axios.post('http://localhost:5000/api/users/login', {
+      const res = await axiosInstance.post('/users/login', {
         username,
         password
       });
-      if (res.data.token) {
-        localStorage.setItem('accessToken', res.data.token);
-        localStorage.setItem('userId', res.data.user.id); 
-        localStorage.setItem('role', res.data.user.role);
-        alert('Đăng nhập thành công!');
-        if (res.data.user.role === 'admin') {
-          navigate('/admin');
-        } else {
-          navigate('/');
-        }
-      } else {
-        alert('Sai tài khoản hoặc mật khẩu.');
-      }
-    } catch (err) {
-      console.error('Login error:', err);
-      if (err.response && err.response.data && err.response.data.message) {
-                
-      }
-      alert('Đăng nhập thất bại!');
+      
+      // Giải mã token để lấy thông tin user
+      const decodedToken = jwtDecode(res.data.token);
+      console.log('Decoded token:', decodedToken);
+      
+      // Lưu token trước để đảm bảo API cart có thể xác thực
+      localStorage.setItem('accessToken', res.data.token);
+      
+      // Đồng bộ giỏ hàng từ localStorage lên server
+      await dispatch(syncCartAfterLogin());
+      
+      // Lưu thông tin người dùng và cập nhật trạng thái đăng nhập
+      login(res.data.token);
+      dispatch(setLoginStatus(true));
+      
+      // Lưu userId (nếu cần)
+      localStorage.setItem('userId', res.data.user.id);
+
+      // Chuyển hướng sau khi đăng nhập thành công
+      navigate(location.state?.from || '/');
+      
+    } catch (error) {
+      console.error('Login error:', error);
+      setError(error.response?.data?.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
+    } finally {
+      setLoading(false);
     }
   };
   
@@ -67,7 +80,7 @@ const Login = () => {
       return;
     }
     try {
-      const res = await axios.post('http://localhost:5000/api/users/forgot-password', {
+      const res = await axiosInstance.post('/users/forgot-password', {
         email
       });
       alert('Email đã được gửi đến email của bạn!');
@@ -85,7 +98,7 @@ const Login = () => {
       return;
     }
     try {
-      const res = await axios.post('http://localhost:5000/api/users/reset-password', {
+      const res = await axiosInstance.post('/users/reset-password', {
         code
       });
       alert('Mật khẩu đã được đặt lại!');
@@ -100,11 +113,9 @@ const Login = () => {
     const token = params.get('token');
     if (token) {
       login(token);
-      const userId = jwtDecode(token).userId;
-      localStorage.setItem('userId', userId);
-      navigate('/home');
+      navigate('/');
     }
-  }, [location.search]);
+  }, [location.search, login, navigate]);
 
   const handleGoogleLogin = () => {
     window.location.href = 'http://localhost:5000/api/auth/google';

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import './Header.css';
+import Category from './Category';
 
 function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -10,6 +12,9 @@ function Header() {
   const [modalInfor, setModalInfor] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
+
+  // Lấy số lượng sản phẩm từ Redux store
+  const cartCount = useSelector(state => state.cart?.cartId?.length || 0);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -40,7 +45,7 @@ function Header() {
     <>
       <header className={`header-main ${isScrolled ? 'scrolled' : ''}`}>
         <div className="left-header">
-          <Link to="/home" className="navbar-brand">
+          <Link to="/" className="navbar-brand">
             HẠNH RUBY
           </Link>
         </div>
@@ -71,6 +76,11 @@ function Header() {
               alt="Cart"
               className="cart-icon"
             />
+            {cartCount > 0 ? (
+                  <div className="output-cart" id="output">{cartCount}</div>
+                ):(
+                  <div></div>
+                )} 
           </Link>
 
           {isLoggedIn ? (
@@ -89,6 +99,7 @@ function Header() {
           )}
         </nav>
       </header>
+      <Category />
 
       {modalInfor && (
         <div className="modalInfor">

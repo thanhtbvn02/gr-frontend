@@ -1,117 +1,221 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useParams, useNavigate } from "react-router-dom";
+import SideBar from "../../../components/SideBar/SideBar";
+import { MdDelete } from 'react-icons/md';
+import "./Update.css";
+
+const TABS = ["Thông tin chung", "Detail", "Ingredient"];
+const MULTILINE_FIELDS = ["description", "uses", "how_use", "side_effects", "notes", "preserve"];
+
 const UpdateProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState(TABS[0]);
   const [product, setProduct] = useState({});
   const [details, setDetails] = useState([]);
   const [ingredients, setIngredients] = useState([]);
 
-  // Danh sách các trường muốn hiển thị để chỉnh sửa
   const editableFields = [
-    'name', 'unit', 'price', 'description',
-    'uses', 'how_use', 'side_effects',
-    'notes', 'preserve', 'stock', 'category_name'
+    "name", "unit", "price",
+    ...MULTILINE_FIELDS,
+    "stock"
   ];
 
-
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/products/${id}`);
-      setProduct(res.data);
-
-      const detailRes = await axios.get(`http://localhost:5000/api/detail?product_id=${id}`);
-      setDetails(detailRes.data);
-
-      const ingredientRes = await axios.get(`http://localhost:5000/api/ingredient?product_id=${id}`);
-      setIngredients(ingredientRes.data);
+        const productRes = await axios.get(`http://localhost:5000/api/products/${id}`);
+        setProduct(productRes.data);
+        const detailRes = await axios.get(`http://localhost:5000/api/details?product_id=${id}`);
+        setDetails(detailRes.data);
+        const ingredientRes = await axios.get(`http://localhost:5000/api/ingredients?product_id=${id}`);
+        setIngredients(ingredientRes.data);
       } catch (err) {
-        console.error('Không thể lấy thông tin sản phẩm:', err);
+        console.error("Error fetching data:", err);
       }
     };
-    fetchProduct();
+    fetchData();
   }, [id]);
 
-  const handleChange = (e) => {
+  const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setProduct(prev => ({ ...prev, [name]: value }));
+    setProduct((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleDetailChange = (index, field, value) => {
+    const updated = [...details];
+    updated[index][field] = value;
+    setDetails(updated);
+  };
+
+  const handleIngredientChange = (index, field, value) => {
+    const updated = [...ingredients];
+    updated[index][field] = value;
+    setIngredients(updated);
+  };
+  
+  const handleAddDetail = () => {
+    setDetails([...details, { key_name: "", value: "" }]);
+  };
+  
+  const handleAddIngredient = () => {
+    setIngredients([...ingredients, { name: "", quantity: "" }]);
+  };
+  
+  const handleDeleteDetail = (index) => {
+    setDetails(details.filter((_, i) => i !== index));
+  };
+
+  const handleDeleteIngredient = (index) => {
+    setIngredients(ingredients.filter((_, i) => i !== index));
   };
 
   const handleUpdate = async () => {
     try {
-      await axios.put(`http://localhost:5000/api/products/${id}`, product);
-      alert('Cập nhật thành công!');
-      navigate('/');
+      await axios.put(`http://localhost:5000/api/products/${id}`, {
+        ...product,
+        details,
+        ingredients
+      });
+      alert('Cập nhật sản phẩm thành công!');
+      navigate('/admin/products');
     } catch (err) {
-      console.error('Cập nhật thất bại:', err);
+      console.error('Error updating product:', err);
+      alert('Lỗi khi cập nhật sản phẩm');
     }
   };
 
-  return (
-    <div style={{ padding: '20px', maxWidth: '600px', margin: 'auto',ontFamily: 'inherit' }}>
-      <h2>Cập nhật sản phẩm</h2>
-
-      {editableFields.map((key) => (
-        <div key={key} style={{ marginBottom: '15px' }}>
-          <label style={{ display: 'block', fontWeight: 'bold' }}>{key}</label>
-
-          <textarea
-              name={key}
-              value={product[key] || ''}
-              onChange={handleChange}
-              style={{ width: '500px', padding: '20px', minHeight: '100px', ontFamily: 'inherit' }}
+  const renderGeneralInfo = () => (
+    <div className="tab-content">
+      {editableFields.map((field) => (
+        <div key={field} className="input-group">
+          <label>{field}</label>
+          {MULTILINE_FIELDS.includes(field) ? (
+            <textarea
+              name={field}
+              className="no-border-input"
+              rows={4}
+              value={product[field] || ""}
+              onChange={handleInputChange}
             />
+          ) : (
+            <input
+              type="text"
+              name={field}
+              className="no-border-input"
+              value={product[field] || ""}
+              onChange={handleInputChange}
+            />
+          )}
         </div>
       ))}
+    </div>
+  );
 
-      {details.length > 0 && (
-        <table border="1" style={{ width: '100%', marginTop: '20px' }}>
-          <thead>
-            <tr>
-              <th>Thuộc tính</th>
-              <th>Giá trị</th>
+  const renderDetails = () => (
+    <div className="tab-content">
+      <table className="custom-table">
+        <thead>
+          <tr>
+            <th>Thuộc tính</th>
+            <th>Giá trị</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {details.map((detail, index) => (
+            <tr key={index}>
+              <td>
+                <input
+                  type="text"
+                  className="no-border-input"
+                  value={detail.key_name}
+                  onChange={(e) => handleDetailChange(index, 'key_name', e.target.value)}
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  className="no-border-input"
+                  value={detail.value}
+                  onChange={(e) => handleDetailChange(index, 'value', e.target.value)}
+                />
+              </td>
+              <td><MdDelete className="delete-icon" onClick={() => handleDeleteDetail(index)} /></td>
             </tr>
-          </thead>
-          <tbody>
-            {details.map((detail, index) => (
-              <tr key={index}>
-                <td>{detail.key_name}</td>
-                <td>{detail.value}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+          ))}
+        </tbody>
+      </table>
+      <button className="add-button" onClick={handleAddDetail}>+</button>
+    </div>
+  );
 
-      {ingredients.length > 0 && (
-        <table border="1" style={{ width: '100%', marginTop: '20px' }}>
-          <thead>
-            <tr>
-              <th>Thành phần</th>
-              <th>Tỉ lệ</th>
+  const renderIngredients = () => (
+    <div className="tab-content">
+      <table className="custom-table">
+        <thead>
+          <tr>
+            <th>Thành phần</th>
+            <th>Tỉ lệ</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {ingredients.map((ingredient, index) => (
+            <tr key={index}>
+              <td>
+                <input
+                  type="text"
+                  className="no-border-input"
+                  value={ingredient.name}
+                  onChange={(e) => handleIngredientChange(index, 'name', e.target.value)}
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  className="no-border-input"
+                  value={ingredient.quantity}
+                  onChange={(e) => handleIngredientChange(index, 'quantity', e.target.value)}
+                />
+              </td>
+              <td><MdDelete className="delete-icon" onClick={() => handleDeleteIngredient(index)} /></td>
             </tr>
-          </thead>
-          <tbody>
-            {ingredients.map((ingredient, index) => (
-              <tr key={index}>
-                <td>{ingredient.name}</td>
-                <td>{ingredient.quantity}</td>
-              </tr>
+          ))}
+        </tbody>
+      </table>
+      <button className="add-button" onClick={handleAddIngredient}>+</button>
+    </div>
+  );
+
+  return (
+    <div className="admin-container">
+      <div className="sidebar-wrapper">
+        <SideBar />
+      </div>
+      <div className="main-wrapper">
+        <div className="update-container">
+          <h2>Cập nhật sản phẩm</h2>
+          <div className="tab-nav">
+            {TABS.map((tab) => (
+              <div
+                key={tab}
+                className={`tab-item ${activeTab === tab ? "active" : ""}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+              </div>
             ))}
-          </tbody>
-        </table>
-      )}
-
-    <button style={{ padding: '10px 20px' }}>
-        <Link to={`/`}>Back</Link>
-      </button>
-
-      <button onClick={handleUpdate} style={{ padding: '10px 20px' }}>
-        Cập nhật
-      </button>
+          </div>
+          <div className="tab-content-container">
+            {activeTab === "Thông tin chung" && renderGeneralInfo()}
+            {activeTab === "Detail" && renderDetails()}
+            {activeTab === "Ingredient" && renderIngredients()}
+          </div>
+          <button className="update-button" onClick={handleUpdate}>Cập nhật</button>
+        </div>
+      </div>
     </div>
   );
 };
