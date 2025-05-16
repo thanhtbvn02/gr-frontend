@@ -23,7 +23,9 @@ import {
 
 import {
   Information,
-  Cart
+  Cart,
+  Address,
+  Account
 } from './pages/User'
 
 import {
@@ -50,7 +52,8 @@ function App() {
           <Route path="/update/:id" element={<Update />} />
           <Route path='/productInfor/:id' element={<ProductInformation />} />
           <Route path='/search' element={<SearchResults />} />
-          <Route path='/infor/:id' element={<Information />} />
+          <Route path='/account/:id' element={<Account />} />
+          <Route path='/account/address/:id' element={<Address />} />
           <Route path='/' element={<Home />} />
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Register />} />

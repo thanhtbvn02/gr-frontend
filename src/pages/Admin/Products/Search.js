@@ -117,13 +117,18 @@ const SearchResults = () => {
     }
   };
 
-  const addToCart = (productId) => {
+  const handleAddToCart = (productId) => {
+    if (!productId) return;
     try {
       // Sử dụng Redux dispatch trực tiếp
-      dispatch(addToCart({ productId, quantity: 1 }));
+      dispatch(addToCart(productId, 1));
 
-      setAlertMessage('Thêm vào giỏ hàng thành công!');
+      setAlertMessage(isLoggedIn 
+        ? 'Thêm vào giỏ hàng thành công!' 
+        : 'Sản phẩm đã được thêm vào giỏ hàng tạm thời');
       setAlertType('success');
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 2000);
     } catch (error) {
       console.error('Lỗi khi thêm vào giỏ hàng:', error);
       setAlertMessage('Có lỗi xảy ra khi thêm vào giỏ hàng!');
@@ -193,7 +198,7 @@ const SearchResults = () => {
             </div>
             <button 
               className="add-to-cart-btn"
-              onClick={() => addToCart(product.id)}
+              onClick={() => handleAddToCart(product.id)}
             >
               Thêm vào giỏ hàng
             </button>

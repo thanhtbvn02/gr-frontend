@@ -318,9 +318,7 @@ function CartPage() {
                           </div>
                         </td>
                         <td className="name-column">
-                          <Link to={`/product/${productId}`} className="product-name">
-                            {product.name}
-                          </Link>
+                        <Link to={`/productInfor/${product.id}`}>{product.name}</Link>
                         </td>
                         <td className="price-column">
                           {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}

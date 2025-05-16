@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axiosInstance from '../../utils/axiosConfig';
 import { Link, useNavigate } from 'react-router-dom';
 import './home.css';
@@ -26,17 +26,13 @@ export default function Home() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const res = await axiosInstance.get(`http://localhost:5000/api/products/paginated?offset=${offset}&limit=${limit}`);
-      const withImages = [];
-
-      for (const product of res.data.products) {
-        const imgRes = await axiosInstance.get(`http://localhost:5000/api/images?product_id=${product.id}`);
-        const firstImage = imgRes.data?.[0]?.url || null;
-        withImages.push({ ...product, image: firstImage });
-      }
+      const res = await axiosInstance.get(
+        `http://localhost:5000/api/products/paginated?offset=${offset}&limit=${limit}&include_image=true`
+      );
+      const productsWithImages = res.data.products;
 
       setProducts(prev => {
-        const merged = [...prev, ...withImages];
+        const merged = [...prev, ...productsWithImages];
         const unique = Array.from(new Map(merged.map(p => [p.id, p])).values());
         return unique;
       });
@@ -80,6 +76,9 @@ export default function Home() {
   };
 
   useEffect(() => {
+    if (fetchOne.current) return;
+    fetchOne.current = true;
+  
     fetchProducts();
   }, []);
 

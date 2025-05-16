@@ -1,2 +1,4 @@
 export {default as Information} from './Information'
 export {default as Cart} from './Cart'
+export {default as Address} from './Address'
+export {default as Account} from './Account'

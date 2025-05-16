@@ -74,8 +74,8 @@ const ProductInformation = () => {
   // Xử lý thêm vào giỏ hàng
   const handleAddToCart = () => {
     try {
-      // Sử dụng Redux dispatch trực tiếp
-      dispatch(addToCart({ productId: id, quantity }));
+      // Sửa lại cách gọi Redux dispatch để truyền tham số đúng cách
+      dispatch(addToCart(id, quantity));
       
       setAlertMessage(isLoggedIn 
         ? 'Thêm vào giỏ hàng thành công!' 

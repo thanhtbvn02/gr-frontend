@@ -30,14 +30,6 @@ const Information = () => {
     newPassword: false,
     confirmPassword: false
   });
-  
-  const toggleShowPassword = (field) => {
-    setShowPassword(prev => ({
-      ...prev,
-      [field]: !prev[field]
-    }));
-  };
-  
 
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
@@ -73,6 +65,27 @@ const Information = () => {
     fetchUser();
   }, [id]);
 
+  useEffect(() => {
+    const province = vietnamData.find((p) => p.name === selectedProvince);
+    setDistricts(province ? province.districts : []);
+    setSelectedDistrict('');
+    setWards([]);
+    setSelectedWard('');
+  }, [selectedProvince]);
+
+  useEffect(() => {
+    const district = districts.find((d) => d.name === selectedDistrict);
+    setWards(district ? district.wards.map((w) => ({ name: w })) : []);
+    setSelectedWard('');
+  }, [selectedDistrict]);
+
+  const toggleShowPassword = (field) => {
+    setShowPassword(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }));
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -81,37 +94,13 @@ const Information = () => {
     }));
   };
 
-  const handleProvinceChange = (e) => {
-    const provinceName = e.target.value;
-    setSelectedProvince(provinceName);
-
-    const province = vietnamData.find((p) => p.name === provinceName);
-    setDistricts(province ? province.districts : []);
-    setSelectedDistrict('');
-    setWards([]);
-    setSelectedWard('');
-  };
-
-  const handleDistrictChange = (e) => {
-    const districtName = e.target.value;
-    setSelectedDistrict(districtName);
-
-    const district = districts.find((d) => d.name === districtName);
-    setWards(district ? district.wards.map((w) => ({ name: w })) : []);
-    setSelectedWard('');
-  };
-
-  const handleWardChange = (e) => {
-    setSelectedWard(e.target.value);
-  };
-
   const handleUpdate = async () => {
-    let fullAddress = user.address; 
-  
+    let fullAddress = formData.address;
+
     if (detailAddress || selectedWard || selectedDistrict || selectedProvince) {
       fullAddress = `${detailAddress}, ${selectedWard}, ${selectedDistrict}, ${selectedProvince}`.trim();
     }
-  
+
     try {
       const res = await axios.put(`http://localhost:5000/api/users/${id}`, {
         ...formData,
@@ -125,26 +114,25 @@ const Information = () => {
       console.error('Lỗi update user:', err);
       alert('Có lỗi xảy ra khi cập nhật.');
     }
-  };  
+  };
 
   const toggleModalChangeInfor = () => {
     if (!modalChangeInfor && user && user.address) {
       const parts = user.address.split(',').map(p => p.trim());
-  
+
       setDetailAddress(parts[0] || '');
       setSelectedWard(parts[1] || '');
       setSelectedDistrict(parts[2] || '');
       setSelectedProvince(parts[3] || '');
-  
+
       const provinceData = vietnamData.find((p) => p.name === parts[3]);
       setDistricts(provinceData ? provinceData.districts : []);
-  
+
       const districtData = provinceData?.districts.find((d) => d.name === parts[2]);
       setWards(districtData ? districtData.wards.map((w) => ({ name: w })) : []);
     }
     setModalChangeInfor(!modalChangeInfor);
   };
-  
 
   const toggleModalChangePass = () => {
     setModalChangePass(!modalChangePass);
@@ -184,19 +172,13 @@ const Information = () => {
     }
   };
 
-  if (!user) {
-    return <div>Đang tải thông tin...</div>;
-  }
+  if (!user) return <div>Đang tải thông tin...</div>;
 
   const formatDate = (isoDate) => {
     if (!isoDate) return '';
     const date = new Date(isoDate);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
+    return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth()+1).toString().padStart(2, '0')}/${date.getFullYear()}`;
   };
-  
 
   return (
     <div className="user-information">
@@ -206,7 +188,6 @@ const Information = () => {
       <p><strong>Họ tên:</strong> {user.full_name}</p>
       <p><strong>Ngày sinh:</strong> {formatDate(user.birth_date)}</p>
       <p><strong>Số điện thoại:</strong> {user.phone}</p>
-      <p><strong>Địa chỉ:</strong> {user.address}</p>
       <div>
         <button onClick={toggleModalChangeInfor}>Thay đổi thông tin</button>
         <button onClick={toggleModalChangePass}>Đổi mật khẩu</button>
@@ -228,34 +209,8 @@ const Information = () => {
               <input type="date" name="birth_date" value={formData.birth_date} onChange={handleInputChange} />
               <label>Số điện thoại</label>
               <input type="text" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="Số điện thoại" />
-
-              <label>Tỉnh/Thành phố</label>
-              <select value={selectedProvince} onChange={handleProvinceChange}>
-                <option value="">-- Chọn Tỉnh/Thành phố --</option>
-                {provinces.map((province) => (
-                  <option key={province.name} value={province.name}>{province.name}</option>
-                ))}
-              </select>
-
-              <label>Quận/Huyện</label>
-              <select value={selectedDistrict} onChange={handleDistrictChange} disabled={!selectedProvince}>
-                <option value="">-- Chọn Quận/Huyện --</option>
-                {districts.map((district) => (
-                  <option key={district.name} value={district.name}>{district.name}</option>
-                ))}
-              </select>
-
-              <label>Phường/Xã</label>
-              <select value={selectedWard} onChange={handleWardChange} disabled={!selectedDistrict}>
-                <option value="">-- Chọn Phường/Xã --</option>
-                {wards.map((ward) => (
-                  <option key={ward.name} value={ward.name}>{ward.name}</option>
-                ))}
-              </select>
-
-              <label>Địa chỉ chi tiết</label>
-              <input type="text" name="detailAddress" value={detailAddress} onChange={(e) => setDetailAddress(e.target.value)} placeholder="Nhập số nhà, tên đường" />
             </div>
+              
             <div className="buttonGroup">
               <button className="saveBtn" onClick={handleUpdate}>Lưu thay đổi</button>
               <button className="cancelBtn" onClick={toggleModalChangeInfor}>Hủy</button>

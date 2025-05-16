@@ -99,18 +99,29 @@ function Header() {
           )}
         </nav>
       </header>
+      <div></div>
       <Category />
 
       {modalInfor && (
         <div className="modalInfor">
           <div className="overlayLogin" onClick={toggleModalInfor} />
           <div className="dropdown">
-            <Link
-              to={`/infor/${user.userId}`}
-              className="dropdown-item info-link"
-            >
-              Thông tin
-            </Link>
+          <Link
+            to={`/account/${user.userId}`}
+            state={{ tab: 'info' }}
+            className="dropdown-item info-link"
+          >
+            Thông tin
+          </Link>
+
+          <Link
+            to={`/account/${user.userId}`}
+            state={{ tab: 'address' }}
+            className="dropdown-item info-link"
+          >
+            Sổ địa chỉ
+          </Link>
+
             <button
               type="button"
               className="dropdown-item logout-button"
