@@ -14,7 +14,10 @@ function Header() {
   const navigate = useNavigate();
 
   // Lấy số lượng sản phẩm từ Redux store
-  const cartCount = useSelector(state => state.cart?.cartId?.length || 0);
+  const cartData = JSON.parse(localStorage.getItem('cartData') || '{}');
+  const cartCount = cartData.cartCount || 0;
+  console.log(cartCount);
+
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();

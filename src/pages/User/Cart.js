@@ -214,19 +214,57 @@ function CartPage() {
     try {
       setLoading(true);
       
-      // Chỉ lấy các sản phẩm đã được chọn để thanh toán
-      const orderItems = selectedItems.map(productId => {
-        return {
-          productId,
-          quantity: itemQuantities[productId] || 0
-        };
-      });
+      // Lấy địa chỉ mặc định của người dùng
+      const userId = localStorage.getItem('userId');
+      const addressResponse = await axiosInstance.get(`http://localhost:5000/api/addresses/user/${userId}`);
+      const addresses = addressResponse.data;
+      const defaultAddress = addresses.find(addr => addr.is_default);
       
-      const orderData = { products: orderItems };
+      if (!defaultAddress) {
+        setError('Không tìm thấy địa chỉ mặc định. Vui lòng thêm địa chỉ trong trang quản lý tài khoản.');
+        setLoading(false);
+        return;
+      }
+      
+      // Đảm bảo tất cả các sản phẩm được chọn đều tồn tại
+      const validSelectedItems = selectedItems.filter(productId => products[productId]);
+      
+      if (validSelectedItems.length === 0) {
+        setError('Không tìm thấy thông tin của sản phẩm đã chọn. Vui lòng làm mới trang.');
+        setLoading(false);
+        return;
+      }
+      
+      // Chỉ lấy các sản phẩm đã được chọn để thanh toán và đảm bảo chúng tồn tại
+      const orderItems = [];
+      for (const productId of validSelectedItems) {
+        const product = products[productId];
+        if (product && product.price) {
+          orderItems.push({
+            product_id: productId,
+            quantity: itemQuantities[productId] || 0,
+            unit_price: product.price
+          });
+        }
+      }
+      
+      if (orderItems.length === 0) {
+        setError('Không có sản phẩm hợp lệ để đặt hàng.');
+        setLoading(false);
+        return;
+      }
+      
+      const orderData = { 
+        user_id: userId,
+        address_id: defaultAddress.id,
+        payment_method: 'cash_on_delivery',
+        orderItems: orderItems
+      };
+      
       await axiosInstance.post('/orders', orderData);
       
       // Xóa các sản phẩm đã thanh toán khỏi giỏ hàng
-      for (const productId of selectedItems) {
+      for (const productId of validSelectedItems) {
         if (isLoggedIn) {
           const cartItemId = cartItemIds[productId];
           if (cartItemId) {
@@ -237,9 +275,11 @@ function CartPage() {
             }
           }
         }
+        // Cập nhật state và Redux
         dispatch(removeFromCart(productId));
       }
       
+      // Làm mới lại trạng thái
       setSelectedItems([]);
       setLoading(false);
       setAlertMessage('Đặt hàng thành công!');
@@ -248,9 +288,12 @@ function CartPage() {
       setTimeout(() => {
         setShowAlert(false);
       }, 2000);
+      
+      // Để đảm bảo rằng giỏ hàng được cập nhật đúng
+      window.location.reload();
     } catch (err) {
       console.error('Lỗi khi đặt hàng:', err);
-      setError('Không thể hoàn tất đơn hàng');
+      setError(err.response?.data?.message || 'Không thể hoàn tất đơn hàng');
       setAlertType('error');
       setLoading(false);
     }
