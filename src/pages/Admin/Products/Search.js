@@ -30,7 +30,7 @@ const SearchResults = () => {
   // Lấy danh sách tất cả danh mục
   const fetchAllCategories = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/category');
+      const res = await axios.get('https://gr-backend.onrender.com/api/category');
       setAllCategories(res.data);
     } catch (err) {
       console.error('Lỗi khi tải danh mục:', err);
@@ -58,12 +58,12 @@ const SearchResults = () => {
     setLoading(true);
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/products/search?query=${query}&offset=${offset}&limit=${limit}`
+        `https://gr-backend.onrender.com/api/products/search?query=${query}&offset=${offset}&limit=${limit}`
       );
 
       const withImages = await Promise.all(
         res.data.map(async (product) => {
-          const imgRes = await axios.get(`http://localhost:5000/api/images?product_id=${product.id}`);
+          const imgRes = await axios.get(`https://gr-backend.onrender.com/api/images?product_id=${product.id}`);
           const firstImage = imgRes.data?.[0]?.url || null;
           return { ...product, image: firstImage };
         })
@@ -97,14 +97,14 @@ const SearchResults = () => {
 
       const allProducts = [];
       for (const id of ids) {
-        const res = await axios.get(`http://localhost:5000/api/products/category/${id}`);
+        const res = await axios.get(`https://gr-backend.onrender.com/api/products/category/${id}`);
         allProducts.push(...res.data);
       }
 
       const unique = Array.from(new Map(allProducts.map(p => [p.id, p])).values());
 
       const withImages = await Promise.all(unique.map(async (product) => {
-        const imgRes = await axios.get(`http://localhost:5000/api/images?product_id=${product.id}`);
+        const imgRes = await axios.get(`https://gr-backend.onrender.com/api/images?product_id=${product.id}`);
         const firstImage = imgRes.data?.[0]?.url || null;
         return { ...product, image: firstImage };
       }));

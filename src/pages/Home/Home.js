@@ -27,7 +27,7 @@ export default function Home() {
     setLoading(true);
     try {
       const res = await axiosInstance.get(
-        `http://localhost:5000/api/products/paginated?offset=${offset}&limit=${limit}&include_image=true`
+        `https://gr-backend.onrender.com/api/products/paginated?offset=${offset}&limit=${limit}&include_image=true`
       );
       const productsWithImages = res.data.products;
 

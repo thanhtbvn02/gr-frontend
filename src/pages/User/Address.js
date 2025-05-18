@@ -29,7 +29,7 @@ const AddressManager = () => {
 
   const fetchAddresses = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/addresses/user/${userId}`);
+      const res = await axios.get(`https://gr-backend.onrender.com/api/addresses/user/${userId}`);
       setAddresses(res.data);
     } catch (err) {
       console.error('Lỗi khi lấy danh sách địa chỉ:', err);
@@ -38,7 +38,7 @@ const AddressManager = () => {
 
   const setAsDefault = async (id) => {
     try {
-      await axios.put(`http://localhost:5000/api/addresses/${id}/default`);
+      await axios.put(`https://gr-backend.onrender.com/api/addresses/${id}/default`);
       fetchAddresses();
     } catch (err) {
       console.error(err);
@@ -53,7 +53,7 @@ const AddressManager = () => {
     }
     if (window.confirm('Bạn có chắc chắn muốn xóa địa chỉ này?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/addresses/${id}`);
+        await axios.delete(`https://gr-backend.onrender.com/api/addresses/${id}`);
         fetchAddresses();
       } catch (err) {
         console.error(err);
@@ -136,9 +136,9 @@ const AddressManager = () => {
 
     try {
       if (isEditMode) {
-        await axios.put(`http://localhost:5000/api/addresses/${editingAddressId}`, data);
+        await axios.put(`https://gr-backend.onrender.com/api/addresses/${editingAddressId}`, data);
       } else {
-        await axios.post('http://localhost:5000/api/addresses', data);
+        await axios.post('https://gr-backend.onrender.com/api/addresses', data);
       }
       setModalOpen(false);
       fetchAddresses();

@@ -28,7 +28,7 @@ function Header() {
   };
 
   const handleLogout = async () => {
-    await axios.post('http://localhost:5000/api/users/logout');
+    await axios.post('https://gr-backend.onrender.com/api/users/logout');
     logout();
     navigate('/login');
   };

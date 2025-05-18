@@ -13,7 +13,7 @@ export default function Category({ onCategorySelect }) {
   useEffect(() => {
     const fetchTree = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/category/tree-with-counts');
+        const res = await axios.get('https://gr-backend.onrender.com/api/category/tree-with-counts');
         setTree(res.data);
       } catch (err) {
         console.error('Error loading category tree:', err);

@@ -27,23 +27,23 @@ const ProductInformation = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const { data: productData } = await axios.get(`http://localhost:5000/api/products/${id}`);
+        const { data: productData } = await axios.get(`https://gr-backend.onrender.com/api/products/${id}`);
         setProduct(productData);
 
         const { data: imageData } = await axios.get(
-          `http://localhost:5000/api/images?product_id=${productData.id}`
+          `https://gr-backend.onrender.com/api/images?product_id=${productData.id}`
         );
         const urls = imageData.map(img => img.url);
         setImages(urls);
         setSelectedImage(urls[0] || '');
 
         const { data: detailData } = await axios.get(
-          `http://localhost:5000/api/details?product_id=${productData.id}`
+          `https://gr-backend.onrender.com/api/details?product_id=${productData.id}`
         );
         setDetails(detailData);
 
         const { data: ingredientData } = await axios.get(
-          `http://localhost:5000/api/ingredients?product_id=${productData.id}`
+          `https://gr-backend.onrender.com/api/ingredients?product_id=${productData.id}`
         );
         setIngredients(ingredientData);
       } catch (error) {

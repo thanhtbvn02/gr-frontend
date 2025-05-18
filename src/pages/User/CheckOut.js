@@ -101,7 +101,7 @@ function CheckOut() {
           const token = localStorage.getItem('accessToken');
           const headers = token ? { Authorization: `Bearer ${token}` } : {};
           
-          addressResponse = await axios.get(`http://localhost:5000/api/addresses/user/${cleanUserId}`, { 
+          addressResponse = await axios.get(`https://gr-backend.onrender.com/api/addresses/user/${cleanUserId}`, { 
             headers,
             timeout: 10000
           });
@@ -135,7 +135,7 @@ function CheckOut() {
           const token = localStorage.getItem('accessToken');
           const headers = token ? { Authorization: `Bearer ${token}` } : {};
           
-          cartResponse = await axios.get('http://localhost:5000/api/cart', { 
+          cartResponse = await axios.get('https://gr-backend.onrender.com/api/cart', { 
             headers,
             timeout: 10000
           });
@@ -167,7 +167,7 @@ function CheckOut() {
           if (!id) continue; // Skip invalid IDs
           
           try {
-            const response = await axios.get(`http://localhost:5000/api/products/${id}`, { 
+            const response = await axios.get(`https://gr-backend.onrender.com/api/products/${id}`, { 
               headers,
               timeout: 10000
             });
@@ -178,7 +178,7 @@ function CheckOut() {
               
               // Get first image for product
               try {
-                const imgRes = await axios.get(`http://localhost:5000/api/images?product_id=${product.id}`, {
+                const imgRes = await axios.get(`https://gr-backend.onrender.com/api/images?product_id=${product.id}`, {
                   headers, 
                   timeout: 10000
                 });
@@ -268,7 +268,7 @@ function CheckOut() {
         'Content-Type': 'application/json'
       } : {};
       
-      await axios.post('http://localhost:5000/api/orders', orderData, {
+      await axios.post('https://gr-backend.onrender.com/api/orders', orderData, {
         headers,
         timeout: 10000
       });
@@ -280,7 +280,7 @@ function CheckOut() {
         const cartItemId = cartItemIds[productId];
         if (cartItemId) {
           try {
-            await axios.delete(`http://localhost:5000/api/cart/${cartItemId}`, {
+            await axios.delete(`https://gr-backend.onrender.com/api/cart/${cartItemId}`, {
               headers,
               timeout: 10000
             });
