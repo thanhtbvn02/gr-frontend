@@ -10,10 +10,18 @@ const Account = () => {
     const location = useLocation();
   
     useEffect(() => {
+      // Đọc từ location.state nếu có
       if (location.state?.tab) {
         setActiveTab(location.state.tab);
       }
-    }, [location.state]);
+      
+      // Đọc từ URL query parameters nếu có
+      const queryParams = new URLSearchParams(location.search);
+      const tabParam = queryParams.get('tab');
+      if (tabParam === 'address' || tabParam === 'info') {
+        setActiveTab(tabParam);
+      }
+    }, [location]);
   return (
     <div>
         <Header />

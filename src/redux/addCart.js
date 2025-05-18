@@ -1,5 +1,5 @@
 /* src/redux/addCart.js */
-import axios from '../axiosConfig';
+import axiosInstance from '../utils/axiosConfig';
 
 // Action types
 export const CART_ACTIONS = {
@@ -9,6 +9,7 @@ export const CART_ACTIONS = {
   UPDATE_QUANTITY: 'cart/updateQuantity',
   CLEAR_CART: 'cart/clearCart',
   SET_CART: 'cart/setCart',
+  SET_SELECTED_ITEMS: 'cart/setSelectedItems',
   
   // Cart loading states
   LOADING: 'cart/loading',
@@ -30,13 +31,14 @@ const initialState = {
   loading: false,
   error: null,
   isLoggedIn: !!localStorage.getItem('accessToken'),
+  selectedItems: [],
   lastUpdated: Date.now()
 };
 
 // Helper function to calculate cart count
 const calculateCartCount = (items) => {
-  // Đếm số loại sản phẩm (số key), không phải tổng số lượng
-  return Object.keys(items).length;
+  // Tính tổng số lượng sản phẩm trong giỏ hàng
+  return Object.values(items).reduce((total, quantity) => total + quantity, 0);
 };
 
 // Helper function to save cart to localStorage
@@ -98,6 +100,12 @@ export default function cartReducer(state = initialState, action) {
         cartId: action.payload.cartId,
         cartCount: action.payload.cartCount,
         lastUpdated: Date.now()
+      };
+
+      case CART_ACTIONS.SET_SELECTED_ITEMS:
+      return {
+        ...state,
+        selectedItems: action.payload
       };
       
     case CART_ACTIONS.LOADING:
@@ -169,6 +177,11 @@ export const clearCart = () => ({
   type: CART_ACTIONS.CLEAR_CART
 });
 
+export const setSelectedItems = (selectedIds) => ({
+  type: CART_ACTIONS.SET_SELECTED_ITEMS,
+  payload: selectedIds
+});
+
 // Thunk: Khởi tạo giỏ hàng
 export const initCart = () => async (dispatch) => {
   try {
@@ -198,7 +211,7 @@ export const fetchCartFromServer = () => async (dispatch) => {
   dispatch(setLoading(true));
   try {
     const headers = getAuthHeader();
-    const response = await axios.get('http://localhost:5000/api/cart', { headers });
+    const response = await axiosInstance.get('http://localhost:5000/api/cart', { headers });
     
     if (response.data && Array.isArray(response.data)) {
       const cartItems = {};
@@ -261,7 +274,7 @@ export const addToCart = (productId, quantity = 1) => async (dispatch, getState)
       try {
         // Đã đăng nhập: Lưu vào database
         const headers = getAuthHeader();
-        await axios.post('http://localhost:5000/api/cart', {
+        await axiosInstance.post('http://localhost:5000/api/cart', {
           productId: parseInt(productId), 
           quantity 
         }, { headers });
@@ -333,7 +346,7 @@ export const updateQuantity = (productId, quantity) => async (dispatch, getState
     if (isLoggedIn) {
       try {
         // Sử dụng allowDuplicate để đảm bảo request này không bị hủy
-        const cartResponse = await axios.get('http://localhost:5000/api/cart', { 
+        const cartResponse = await axiosInstance.get('http://localhost:5000/api/cart', { 
           allowDuplicate: true,
           headers: getAuthHeader() 
         });
@@ -342,12 +355,12 @@ export const updateQuantity = (productId, quantity) => async (dispatch, getState
           const cartItem = cartResponse.data.find(item => String(item.product_id) === productId);
           
           if (cartItem) {
-            await axios.put(`http://localhost:5000/api/cart/${cartItem.id}`, { quantity }, {
+            await axiosInstance.put(`http://localhost:5000/api/cart/${cartItem.id}`, { quantity }, {
               allowDuplicate: true,
               headers: getAuthHeader()
             });
           } else {
-            await axios.post('http://localhost:5000/api/cart', {
+            await axiosInstance.post('http://localhost:5000/api/cart', {
               productId: parseInt(productId),
               quantity
             }, {
@@ -416,7 +429,7 @@ export const removeFromCart = (productId) => async (dispatch, getState) => {
         const headers = getAuthHeader();
         
         // Trước tiên lấy thông tin giỏ hàng hiện tại để biết cart item ID
-        const cartResponse = await axios.get('http://localhost:5000/api/cart', { 
+        const cartResponse = await axiosInstance.get('http://localhost:5000/api/cart', { 
           headers, 
           allowDuplicate: true  // Thêm allowDuplicate để tránh bị cancel request
         });
@@ -428,7 +441,7 @@ export const removeFromCart = (productId) => async (dispatch, getState) => {
           if (cartItem) {
             console.log(`Tìm thấy item trong giỏ hàng: ${cartItem.id}, xóa khỏi database`);
             // Gọi API với cart item ID thay vì product ID
-            await axios.delete(`http://localhost:5000/api/cart/${cartItem.id}`, { 
+            await axiosInstance.delete(`http://localhost:5000/api/cart/${cartItem.id}`, { 
               headers,
               allowDuplicate: true  // Thêm allowDuplicate để tránh bị cancel request
             });
@@ -512,7 +525,7 @@ export const syncCartAfterLogin = () => async (dispatch, getState) => {
       for (const [productId, quantity] of Object.entries(localCart.cartItems)) {
         try {
           console.log(`Thêm sản phẩm ID: ${productId}, Số lượng: ${quantity}`);
-          await axios.post('http://localhost:5000/api/cart', { 
+          await axiosInstance.post('http://localhost:5000/api/cart', { 
             productId: parseInt(productId), 
             quantity: parseInt(quantity) 
           }, { headers });

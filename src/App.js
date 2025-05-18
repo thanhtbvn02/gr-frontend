@@ -25,7 +25,8 @@ import {
   Information,
   Cart,
   Address,
-  Account
+  Account,
+  CheckOut
 } from './pages/User'
 
 import {
@@ -53,7 +54,6 @@ function App() {
           <Route path='/productInfor/:id' element={<ProductInformation />} />
           <Route path='/search' element={<SearchResults />} />
           <Route path='/account/:id' element={<Account />} />
-          <Route path='/account/address/:id' element={<Address />} />
           <Route path='/' element={<Home />} />
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Register />} />
@@ -63,6 +63,7 @@ function App() {
           <Route path='/admin/users' element={<ManageUser />} />
           <Route path='/admin/products/add' element={<AddProduct />} />
           <Route path='/cart' element={<Cart />} />
+          <Route path='/checkout' element={<CheckOut />} />
         </Routes>
       </BrowserRouter>
       </Fragment>

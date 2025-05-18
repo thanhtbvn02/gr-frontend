@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "./Cart.css";
 import { useSelector, useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axiosInstance from '../../utils/axiosConfig';
-import { updateQuantity, removeFromCart } from '../../redux/addCart';
+import { updateQuantity, removeFromCart, setSelectedItems } from '../../redux/addCart';
 import Header from "../../components/Header/Header";
 
 
@@ -12,8 +12,8 @@ function CartPage() {
   const itemQuantities = useSelector(state => state.cart.cartItems);
   const isLoggedIn = useSelector(state => state.cart.isLoggedIn);
   const dispatch = useDispatch();
-  
-  const [selectedItems, setSelectedItems] = useState([]);
+  const navigate = useNavigate();
+  const [selectedItems, setSelectedItemsState] = useState([]);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertType, setAlertType] = useState('success');
@@ -32,7 +32,7 @@ function CartPage() {
         if (cartItems.length > 0) {
           if (isLoggedIn) {
             // Thêm allowDuplicate để ngăn việc hủy request
-            const cartResponse = await axiosInstance.get('http://localhost:5000/api/cart', { 
+            const cartResponse = await axiosInstance.get('/cart', { 
               allowDuplicate: true 
             });
             
@@ -44,7 +44,7 @@ function CartPage() {
             setCartItemIds(itemIdMap);
     
             const productPromises = cartItems.map(id => 
-              axiosInstance.get(`http://localhost:5000/api/products/${id}`, { allowDuplicate: true })
+              axiosInstance.get(`/products/${id}`, { allowDuplicate: true })
             );
             
             // Xử lý từng promise riêng lẻ, không dừng khi một request lỗi
@@ -53,12 +53,12 @@ function CartPage() {
             
             for (const id of cartItems) {
               try {
-                const response = await axiosInstance.get(`http://localhost:5000/api/products/${id}`, { allowDuplicate: true });
+                const response = await axiosInstance.get(`/products/${id}`, { allowDuplicate: true });
                 const product = response.data;
                 productsData[product.id] = product;
                 
                 // Lấy ảnh đầu tiên cho sản phẩm
-                const imgRes = await axiosInstance.get(`http://localhost:5000/api/images?product_id=${product.id}`, { allowDuplicate: true });
+                const imgRes = await axiosInstance.get(`/images?product_id=${product.id}`, { allowDuplicate: true });
                 const firstImage = imgRes.data?.[0]?.url || null;
                 imagesData[product.id] = firstImage;
               } catch (productErr) {
@@ -76,12 +76,12 @@ function CartPage() {
             
             for (const id of cartItems) {
               try {
-                const response = await axiosInstance.get(`http://localhost:5000/api/products/${id}`, { allowDuplicate: true });
+                const response = await axiosInstance.get(`/products/${id}`, { allowDuplicate: true });
                 const product = response.data;
                 productsData[product.id] = product;
                 
                 // Lấy ảnh đầu tiên cho sản phẩm
-                const imgRes = await axiosInstance.get(`http://localhost:5000/api/images?product_id=${product.id}`, { allowDuplicate: true });
+                const imgRes = await axiosInstance.get(`/images?product_id=${product.id}`, { allowDuplicate: true });
                 const firstImage = imgRes.data?.[0]?.url || null;
                 imagesData[product.id] = firstImage;
               } catch (productErr) {
@@ -115,7 +115,7 @@ function CartPage() {
 
   const handleSelectIndividual = (e, productId) => {
     const checked = e.target.checked;
-    setSelectedItems(prevSelectedItems => {
+    setSelectedItemsState(prevSelectedItems => {
       if (checked && !prevSelectedItems.includes(productId)) {
         return [...prevSelectedItems, productId];
       } else if (!checked && prevSelectedItems.includes(productId)) {
@@ -169,7 +169,7 @@ function CartPage() {
       setProducts(updatedProducts);
       
       // Cập nhật danh sách sản phẩm đã chọn
-      setSelectedItems(prev => prev.filter(id => id !== productId));
+      setSelectedItemsState(prev => prev.filter(id => id !== productId));
       
       // Gọi action removeFromCart từ Redux
       await dispatch(removeFromCart(productId));
@@ -200,7 +200,6 @@ function CartPage() {
 
   const handleCheckout = async (e) => {
     e.preventDefault();
-    
     if (!isLoggedIn) {
       setError('Vui lòng đăng nhập để thanh toán');
       return;
@@ -212,90 +211,43 @@ function CartPage() {
     }
     
     try {
-      setLoading(true);
+      // Cập nhật Redux store với các mục đã chọn - sử dụng action creator từ Redux
+      dispatch(setSelectedItems(selectedItems));
       
-      // Lấy địa chỉ mặc định của người dùng
+      // Kiểm tra người dùng có địa chỉ chưa
       const userId = localStorage.getItem('userId');
-      const addressResponse = await axiosInstance.get(`http://localhost:5000/api/addresses/user/${userId}`);
-      const addresses = addressResponse.data;
-      const defaultAddress = addresses.find(addr => addr.is_default);
       
-      if (!defaultAddress) {
-        setError('Không tìm thấy địa chỉ mặc định. Vui lòng thêm địa chỉ trong trang quản lý tài khoản.');
-        setLoading(false);
+      // Sửa lỗi: Kiểm tra userId trước khi sử dụng
+      if (!userId) {
+        setError('Không tìm thấy thông tin người dùng');
         return;
       }
       
-      // Đảm bảo tất cả các sản phẩm được chọn đều tồn tại
-      const validSelectedItems = selectedItems.filter(productId => products[productId]);
+      const addressResponse = await axiosInstance.get(`/addresses/user/${userId}`);
       
-      if (validSelectedItems.length === 0) {
-        setError('Không tìm thấy thông tin của sản phẩm đã chọn. Vui lòng làm mới trang.');
-        setLoading(false);
-        return;
-      }
+      // Sửa lỗi: Kiểm tra dữ liệu trả về
+      const addresses = addressResponse.data || [];
       
-      // Chỉ lấy các sản phẩm đã được chọn để thanh toán và đảm bảo chúng tồn tại
-      const orderItems = [];
-      for (const productId of validSelectedItems) {
-        const product = products[productId];
-        if (product && product.price) {
-          orderItems.push({
-            product_id: productId,
-            quantity: itemQuantities[productId] || 0,
-            unit_price: product.price
-          });
+      if (!addresses || addresses.length === 0) {
+        // Hiển thị thông báo và xác nhận
+        const confirmNavigation = window.confirm('Bạn chưa có địa chỉ giao hàng. Bạn muốn thêm địa chỉ ngay bây giờ không?');
+        if (confirmNavigation) {
+          navigate(`/account/${userId}`, { state: { tab: 'address' } });
+          return;
+        } else {
+          return;
         }
       }
       
-      if (orderItems.length === 0) {
-        setError('Không có sản phẩm hợp lệ để đặt hàng.');
-        setLoading(false);
-        return;
-      }
+      // Lưu danh sách sản phẩm đã chọn
+      localStorage.setItem('selectedItems', JSON.stringify(selectedItems));
       
-      const orderData = { 
-        user_id: userId,
-        address_id: defaultAddress.id,
-        payment_method: 'cash_on_delivery',
-        orderItems: orderItems
-      };
-      
-      await axiosInstance.post('/orders', orderData);
-      
-      // Xóa các sản phẩm đã thanh toán khỏi giỏ hàng
-      for (const productId of validSelectedItems) {
-        if (isLoggedIn) {
-          const cartItemId = cartItemIds[productId];
-          if (cartItemId) {
-            try {
-              await axiosInstance.delete(`http://localhost:5000/api/cart/${cartItemId}`);
-            } catch (err) {
-              console.error(`Lỗi khi xóa sản phẩm ${productId} sau khi đặt hàng:`, err);
-            }
-          }
-        }
-        // Cập nhật state và Redux
-        dispatch(removeFromCart(productId));
-      }
-      
-      // Làm mới lại trạng thái
-      setSelectedItems([]);
-      setLoading(false);
-      setAlertMessage('Đặt hàng thành công!');
-      setAlertType('success');
-      setShowAlert(true);
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 2000);
-      
-      // Để đảm bảo rằng giỏ hàng được cập nhật đúng
-      window.location.reload();
+      // Chuyển hướng sang trang thanh toán
+      navigate('/checkout');
     } catch (err) {
-      console.error('Lỗi khi đặt hàng:', err);
-      setError(err.response?.data?.message || 'Không thể hoàn tất đơn hàng');
+      console.error('Lỗi khi chuẩn bị thanh toán:', err);
+      setError('Không thể tiến hành thanh toán');
       setAlertType('error');
-      setLoading(false);
     }
   };
 
@@ -306,7 +258,7 @@ function CartPage() {
         <h1 className="cart-title">Giỏ hàng của bạn</h1>
         
         {showAlert && (
-          <div className={`alert ${alertType === 'error' ? 'alert-error' : 'alert-success'}`}>
+          <div className={`alert ${alertType === 'error' ? 'alert-error' : alertType === 'warning' ? 'alert-warning' : 'alert-success'}`}>
             {alertMessage}
           </div>
         )}
