@@ -18,8 +18,8 @@ const ManageProduct = () => {
     setLoading(true);
     try {
       const url = categoryId 
-        ? `https://gr-backend.onrender.com/api/products/category/${categoryId}?offset=${offset}&limit=${limit}`
-        : `https://gr-backend.onrender.com/api/products/paginated?offset=${offset}&limit=${limit}`;
+        ? `http://localhost:5000/api/products/category/${categoryId}?offset=${offset}&limit=${limit}`
+        : `http://localhost:5000/api/products/paginated?offset=${offset}&limit=${limit}`;
       
       const res = await axios.get(url);
       const productsData = Array.isArray(res.data) ? res.data : (res.data.products || []);
@@ -27,7 +27,7 @@ const ManageProduct = () => {
 
       for (const product of productsData) {
         try {
-          const imgRes = await axios.get(`https://gr-backend.onrender.com/api/images?product_id=${product.id}`);
+          const imgRes = await axios.get(`http://localhost:5000/api/images?product_id=${product.id}`);
           const firstImage = imgRes.data?.[0]?.url || null;
           withImages.push({ ...product, image: firstImage });
         } catch (imgErr) {

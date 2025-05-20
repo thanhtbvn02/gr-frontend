@@ -28,7 +28,7 @@ const Register = () => {
     if (isRefreshing.current) return;
     isRefreshing.current = true;
 
-    fetch('https://gr-backend.onrender.com/api/captcha', {
+    fetch('http://localhost:5000/api/captcha', {
       credentials: 'include'
     })
       .then(res => res.text())
@@ -55,7 +55,7 @@ const Register = () => {
 
     try {
       const captchaValidRes = await axios.post(
-        'https://gr-backend.onrender.com/api/captcha/verify-captcha',
+        'http://localhost:5000/api/captcha/verify-captcha',
         { captcha: captchaInput },
         { withCredentials: true }
       );
@@ -65,7 +65,7 @@ const Register = () => {
         return;
       }
 
-      const res = await axios.post('https://gr-backend.onrender.com/api/users/register', {
+      const res = await axios.post('http://localhost:5000/api/users/register', {
         username,
         password,
         email: '',
@@ -186,7 +186,7 @@ const Register = () => {
               type="button"
               className="google-login-btn"
               onClick={() => {
-                window.location.href = 'https://gr-backend.onrender.com/api/auth/google';
+                window.location.href = 'http://localhost:5000/api/auth/google';
               }}
             >
               G

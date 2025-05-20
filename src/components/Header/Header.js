@@ -1,20 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import axios from 'axios';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
-import './Header.css';
-import Category from './Category';
+import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
+import axios from "axios";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
+import "./Header.css";
+import Category from "./Category";
 
 function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
   const { user, isLoggedIn, logout } = useAuth();
   const [modalInfor, setModalInfor] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
   // Lấy số lượng sản phẩm từ Redux store
-  const cartCount = useSelector(state => state.cart.cartCount || 0);
+  const cartCount = useSelector((state) => state.cart.cartCount || 0);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -28,25 +28,25 @@ function Header() {
   };
 
   const handleLogout = async () => {
-    await axios.post('https://gr-backend.onrender.com/api/users/logout');
+    await axios.post("http://localhost:5000/api/users/logout");
     logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 0);
-    window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const userInitial = user?.username?.charAt(4).toUpperCase() || 'U';
+  const userInitial = user?.username?.charAt(4).toUpperCase() || "U";
 
   return (
     <>
-      <header className={`header-main ${isScrolled ? 'scrolled' : ''}`}>
+      <header className={`header-main ${isScrolled ? "scrolled" : ""}`}>
         <div className="left-header">
           <Link to="/" className="navbar-brand">
-            HẠNH RUBY
+            <img src="/Logo.png" alt="Logo" className="logo" />
           </Link>
         </div>
 
@@ -77,10 +77,12 @@ function Header() {
               className="cart-icon"
             />
             {cartCount > 0 ? (
-                  <div className="output-cart" id="output">{cartCount}</div>
-                ):(
-                  <div></div>
-                )} 
+              <div className="output-cart" id="output">
+                {cartCount}
+              </div>
+            ) : (
+              <div></div>
+            )}
           </Link>
 
           {isLoggedIn ? (
@@ -106,21 +108,21 @@ function Header() {
         <div className="modalInfor">
           <div className="overlayLogin" onClick={toggleModalInfor} />
           <div className="dropdown">
-          <Link
-            to={`/account/${user.userId}`}
-            state={{ tab: 'info' }}
-            className="dropdown-item info-link"
-          >
-            Thông tin
-          </Link>
+            <Link
+              to={`/account/${user.userId}`}
+              state={{ tab: "info" }}
+              className="dropdown-item info-link"
+            >
+              Thông tin
+            </Link>
 
-          <Link
-            to={`/account/${user.userId}`}
-            state={{ tab: 'address' }}
-            className="dropdown-item info-link"
-          >
-            Sổ địa chỉ
-          </Link>
+            <Link
+              to={`/account/${user.userId}`}
+              state={{ tab: "address" }}
+              className="dropdown-item info-link"
+            >
+              Sổ địa chỉ
+            </Link>
 
             <button
               type="button"

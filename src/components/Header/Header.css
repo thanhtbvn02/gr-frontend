@@ -34,7 +34,7 @@ button {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 body {
-  font-family: "Segoe UI", Roboto, sans-serif;
+  /* font-family: "Segoe UI", Roboto, sans-serif; */
   background-color: #f9f9f9;
   color: #333;
   padding-top: 30px;
@@ -43,9 +43,15 @@ body {
 /* Brand */
 .left-header .navbar-brand {
   font-size: 1.6rem;
+  font-family: "Times New Roman", sans-serif;
   font-weight: 700;
   color: #ffffff;
   letter-spacing: 1px;
+}
+
+.left-header .navbar-brand img {
+  width: 64px;
+  height: 64px;
 }
 
 /* Centered search bar */

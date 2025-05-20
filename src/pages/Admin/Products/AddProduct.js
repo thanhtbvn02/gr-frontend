@@ -136,7 +136,7 @@ function AddProduct() {
       }
 
       // Tạo sản phẩm mới
-      const productResponse = await axios.post('https://gr-backend.onrender.com/api/products', {
+      const productResponse = await axios.post('http://localhost:5000/api/products', {
         ...formData,
         category_id: categoryId
       });
@@ -146,7 +146,7 @@ function AddProduct() {
       // Thêm details
       for (const detail of details) {
         if (detail.key_name && detail.value) {
-          await axios.post('https://gr-backend.onrender.com/api/details', {
+          await axios.post('http://localhost:5000/api/details', {
             product_id: productId,
             key_name: detail.key_name,
             value: detail.value || ''
@@ -157,7 +157,7 @@ function AddProduct() {
       // Thêm ingredients
       for (const ingredient of ingredients) {
         if (ingredient.name && ingredient.quantity) {
-          await axios.post('https://gr-backend.onrender.com/api/ingredients', {
+          await axios.post('http://localhost:5000/api/ingredients', {
             product_id: productId,
             name: ingredient.name,
             quantity: ingredient.quantity || ''

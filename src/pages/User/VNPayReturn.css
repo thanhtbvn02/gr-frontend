@@ -1,0 +1,281 @@
+.vnpay-return-container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.vnpay-return-card {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.loading-spinner {
+  padding: 30px;
+  font-size: 18px;
+  color: #666;
+}
+
+.status-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  font-size: 40px;
+  color: white;
+}
+
+.status-icon.success {
+  background-color: #28a745;
+}
+
+.status-icon.failed, .status-icon.error {
+  background-color: #dc3545;
+}
+
+.result-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.result-message {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.order-summary {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.order-summary h2 {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.order-summary h3 {
+  font-size: 16px;
+  margin: 20px 0 10px 0;
+  padding-top: 15px;
+  border-top: 1px solid #ddd;
+  color: #333;
+}
+
+.order-summary p {
+  margin: 10px 0;
+  color: #555;
+}
+
+.order-total {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #ddd;
+  font-size: 16px;
+  color: #333;
+  text-align: right;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.action-btn {
+  padding: 12px 24px;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.continue-shopping {
+  background-color: #007bff;
+  color: white;
+}
+
+.continue-shopping:hover {
+  background-color: #0069d9;
+}
+
+.view-orders {
+  background-color: #6c757d;
+  color: white;
+}
+
+.view-orders:hover {
+  background-color: #5a6268;
+}
+
+.product-list {
+  list-style-type: none;
+  padding-left: 0;
+  margin-top: 10px;
+}
+
+.product-list li {
+  background-color: rgba(0, 123, 255, 0.1);
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.product-list li:last-child {
+  margin-bottom: 0;
+}
+
+/* CSS cho bảng sản phẩm */
+.product-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.product-table th {
+  background-color: #f0f0f0;
+  padding: 10px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #ddd;
+}
+
+.product-table td {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+}
+
+.product-table tr:last-child td {
+  border-bottom: none;
+}
+
+.product-table .image-column {
+  width: 80px;
+}
+
+.product-table .name-column {
+  width: 30%;
+  font-weight: 500;
+}
+
+.product-table .price-column,
+.product-table .quantity-column,
+.product-table .total-column {
+  width: 20%;
+  text-align: center;
+}
+
+.product-table .total-column {
+  font-weight: 600;
+  color: #007bff;
+}
+
+.product-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+}
+
+.product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.no-image {
+  font-size: 10px;
+  color: #999;
+  text-align: center;
+  padding: 5px;
+}
+
+@media (max-width: 768px) {
+  .vnpay-return-card {
+    padding: 20px;
+    max-width: 100%;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+  
+  .action-btn {
+    width: 100%;
+  }
+
+  .product-table {
+    font-size: 14px;
+  }
+
+  .product-table th,
+  .product-table td {
+    padding: 8px 5px;
+  }
+
+  .product-image {
+    width: 40px;
+    height: 40px;
+  }
+
+  .product-table .name-column {
+    width: auto;
+  }
+}
+
+@media (max-width: 576px) {
+  .product-table thead {
+    display: none;
+  }
+
+  .product-table tbody tr {
+    display: block;
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+  }
+
+  .product-table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+    border: none;
+  }
+
+  .product-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    margin-right: 10px;
+  }
+
+  .product-table .image-column {
+    justify-content: center;
+    width: 100%;
+  }
+} 

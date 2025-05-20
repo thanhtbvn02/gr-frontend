@@ -25,11 +25,11 @@ const UpdateProduct = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const productRes = await axios.get(`https://gr-backend.onrender.com/api/products/${id}`);
+        const productRes = await axios.get(`http://localhost:5000/api/products/${id}`);
         setProduct(productRes.data);
-        const detailRes = await axios.get(`https://gr-backend.onrender.com/api/details?product_id=${id}`);
+        const detailRes = await axios.get(`http://localhost:5000/api/details?product_id=${id}`);
         setDetails(detailRes.data);
-        const ingredientRes = await axios.get(`https://gr-backend.onrender.com/api/ingredients?product_id=${id}`);
+        const ingredientRes = await axios.get(`http://localhost:5000/api/ingredients?product_id=${id}`);
         setIngredients(ingredientRes.data);
       } catch (err) {
         console.error("Error fetching data:", err);
@@ -73,7 +73,7 @@ const UpdateProduct = () => {
 
   const handleUpdate = async () => {
     try {
-      await axios.put(`https://gr-backend.onrender.com/api/products/${id}`, {
+      await axios.put(`http://localhost:5000/api/products/${id}`, {
         ...product,
         details,
         ingredients

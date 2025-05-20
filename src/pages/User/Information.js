@@ -47,7 +47,7 @@ const Information = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`https://gr-backend.onrender.com/api/users/${id}`);
+        const res = await axios.get(`http://localhost:5000/api/users/${id}`);
         setUser(res.data);
         setFormData({
           username: res.data.username || '',
@@ -102,7 +102,7 @@ const Information = () => {
     }
 
     try {
-      const res = await axios.put(`https://gr-backend.onrender.com/api/users/${id}`, {
+      const res = await axios.put(`http://localhost:5000/api/users/${id}`, {
         ...formData,
         address: fullAddress
       });
@@ -158,7 +158,7 @@ const Information = () => {
     }
 
     try {
-      const res = await axios.put(`https://gr-backend.onrender.com/api/users/${id}/change-password`, {
+      const res = await axios.put(`http://localhost:5000/api/users/${id}/change-password`, {
         oldPassword: passwordData.oldPassword,
         newPassword: passwordData.newPassword
       });

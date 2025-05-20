@@ -26,7 +26,8 @@ import {
   Cart,
   Address,
   Account,
-  CheckOut
+  CheckOut,
+  VNPayReturn
 } from './pages/User'
 
 import {
@@ -64,6 +65,7 @@ function App() {
           <Route path='/admin/products/add' element={<AddProduct />} />
           <Route path='/cart' element={<Cart />} />
           <Route path='/checkout' element={<CheckOut />} />
+          <Route path='/vnpay-return' element={<VNPayReturn />} />
         </Routes>
       </BrowserRouter>
       </Fragment>

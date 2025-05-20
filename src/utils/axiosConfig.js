@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Tạo instance axios với URL mặc định
 const axiosInstance = axios.create({
-  baseURL: 'https://gr-backend.onrender.com/api',
+  baseURL: 'http://localhost:5000/api',
   timeout: 10000, // timeout 10 giây
   headers: {
     common: {

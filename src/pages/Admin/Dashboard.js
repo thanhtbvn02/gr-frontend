@@ -48,10 +48,10 @@ export default function Dashboard() {
     const fetchStats = async () => {
       try {
         const [userTotal, userAdmins, userNormal, products] = await Promise.all([
-          axios.get('https://gr-backend.onrender.com/api/users/count'),
-          axios.get('https://gr-backend.onrender.com/api/users/count/admin'),
-          axios.get('https://gr-backend.onrender.com/api/users/count/user'),
-          axios.get('https://gr-backend.onrender.com/api/products/count')
+          axios.get('http://localhost:5000/api/users/count'),
+          axios.get('http://localhost:5000/api/users/count/admin'),
+          axios.get('http://localhost:5000/api/users/count/user'),
+          axios.get('http://localhost:5000/api/products/count')
         ]);
 
         setUserStats({
@@ -72,7 +72,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchCategoryTree = async () => {
       try {
-        const { data: tree } = await axios.get('https://gr-backend.onrender.com/api/category/tree-with-counts');
+        const { data: tree } = await axios.get('http://localhost:5000/api/category/tree-with-counts');
         setCategoryTree(tree);
       } catch (err) {
         console.error('Error loading category tree with counts:', err);
