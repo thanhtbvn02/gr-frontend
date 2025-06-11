@@ -27,7 +27,9 @@ import {
   Address,
   Account,
   CheckOut,
-  VNPayReturn
+  VNPayReturn,
+  UpdateEmail,
+  UpdatePass
 } from './pages/User'
 
 import {

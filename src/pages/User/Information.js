@@ -1,276 +1,199 @@
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
-import vietnamData from './Vietnam.json';
-import './Information.css';
+// --- BẮT ĐẦU: Thay thế toàn bộ nội dung file Information.js ---
+import React, { useEffect, useState, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import axios from "axios";
+import "./Information.css";
+
+const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
 const Information = () => {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [user, setUser] = useState(null);
-  const [modalChangeInfor, setModalChangeInfor] = useState(false);
-  const [modalChangePass, setModalChangePass] = useState(false);
+  const [disableSave, setDisableSave] = useState(true);
+  const [avatar, setAvatar] = useState(defaultAvatar);
+  const [avatarUploading, setAvatarUploading] = useState(false);
 
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    full_name: '',
-    birth_date: '',
-    phone: '',
-    address: ''
-  });
+  const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
+  const [birthDate, setBirthDate] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
 
-  const [passwordData, setPasswordData] = useState({
-    oldPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
-
-  const [showPassword, setShowPassword] = useState({
-    oldPassword: false,
-    newPassword: false,
-    confirmPassword: false
-  });
-
-  const [provinces, setProvinces] = useState([]);
-  const [districts, setDistricts] = useState([]);
-  const [wards, setWards] = useState([]);
-
-  const [selectedProvince, setSelectedProvince] = useState('');
-  const [selectedDistrict, setSelectedDistrict] = useState('');
-  const [selectedWard, setSelectedWard] = useState('');
-  const [detailAddress, setDetailAddress] = useState('');
-
-  useEffect(() => {
-    setProvinces(vietnamData);
-  }, []);
+  const inputAvatarRef = useRef();
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
         const res = await axios.get(`http://localhost:5000/api/users/${id}`);
         setUser(res.data);
-        setFormData({
-          username: res.data.username || '',
-          email: res.data.email || '',
-          full_name: res.data.full_name || '',
-          birth_date: res.data.birth_date || '',
-          phone: res.data.phone || '',
-          address: res.data.address || ''
-        });
+        setFullName(res.data.full_name || "");
+        setUsername(res.data.username || "");
+        setBirthDate(
+          res.data.birth_date ? res.data.birth_date.substring(0, 10) : ""
+        );
+        setPhone(res.data.phone || "");
+        setEmail(res.data.email || "");
+        setAvatar(res.data.image || defaultAvatar);
       } catch (err) {
-        console.error('Không thể lấy thông tin người dùng:', err);
+        console.error("Không thể lấy thông tin người dùng:", err);
       }
     };
-
     fetchUser();
   }, [id]);
 
   useEffect(() => {
-    const province = vietnamData.find((p) => p.name === selectedProvince);
-    setDistricts(province ? province.districts : []);
-    setSelectedDistrict('');
-    setWards([]);
-    setSelectedWard('');
-  }, [selectedProvince]);
-
-  useEffect(() => {
-    const district = districts.find((d) => d.name === selectedDistrict);
-    setWards(district ? district.wards.map((w) => ({ name: w })) : []);
-    setSelectedWard('');
-  }, [selectedDistrict]);
-
-  const toggleShowPassword = (field) => {
-    setShowPassword(prev => ({
-      ...prev,
-      [field]: !prev[field]
-    }));
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value
-    }));
-  };
-
-  const handleUpdate = async () => {
-    let fullAddress = formData.address;
-
-    if (detailAddress || selectedWard || selectedDistrict || selectedProvince) {
-      fullAddress = `${detailAddress}, ${selectedWard}, ${selectedDistrict}, ${selectedProvince}`.trim();
+    if (!user) return;
+    if (
+      fullName !== (user.full_name || "") ||
+      username !== (user.username || "") ||
+      birthDate !== (user.birth_date ? user.birth_date.substring(0, 10) : "") ||
+      phone !== (user.phone || "") ||
+      email !== (user.email || "")
+    ) {
+      setDisableSave(false);
+    } else {
+      setDisableSave(true);
     }
+  }, [fullName, username, birthDate, phone, email, user]);
 
+  const handleAvatarChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file && (file.type === "image/jpeg" || file.type === "image/png")) {
+      if (file.size > MAX_IMAGE_SIZE) {
+        alert("Dung lượng file quá lớn. Vui lòng chọn file nhỏ hơn 5MB.");
+        return;
+      }
+      setAvatarUploading(true);
+      try {
+        const formData = new FormData();
+        formData.append("image", file);
+        const res = await axios.post(
+          `http://localhost:5000/api/users/${id}/avatar`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+        setAvatar(res.data.data.url);
+        setDisableSave(false);
+        alert("Cập nhật ảnh đại diện thành công!");
+      } catch (error) {
+        alert("Lỗi upload ảnh. Vui lòng thử lại.");
+      }
+      setAvatarUploading(false);
+    } else {
+      alert("Định dạng không hỗ trợ. Chỉ nhận .JPEG hoặc .PNG");
+    }
+  };
+
+  const handleSave = async (e) => {
+    e.preventDefault();
     try {
-      const res = await axios.put(`http://localhost:5000/api/users/${id}`, {
-        ...formData,
-        address: fullAddress
+      await axios.put(`http://localhost:5000/api/users/${id}`, {
+        full_name: fullName,
+        username: username,
+        birth_date: birthDate,
       });
-      console.log(res.data);
-      setModalChangeInfor(false);
-      setUser({ ...user, ...formData, address: fullAddress });
-      alert('Cập nhật thông tin thành công!');
+      alert("Cập nhật thông tin thành công!");
+      setDisableSave(true);
     } catch (err) {
-      console.error('Lỗi update user:', err);
-      alert('Có lỗi xảy ra khi cập nhật.');
+      alert("Có lỗi khi cập nhật.");
     }
   };
 
-  const toggleModalChangeInfor = () => {
-    if (!modalChangeInfor && user && user.address) {
-      const parts = user.address.split(',').map(p => p.trim());
-
-      setDetailAddress(parts[0] || '');
-      setSelectedWard(parts[1] || '');
-      setSelectedDistrict(parts[2] || '');
-      setSelectedProvince(parts[3] || '');
-
-      const provinceData = vietnamData.find((p) => p.name === parts[3]);
-      setDistricts(provinceData ? provinceData.districts : []);
-
-      const districtData = provinceData?.districts.find((d) => d.name === parts[2]);
-      setWards(districtData ? districtData.wards.map((w) => ({ name: w })) : []);
-    }
-    setModalChangeInfor(!modalChangeInfor);
-  };
-
-  const toggleModalChangePass = () => {
-    setModalChangePass(!modalChangePass);
-  };
-
-  const handlePasswordInputChange = (e) => {
-    const { name, value } = e.target;
-    setPasswordData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleChangePassword = async () => {
-    if (!passwordData.oldPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
-      alert('Vui lòng nhập đầy đủ các trường.');
-      return;
-    }
-
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert('Mật khẩu mới và xác nhận không khớp.');
-      return;
-    }
-
-    try {
-      const res = await axios.put(`http://localhost:5000/api/users/${id}/change-password`, {
-        oldPassword: passwordData.oldPassword,
-        newPassword: passwordData.newPassword
-      });
-      console.log(res.data);
-      alert('Đổi mật khẩu thành công!');
-      setModalChangePass(false);
-      setPasswordData({ oldPassword: '', newPassword: '', confirmPassword: '' });
-    } catch (err) {
-      console.error('Lỗi đổi mật khẩu:', err);
-      alert(err.response?.data?.message || 'Có lỗi xảy ra khi đổi mật khẩu.');
-    }
+  // Hiển thị phone ẩn đi 1 phần
+  const maskPhone = (phone) => {
+    if (!phone) return "";
+    if (phone.length < 4) return phone;
+    return "*".repeat(phone.length - 3) + phone.slice(-3);
   };
 
   if (!user) return <div>Đang tải thông tin...</div>;
 
-  const formatDate = (isoDate) => {
-    if (!isoDate) return '';
-    const date = new Date(isoDate);
-    return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth()+1).toString().padStart(2, '0')}/${date.getFullYear()}`;
-  };
-
   return (
-    <div className="user-information">
-      <h2>Thông tin người dùng</h2>
-      <p><strong>Username:</strong> {user.username}</p>
-      <p><strong>Email:</strong> {user.email}</p>
-      <p><strong>Họ tên:</strong> {user.full_name}</p>
-      <p><strong>Ngày sinh:</strong> {formatDate(user.birth_date)}</p>
-      <p><strong>Số điện thoại:</strong> {user.phone}</p>
-      <div>
-        <button onClick={toggleModalChangeInfor}>Thay đổi thông tin</button>
-        <button onClick={toggleModalChangePass}>Đổi mật khẩu</button>
+    <div className="info-main-wrap">
+      <div className="info-form-left">
+        <div className="avatar-block-row">
+          <div className="avatar-img-wrap">
+            <div className="avatar-title">Ảnh đại diện</div>
+            <img className="avatar-circle-img" src={avatar} alt="Avatar" />
+          </div>
+          <div className="avatar-info-wrap">
+            <button
+              className="update-avatar-btn"
+              onClick={() => inputAvatarRef.current.click()}
+              disabled={avatarUploading}
+            >
+              {avatarUploading ? "Đang tải lên..." : "Cập nhật ảnh mới"}
+            </button>
+            <input
+              ref={inputAvatarRef}
+              type="file"
+              accept=".jpeg,.jpg,.png"
+              style={{ display: "none" }}
+              onChange={handleAvatarChange}
+            />
+            <div className="avatar-note">
+              Dung lượng file tối đa 5 MB.
+              <br />
+              Định dạng: .JPEG, .PNG
+            </div>
+          </div>
+        </div>
+
+        <form className="info-form" onSubmit={handleSave}>
+          <label>Họ và tên</label>
+          <input
+            type="text"
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            placeholder="Họ và tên"
+          />
+          <label>Username</label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Username"
+          />
+          <label>Ngày sinh</label>
+          <input
+            type="date"
+            value={birthDate}
+            onChange={(e) => setBirthDate(e.target.value)}
+            placeholder="Ngày sinh"
+          />
+          <button type="submit" className="save-btn" disabled={disableSave}>
+            Lưu thay đổi
+          </button>
+        </form>
       </div>
-
-      {modalChangeInfor && (
-        <div className="modalChangeInfor">
-          <div className="overlay" onClick={toggleModalChangeInfor}></div>
-          <div className="modalContent">
-            <h3>Chỉnh sửa thông tin</h3>
-            <div className="formGroup">
-              <label>Username</label>
-              <input type="text" name="username" value={formData.username} onChange={handleInputChange} placeholder="Username" />
-              <label>Email</label>
-              <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="Email" />
-              <label>Họ tên</label>
-              <input type="text" name="full_name" value={formData.full_name} onChange={handleInputChange} placeholder="Họ tên" />
-              <label>Ngày sinh</label>
-              <input type="date" name="birth_date" value={formData.birth_date} onChange={handleInputChange} />
-              <label>Số điện thoại</label>
-              <input type="text" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="Số điện thoại" />
-            </div>
-              
-            <div className="buttonGroup">
-              <button className="saveBtn" onClick={handleUpdate}>Lưu thay đổi</button>
-              <button className="cancelBtn" onClick={toggleModalChangeInfor}>Hủy</button>
-            </div>
-          </div>
+      <div className="info-view-right">
+        <div className="info-row">
+          <span className="info-label">Số điện thoại</span>
+          <span className="info-value">{maskPhone(phone)}</span>
         </div>
-      )}
-
-    {modalChangePass && (
-        <div className="modalChangePass">
-          <div className="overlay1" onClick={toggleModalChangePass}></div>
-          <div className="modalContent">
-            <h3>Đổi mật khẩu</h3>
-            <div className="formGroup">
-                <div className="inputWithIcon">
-                    <input
-                    type={showPassword.oldPassword ? "text" : "password"}
-                    name="oldPassword"
-                    placeholder="Mật khẩu cũ"
-                    value={passwordData.oldPassword}
-                    onChange={handlePasswordInputChange}
-                    />
-                    <span onClick={() => toggleShowPassword('oldPassword')}>
-                    {showPassword.oldPassword ? '👁️' : '🙈'}
-                    </span>
-                </div>
-
-                <div className="inputWithIcon">
-                    <input
-                    type={showPassword.newPassword ? "text" : "password"}
-                    name="newPassword"
-                    placeholder="Mật khẩu mới"
-                    value={passwordData.newPassword}
-                    onChange={handlePasswordInputChange}
-                    />
-                    <span onClick={() => toggleShowPassword('newPassword')}>
-                    {showPassword.newPassword ? '👁️' : '🙈'}
-                    </span>
-                </div>
-
-                <div className="inputWithIcon">
-                    <input
-                    type={showPassword.confirmPassword ? "text" : "password"}
-                    name="confirmPassword"
-                    placeholder="Xác nhận mật khẩu mới"
-                    value={passwordData.confirmPassword}
-                    onChange={handlePasswordInputChange}
-                    />
-                    <span onClick={() => toggleShowPassword('confirmPassword')}>
-                    {showPassword.confirmPassword ? '👁️' : '🙈'}
-                    </span>
-                </div>
-                </div>
-            <div className="buttonGroup">
-              <button className="saveBtn" onClick={handleChangePassword}>Lưu</button>
-              <button className="cancelBtn" onClick={toggleModalChangePass}>Hủy</button>
-            </div>
-          </div>
+        <div className="info-row">
+          <span className="info-label">Email</span>
+          <span className="info-value">{email}</span>
+          <button
+            className="edit-btn"
+            onClick={() => navigate(`/account/${id}?tab=updateEmail`)}
+          >
+            Cập nhật
+          </button>
         </div>
-      )}
+        <div className="info-row">
+          <span className="info-label">Mật khẩu</span>
+          <button
+            className="edit-btn"
+            onClick={() => navigate(`/account/${id}?tab=updatePass`)}
+          >
+            Cập nhật
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
