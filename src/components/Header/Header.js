@@ -124,6 +124,14 @@ function Header() {
               Sổ địa chỉ
             </Link>
 
+            <Link
+              to={`/account/${user.userId}`}
+              state={{ tab: "order" }}
+              className="dropdown-item info-link"
+            >
+              Đơn hàng
+            </Link>
+
             <button
               type="button"
               className="dropdown-item logout-button"

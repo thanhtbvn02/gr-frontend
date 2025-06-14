@@ -1,16 +1,16 @@
-import React, { useEffect, useState, useRef } from 'react';
-import axiosInstance from '../../utils/axiosConfig';
-import { Link, useNavigate } from 'react-router-dom';
-import './home.css';
-import {Header, Footer, ScrollingBar, Category} from '../../components'
-import { useSelector, useDispatch } from 'react-redux';
-import { addToCart } from '../../redux/addCart';
+import React, { useEffect, useState, useRef } from "react";
+import axiosInstance from "../../utils/axiosConfig";
+import { Link, useNavigate } from "react-router-dom";
+import "./home.css";
+import { Header, Footer, ScrollingBar, Category } from "../../components";
+import { useSelector, useDispatch } from "react-redux";
+import { addToCart } from "../../redux/addCart";
 
 export default function Home() {
   const navigate = useNavigate();
-  
+
   // Sử dụng Redux thay vì useCart hook
-  const isLoggedIn = useSelector(state => state.cart.isLoggedIn);
+  const isLoggedIn = useSelector((state) => state.cart.isLoggedIn);
   const dispatch = useDispatch();
 
   const [products, setProducts] = useState([]);
@@ -18,8 +18,8 @@ export default function Home() {
   const [limit, setLimit] = useState(20);
   const [loading, setLoading] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
-  const [alertType, setAlertType] = useState('success');
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState("success");
 
   const fetchOne = useRef(false);
 
@@ -31,16 +31,18 @@ export default function Home() {
       );
       const productsWithImages = res.data.products;
 
-      setProducts(prev => {
+      setProducts((prev) => {
         const merged = [...prev, ...productsWithImages];
-        const unique = Array.from(new Map(merged.map(p => [p.id, p])).values());
+        const unique = Array.from(
+          new Map(merged.map((p) => [p.id, p])).values()
+        );
         return unique;
       });
 
-      setOffset(prev => prev + limit);
+      setOffset((prev) => prev + limit);
       if (offset === 0) setLimit(8);
     } catch (err) {
-      console.error('Lỗi khi load sản phẩm:', err);
+      console.error("Lỗi khi load sản phẩm:", err);
     } finally {
       setLoading(false);
     }
@@ -48,28 +50,29 @@ export default function Home() {
 
   const handleAddToCart = (productId) => {
     if (!productId) return;
-    
+
     try {
       // Sử dụng Redux dispatch trực tiếp
       dispatch(addToCart(productId, 1));
 
-      setAlertMessage(isLoggedIn
-        ? 'Thêm vào giỏ hàng thành công!'
-        : 'Sản phẩm đã được thêm vào giỏ hàng tạm thời'
+      setAlertMessage(
+        isLoggedIn
+          ? "Thêm vào giỏ hàng thành công!"
+          : "Sản phẩm đã được thêm vào giỏ hàng tạm thời"
       );
-      setAlertType('success');
+      setAlertType("success");
       setShowAlert(true);
       setTimeout(() => setShowAlert(false), 2000);
     } catch (error) {
-      console.error('Lỗi khi thêm vào giỏ hàng:', error);
+      console.error("Lỗi khi thêm vào giỏ hàng:", error);
       if (error.response?.status === 403) {
         // Phiên hết hạn, chuyển đến trang đăng nhập
-        navigate('/login');
-        setAlertMessage('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại');
+        navigate("/login");
+        setAlertMessage("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
       } else {
-        setAlertMessage('Có lỗi xảy ra khi thêm vào giỏ hàng!');
+        setAlertMessage("Có lỗi xảy ra khi thêm vào giỏ hàng!");
       }
-      setAlertType('error');
+      setAlertType("error");
       setShowAlert(true);
       setTimeout(() => setShowAlert(false), 2000);
     }
@@ -78,14 +81,18 @@ export default function Home() {
   useEffect(() => {
     if (fetchOne.current) return;
     fetchOne.current = true;
-  
+
     fetchProducts();
   }, []);
 
   return (
     <div className="home-container">
       {showAlert && (
-        <div className={`alert ${alertType === 'success' ? 'alert-success' : 'alert-error'}`}>
+        <div
+          className={`alert ${
+            alertType === "success" ? "alert-success" : "alert-error"
+          }`}
+        >
           {alertMessage}
         </div>
       )}
@@ -95,16 +102,21 @@ export default function Home() {
       </div>
       <div className="home-container">
         <div className="product-list">
-          {products.map(product => (
+          {products.map((product) => (
             <div className="product-card" key={product.id}>
               {product.image && <img src={product.image} alt={product.name} />}
               <div className="product-info">
-                <h3><Link to={`/productInfor/${product.id}`}>{product.name}</Link></h3>
+                <h3>
+                  <Link to={`/productInfor/${product.id}`}>{product.name}</Link>
+                </h3>
                 <p className="price">
-                  {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
+                  {new Intl.NumberFormat("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                  }).format(product.price)} / {product.unit}
                 </p>
               </div>
-              <button 
+              <button
                 className="add-to-cart-btn"
                 onClick={() => handleAddToCart(product.id)}
               >

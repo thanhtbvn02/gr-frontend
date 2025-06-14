@@ -6,3 +6,5 @@ export { default as CheckOut } from "./CheckOut";
 export { default as VNPayReturn } from "./VNPayReturn";
 export { default as UpdatePass } from "./UpdatePass";
 export { default as UpdateEmail } from "./UpdateEmail";
+export { default as Order } from "./Order";
+export { default as OrderDetail } from "./OrderDetail";

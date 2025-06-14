@@ -29,12 +29,16 @@ import {
   CheckOut,
   VNPayReturn,
   UpdateEmail,
-  UpdatePass
+  UpdatePass,
+  Order,
+  OrderDetail
 } from './pages/User'
 
 import {
   ManageProduct,
-  ManageUser
+  ManageUser,
+  ManageOrder,
+  UpdateUser
 } from './pages/Admin'
 
 
@@ -64,7 +68,9 @@ function App() {
           <Route path='/admin' element={<Dashboard />} />
           <Route path='/admin/products' element={<ManageProduct />} />
           <Route path='/admin/users' element={<ManageUser />} />
+          <Route path='/admin/orders' element={<ManageOrder />} />
           <Route path='/admin/products/add' element={<AddProduct />} />
+          <Route path='/admin/users/update/:id' element={<UpdateUser />} />
           <Route path='/cart' element={<Cart />} />
           <Route path='/checkout' element={<CheckOut />} />
           <Route path='/vnpay-return' element={<VNPayReturn />} />

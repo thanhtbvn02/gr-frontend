@@ -53,8 +53,8 @@
 }
 
 .product-card img {
-  width: 120px;
-  height: 120px;
+  width: 140px;
+  height: 140px;
   object-fit: cover;
   margin-bottom: 12px;
   border-radius: 8px;
@@ -67,7 +67,7 @@
 
 .product-info h3 {
   font-size: 14px;
-  color: #333;
+  color: #4d4949;
   margin-bottom: 4px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -83,8 +83,7 @@
   color: #007bff;
   font-weight: 600;
   margin-bottom: 8px;
-  color: #007bff;
-  font-weight: 600;
+  text-align: left;
 }
 
 .product-card button {
@@ -93,7 +92,7 @@
   background-color: #007bff;
   color: #ffffff;
   border: none;
-  border-radius: 8px;
+  border-radius: 20px;
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.3s ease;
@@ -143,9 +142,12 @@
   padding: 10px 20px;
   border-radius: 4px;
   cursor: pointer;
-  font-weight: 600;
+  font-size: 14px;
   transition: all 0.2s;
-  width: 100%;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 70%;
   margin-top: 10px;
 }
 

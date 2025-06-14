@@ -3,7 +3,6 @@ import SideBar from '../../components/SideBar/SideBar';
 import './Dashboard.css';
 import axios from 'axios';
 
-// Component con cho mỗi mục danh mục
 const CategoryItem = ({ node, level }) => {
   const [expanded, setExpanded] = useState(false);
   
@@ -43,7 +42,6 @@ export default function Dashboard() {
   const [categoryTree, setCategoryTree] = useState([]);
   const [totalProducts, setTotalProducts] = useState(0);
 
-  // Fetch user stats & total products
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -108,7 +106,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Product Stats */}
         <div className="stats-card">
           <h2>Product Stats</h2>
           <div className="stats-grid">
@@ -119,7 +116,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Category tree */}
         <div className="category-tree-container">
           <h2>Categories</h2>
           <div className="category-tree">

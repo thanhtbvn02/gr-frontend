@@ -1,0 +1,278 @@
+.info-main-wrap {
+    display: flex;
+    max-width: 880px;
+    margin: 36px auto;
+    background: #fcfcfd;
+    border-radius: 16px;
+    box-shadow: 0 2px 18px rgba(24, 71, 133, 0.06);
+    padding: 36px 28px;
+    gap: 44px;
+    font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  }
+  
+  .info-form-left {
+    width: 340px;
+    flex-shrink: 0;
+  }
+  
+  .avatar-block-row {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    margin-bottom: 24px;
+  }
+  
+  .avatar-img-wrap {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .avatar-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: #164785;
+    margin-bottom: 2px;
+  }
+  
+  .avatar-circle-img1 {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border: 2.5px solid #e6eaf4;
+    background: #f4f8fd;
+    box-shadow: 0 2px 10px 0 rgba(36,120,251,0.04);
+  }
+  
+  .avatar-info-wrap {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 7px;
+  }
+  
+  .update-avatar-btn {
+    background: #f2f6fc;
+    color: #2156c2;
+    font-weight: 500;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 19px;
+    cursor: pointer;
+    font-size: 15px;
+    margin-bottom: 0;
+    transition: background 0.18s, color 0.18s;
+    width: max-content;
+  }
+  .update-avatar-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  .update-avatar-btn:hover:not(:disabled) {
+    background: #e1edfc;
+    color: #173d70;
+  }
+  
+  .avatar-note {
+    color: #76849a;
+    font-size: 13px;
+    margin-top: 3px;
+    line-height: 1.5;
+  }
+  
+  .info-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .info-form label {
+    font-weight: 500;
+    text-align: left;
+    font-size: 15px;
+    color: #2854a6;
+    margin-bottom: 2px;
+  }
+  
+  .info-form input {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 16px;
+    border-radius: 8px;
+    border: 1.2px solid #dadada;
+    margin-bottom: 2px;
+    background: #f8faff;
+    transition: border-color 0.2s, background 0.18s;
+  }
+  .info-form input:focus {
+    border-color: #2478fb;
+    outline: none;
+    background: #fff;
+  }
+  
+  .save-btn {
+    width: 100%;
+    margin-top: 14px;
+    background: #e0e7ef;
+    color: #427af7;
+    border: none;
+    border-radius: 8px;
+    padding: 13px 0;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: not-allowed;
+    transition: background 0.2s, color 0.2s;
+    letter-spacing: 0.04em;
+  }
+  .save-btn:enabled {
+    background: #2478fb;
+    color: #fff;
+    cursor: pointer;
+  }
+  .save-btn:enabled:hover {
+    background: #1a60ca;
+  }
+  
+  .info-view-right {
+    flex: 1;
+    border-left: 1.5px solid #ececec;
+    padding-left: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    justify-content: flex-start;
+    text-align: left;
+  }
+  
+  .info-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 8px;
+  }
+  
+  .info-label {
+    min-width: 120px;
+    color: #35517d;
+    font-weight: 600;
+    font-size: 16.5px;
+    letter-spacing: 0.02em;
+  }
+  
+  .info-value {
+    font-size: 16px;
+    color: #383838;
+    flex: 1;
+  }
+  
+  @media (max-width: 800px) {
+    .info-main-wrap {
+      flex-direction: column;
+      padding: 20px 8px;
+      gap: 24px;
+    }
+    .info-form-left {
+      width: 100%;
+    }
+    .info-view-right {
+      border-left: none;
+      padding-left: 0;
+    }
+  }
+/* --- GIAO DIỆN TOGGLE VAI TRÒ & TRẠNG THÁI --- */
+.info-view-right-user {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    justify-content: flex-start;
+    text-align: left;
+  }
+  
+  .role-status-group {
+    margin-top: 36px;
+    background: #f9fbfe;
+    border-radius: 14px;
+    padding: 20px 24px;
+    box-shadow: 0 2px 12px rgba(80,120,255,0.07);
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 36px;
+    margin-bottom: 0;
+  }
+  .toggle-label {
+    font-size: 16.5px;
+    color: #2950a6;
+    min-width: 110px;
+    font-weight: 600;
+  }
+  .toggle-switch-group {
+    flex: 1;
+  }
+  
+  .toggle-switch {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    cursor: pointer;
+    user-select: none;
+    font-weight: 500;
+    font-size: 15.8px;
+  }
+  
+  .toggle-switch input[type="checkbox"] {
+    display: none;
+  }
+  .toggle-switch .slider {
+    width: 42px;
+    height: 24px;
+    background: #e3e9f7;
+    border-radius: 12px;
+    position: relative;
+    display: inline-block;
+    transition: background 0.2s;
+  }
+  .toggle-switch .slider:before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 4px;
+    width: 18px;
+    height: 18px;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px 0 rgba(36,120,251,0.09);
+    transition: left 0.2s;
+  }
+  
+  .toggle-switch input[type="checkbox"]:checked + .slider {
+    background: #2478fb;
+  }
+  .toggle-switch input[type="checkbox"]:checked + .slider:before {
+    left: 20px;
+    background: #f4f7fd;
+  }
+  
+  .toggle-txt {
+    margin-left: 8px;
+    min-width: 98px;
+    color: #1862ca;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+  }
+  
+  @media (max-width: 800px) {
+    .role-status-group {
+      padding: 14px 7px;
+    }
+    .toggle-label { min-width: 80px; }
+    .toggle-txt { min-width: 70px; }
+  }
+    

@@ -1,4 +1,3 @@
-// --- BẮT ĐẦU: Thay thế toàn bộ nội dung file Information.js ---
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -186,6 +185,7 @@ const Information = () => {
         </div>
         <div className="info-row">
           <span className="info-label">Mật khẩu</span>
+          <span className="info-value">********</span>
           <button
             className="edit-btn"
             onClick={() => navigate(`/account/${id}?tab=updatePass`)}

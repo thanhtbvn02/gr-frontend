@@ -1,0 +1,264 @@
+body {
+    background: #f4f5f7;
+  }
+  
+  .order-detail-container {
+    max-width: 800px;
+    margin: 32px auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    padding: 36px 28px 32px 28px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    transition: box-shadow 0.2s;
+    font-size: 15px;
+    letter-spacing: 0.02em;
+  }
+  
+  .order-detail-header {
+    border-bottom: 1.5px solid #f0f0f0;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .order-detail-header h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0;
+    color: #222;
+  }
+  .order-detail-status-fail {
+    background: #ffeaea;
+    color: #d32f2f;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-size: 16px;
+    margin-top: 10px;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(211,47,47,0.04);
+  }
+  
+  .order-detail-status-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin: 22px 0 10px 0;
+  }
+  .order-detail-status-badge {
+    color: #fff;
+    font-weight: 600;
+    border-radius: 18px;
+    padding: 6px 22px;
+    font-size: 16px;
+    display: inline-block;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    letter-spacing: 0.5px;
+  }
+  .order-detail-ship {
+    background: #f2f6fa;
+    color: #2d9cdb;
+    border-radius: 14px;
+    padding: 4px 14px;
+    font-size: 15px;
+    margin-left: 10px;
+    font-weight: 500;
+  }
+  
+  .order-detail-shipping {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 14px 22px;
+    margin-bottom: 22px;
+    font-size: 15px;
+    color: #444;
+    position: relative;
+    box-shadow: 0 1px 4px rgba(45,156,219,0.03);
+  }
+  .order-detail-ship-cancel {
+    color: #d32f2f;
+    font-weight: 700;
+    margin-top: 6px;
+    font-size: 15px;
+  }
+  .order-detail-ship-time {
+    font-size: 13px;
+    color: #888;
+    margin-top: 2px;
+  }
+  .order-detail-ship-note {
+    color: #d32f2f;
+    font-size: 13px;
+    margin-top: 2px;
+  }
+  
+  .order-detail-info-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 36px;
+    background: #f7fafd;
+    border-radius: 10px;
+    padding: 20px 22px 12px 22px;
+    margin-bottom: 22px;
+    font-size: 15px;
+    box-shadow: 0 1px 4px rgba(45,156,219,0.03);
+  }
+  .order-detail-info-row > div {
+    flex: 1;
+  }
+  .order-detail-copy {
+    color: #2d9cdb;
+    cursor: pointer;
+    font-size: 13px;
+    margin-left: 10px;
+    font-weight: 500;
+    transition: color 0.15s;
+  }
+  .order-detail-copy:hover {
+    color: #1565c0;
+    text-decoration: underline;
+  }
+  
+  .order-detail-products {
+    margin-bottom: 22px;
+  }
+  .order-detail-products-title {
+    font-weight: 700;
+    font-size: 17px;
+    margin-bottom: 10px;
+    color: #222;
+  }
+  .order-detail-products-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+  }
+  .order-detail-products-table td {
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+    vertical-align: middle;
+    font-size: 15px;
+    min-width: 80px;
+  }
+  .order-detail-product-img {
+    width: 60px;
+    text-align: center;
+  }
+  .order-detail-product-img img {
+    border-radius: 8px;
+    width: 44px;
+    height: 44px;
+    object-fit: cover;
+    background: #f2f2f2;
+    box-shadow: 0 1px 4px rgba(45,156,219,0.04);
+  }
+  .order-detail-product-img-placeholder {
+    width: 44px;
+    height: 44px;
+    background: #f2f2f2;
+    border-radius: 8px;
+  }
+  .order-detail-product-type {
+    color: #888;
+    font-size: 13px;
+    margin-top: 2px;
+  }
+  
+  .order-detail-payment {
+    background: #f7fafd;
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin-top: 22px;
+    box-shadow: 0 1px 4px rgba(45,156,219,0.03);
+  }
+  .order-detail-payment-title {
+    font-weight: 700;
+    font-size: 17px;
+    margin-bottom: 10px;
+    color: #222;
+  }
+  .order-detail-payment-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 15px;
+  }
+  .order-detail-payment-total {
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .order-detail-payment-total span:last-child {
+    color: #eb5757 !important;
+    font-weight: 700;
+    font-size: 20px !important;
+  }
+  .order-detail-cod {
+    background: #e0eaff;
+    color: #2d9cdb;
+    border-radius: 7px;
+    padding: 3px 10px;
+    font-size: 13px;
+    margin-right: 8px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+.is-delivery {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+.is-delivery-button {
+  background: #2d9cdb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.badge {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 12px;
+  display: inline-block;
+  min-width: 80px;
+  text-align: center;
+}
+.badge-pending {
+  background: #fff9e6;
+  color: #ffcc00;
+}
+.badge-processing {
+  background: #e6f0ff;
+  color: #007bff;
+}
+.badge-delivered {
+  background: #e8f9f1;
+  color: #22c55e;
+}
+.badge-cancelled {
+  background: #ffeaea;
+  color: #ef4444;
+}
+  
+  @media (max-width: 700px) {
+    .order-detail-container {
+      padding: 10px 2px;
+    }
+    .order-detail-info-row {
+      flex-direction: column;
+      gap: 10px;
+      padding: 12px;
+    }
+    .order-detail-payment {
+      padding: 12px;
+    }
+    .order-detail-header h2 {
+      font-size: 20px;
+    }
+  }
+  

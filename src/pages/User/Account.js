@@ -4,10 +4,13 @@ import Information from "./Information";
 import Address from "./Address";
 import UpdateEmail from "./UpdateEmail";
 import UpdatePass from "./UpdatePass";
+import Order from "./Order";
+import OrderDetail from "./OrderDetail";
 import "./Account.css";
 import Header from "../../components/Header/Header";
 const Account = () => {
   const [activeTab, setActiveTab] = useState("info");
+  const [selectedOrderCode, setSelectedOrderCode] = useState(null);
   const location = useLocation();
 
   useEffect(() => {
@@ -21,11 +24,12 @@ const Account = () => {
       tabParam === "address" ||
       tabParam === "info" ||
       tabParam === "updateEmail" ||
-      tabParam === "updatePass"
+      tabParam === "updatePass" ||
+      tabParam === "order" ||
+      tabParam === "orderDetail"
     ) {
       setActiveTab(tabParam);
     }
-    
   }, [location]);
   return (
     <div>
@@ -44,6 +48,12 @@ const Account = () => {
           >
             Địa chỉ
           </button>
+          <button
+            className={activeTab === "order" ? "active" : ""}
+            onClick={() => setActiveTab("order")}
+          >
+            Đơn hàng
+          </button>
         </div>
 
         <div className="account-content">
@@ -53,6 +63,15 @@ const Account = () => {
             <Address />
           ) : activeTab === "updateEmail" ? (
             <UpdateEmail />
+          ) : activeTab === "order" ? (
+            <Order
+              onSelectOrder={(orderCode) => {
+                setSelectedOrderCode(orderCode);
+                setActiveTab("orderDetail");
+              }}
+            />
+          ) : activeTab === "orderDetail" ? (
+            <OrderDetail orderCode={selectedOrderCode} />
           ) : (
             <UpdatePass />
           )}
