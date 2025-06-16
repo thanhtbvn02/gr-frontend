@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useParams } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import "./Header.css";
 import Category from "./Category";
+
+const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
 
 function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -12,8 +14,9 @@ function Header() {
   const [modalInfor, setModalInfor] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
-
-  // Lấy số lượng sản phẩm từ Redux store
+  const { id } = useParams();
+  const [avatar, setAvatar] = useState(defaultAvatar);
+    // Lấy số lượng sản phẩm từ Redux store
   const cartCount = useSelector((state) => state.cart.cartCount || 0);
 
   const handleSearchSubmit = (e) => {
@@ -26,6 +29,18 @@ function Header() {
   const toggleModalInfor = () => {
     setModalInfor(!modalInfor);
   };
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5000/api/users/${id}`);
+        setAvatar(res.data.image || defaultAvatar);
+      } catch (err) {
+        console.error("Không thể lấy thông tin người dùng:", err);
+      }
+    };
+    fetchUser();
+  }, [id]);
 
   const handleLogout = async () => {
     await axios.post("http://localhost:5000/api/users/logout");
@@ -87,7 +102,7 @@ function Header() {
 
           {isLoggedIn ? (
             <div className="user-icon" onClick={toggleModalInfor}>
-              {userInitial}
+              <img src={avatar} alt="Avatar" className="avatar-icon" />
             </div>
           ) : (
             <>

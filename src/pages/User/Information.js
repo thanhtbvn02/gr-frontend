@@ -92,7 +92,7 @@ const Information = () => {
       await axios.put(`http://localhost:5000/api/users/${id}`, {
         full_name: fullName,
         username: username,
-        birth_date: birthDate,
+        birth_date:"",
       });
       alert("Cập nhật thông tin thành công!");
       setDisableSave(true);

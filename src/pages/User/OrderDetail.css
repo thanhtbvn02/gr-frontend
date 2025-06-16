@@ -9,7 +9,7 @@ body {
     border-radius: 16px;
     box-shadow: 0 4px 24px rgba(0,0,0,0.08);
     padding: 36px 28px 32px 28px;
-    font-family: 'Segoe UI', Arial, sans-serif;
+    font-family: 'Inter', 'Inter Fallback' !important;
     transition: box-shadow 0.2s;
     font-size: 15px;
     letter-spacing: 0.02em;

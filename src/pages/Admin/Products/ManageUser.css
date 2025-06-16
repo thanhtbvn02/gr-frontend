@@ -2,7 +2,7 @@
   display: flex;
   min-height: 100vh;
   background: #f6f8fa;
-  font-family: 'Segoe UI', Arial, sans-serif;
+  font-family: 'Inter', 'Inter Fallback' !important;
 }
 
 .sidebar-wrapper {

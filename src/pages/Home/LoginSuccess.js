@@ -34,7 +34,12 @@ const LoginSuccess = () => {
           
           const decoded = jwtDecode(token);
           localStorage.setItem('userId', decoded.userId);
-          navigate('/');
+          localStorage.setItem('userRole', decoded.role);
+          if (decoded.role === 'admin') {
+            navigate('/admin');
+          } else {
+            navigate('/');
+          }
         } catch (error) {
           console.error('Lỗi khi xử lý đăng nhập Google:', error);
           navigate('/login');
