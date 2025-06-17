@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import axiosInstance from "../../utils/axiosConfig";
 import { Link, useNavigate } from "react-router-dom";
 import "./home.css";
-import { Header, Footer, ScrollingBar, Category } from "../../components";
+import { Header, Footer, ScrollingBar } from "../../components";
 import { useSelector, useDispatch } from "react-redux";
 import { addToCart } from "../../redux/addCart";
 
@@ -86,7 +86,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="home-container">
+    <div className="home-main-content" style={{ paddingTop: 90 }}>
       {showAlert && (
         <div
           className={`alert ${
@@ -96,7 +96,6 @@ export default function Home() {
           {alertMessage}
         </div>
       )}
-
       <div>
         <Header />
       </div>
@@ -113,7 +112,8 @@ export default function Home() {
                   {new Intl.NumberFormat("vi-VN", {
                     style: "currency",
                     currency: "VND",
-                  }).format(product.price)} / {product.unit}
+                  }).format(product.price)}{" "}
+                  / {product.unit}
                 </p>
               </div>
               <button
@@ -125,7 +125,6 @@ export default function Home() {
             </div>
           ))}
         </div>
-
         {/* Nút hiển thị thêm */}
         <div className="load-more-container">
           {!loading && products.length > 0 && (

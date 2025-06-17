@@ -10,6 +10,7 @@ import {
   setSelectedItems,
 } from "../../redux/addCart";
 import Header from "../../components/Header/Header";
+import Footer from "../../components/Footer/Footer";
 
 function CartPage() {
   const cartItems = useSelector((state) => state.cart.cartId);
@@ -271,157 +272,168 @@ function CartPage() {
 
   return (
     <>
-      <Header />
-      <div className="cart-container">
-        <h1 className="cart-title">Giỏ hàng của bạn</h1>
+      <div className="cart-main-content" style={{ paddingTop: 90 }}>
+        <Header />
+        <div className="cart-container">
+          <h1 className="cart-title">Giỏ hàng của bạn</h1>
 
-        {showAlert && (
-          <div
-            className={`alert ${
-              alertType === "error"
-                ? "alert-error"
-                : alertType === "warning"
-                ? "alert-warning"
-                : "alert-success"
-            }`}
-          >
-            {alertMessage}
-          </div>
-        )}
-
-        {error && <div className="error-message">{error}</div>}
-
-        {loading ? (
-          <div className="loading">Đang tải...</div>
-        ) : isCartEmpty ? (
-          <div className="empty-cart">
-            <p>Giỏ hàng của bạn đang trống</p>
-            <Link to="/" className="continue-shopping">
-              Tiếp tục mua sắm
-            </Link>
-          </div>
-        ) : (
-          <div className="cart-content">
-            <div className="cart-items">
-              <table className="cart-table">
-                <thead>
-                  <tr>
-                    <th className="checkbox-column">Chọn</th>
-                    <th className="image-column">Hình ảnh</th>
-                    <th className="name-column">Tên sản phẩm</th>
-                    <th className="price-column">Đơn giá</th>
-                    <th className="quantity-column">Số lượng</th>
-                    <th className="total-column">Thành tiền</th>
-                    <th className="action-column">Thao tác</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {validCartItems.map((productId) => {
-                    const product = products[productId];
-                    const quantity = itemQuantities[productId] || 0;
-
-                    if (!product || quantity <= 0) return null;
-
-                    return (
-                      <tr key={productId} className="cart-item">
-                        <td className="checkbox-column">
-                          <input
-                            type="checkbox"
-                            checked={selectedItems.includes(productId)}
-                            onChange={(e) =>
-                              handleSelectIndividual(e, productId)
-                            }
-                          />
-                        </td>
-                        <td className="image-column">
-                          <div className="product-image">
-                            {productImages[productId] ? (
-                              <img
-                                src={productImages[productId]}
-                                alt={product.name}
-                              />
-                            ) : (
-                              <div className="no-image">Không có ảnh</div>
-                            )}
-                          </div>
-                        </td>
-                        <td className="name-column">
-                          <Link to={`/productInfor/${product.id}`}>
-                            {product.name}
-                          </Link>
-                        </td>
-                        <td className="price-column">
-                          {new Intl.NumberFormat("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                          }).format(product.price)}
-                        </td>
-                        <td className="quantity-column">
-                          <div className="quantity-control">
-                            <button
-                              className="quantity-btn decrease"
-                              onClick={(e) =>
-                                handleUpdateQuantity(e, productId, quantity - 1)
-                              }
-                              disabled={quantity <= 1}
-                            >
-                              -
-                            </button>
-                            <span className="quantity">{quantity}</span>
-                            <button
-                              className="quantity-btn increase"
-                              onClick={(e) =>
-                                handleUpdateQuantity(e, productId, quantity + 1)
-                              }
-                            >
-                              +
-                            </button>
-                          </div>
-                        </td>
-                        <td className="total-column">
-                          {new Intl.NumberFormat("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                          }).format(product.price * quantity)}
-                        </td>
-                        <td className="action-column">
-                          <MdDelete
-                            className="delete-icon"
-                            onClick={(e) => handleRemoveItem(e, productId)}
-                          />
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+          {showAlert && (
+            <div
+              className={`alert ${
+                alertType === "error"
+                  ? "alert-error"
+                  : alertType === "warning"
+                  ? "alert-warning"
+                  : "alert-success"
+              }`}
+            >
+              {alertMessage}
             </div>
+          )}
 
-            <div className="cart-summary">
-              <div className="summary-header">Tổng thanh toán</div>
-              <div className="summary-row">
-                <span>Số sản phẩm đã chọn:</span>
-                <span>{selectedItems.length}</span>
-              </div>
-              <div className="summary-row">
-                <span>Tổng tiền:</span>
-                <span className="total-price">
-                  {new Intl.NumberFormat("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                  }).format(totalAmount)}
-                </span>
-              </div>
-              <button
-                className="checkout-btn"
-                onClick={handleCheckout}
-                disabled={selectedItems.length === 0}
-              >
-                Thanh toán
-              </button>
+          {error && <div className="error-message">{error}</div>}
+
+          {loading ? (
+            <div className="loading">Đang tải...</div>
+          ) : isCartEmpty ? (
+            <div className="empty-cart">
+              <p>Giỏ hàng của bạn đang trống</p>
+              <Link to="/" className="continue-shopping">
+                Tiếp tục mua sắm
+              </Link>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="cart-content">
+              <div className="cart-items">
+                <table className="cart-table">
+                  <thead>
+                    <tr>
+                      <th className="checkbox-column">Chọn</th>
+                      <th className="image-column">Hình ảnh</th>
+                      <th className="name-column">Tên sản phẩm</th>
+                      <th className="price-column">Đơn giá</th>
+                      <th className="quantity-column">Số lượng</th>
+                      <th className="total-column">Thành tiền</th>
+                      <th className="action-column">Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {validCartItems.map((productId) => {
+                      const product = products[productId];
+                      const quantity = itemQuantities[productId] || 0;
+
+                      if (!product || quantity <= 0) return null;
+
+                      return (
+                        <tr key={productId} className="cart-item">
+                          <td className="checkbox-column">
+                            <input
+                              type="checkbox"
+                              checked={selectedItems.includes(productId)}
+                              onChange={(e) =>
+                                handleSelectIndividual(e, productId)
+                              }
+                            />
+                          </td>
+                          <td className="image-column">
+                            <div className="product-image">
+                              {productImages[productId] ? (
+                                <img
+                                  src={productImages[productId]}
+                                  alt={product.name}
+                                />
+                              ) : (
+                                <div className="no-image">Không có ảnh</div>
+                              )}
+                            </div>
+                          </td>
+                          <td className="name-column">
+                            <Link to={`/productInfor/${product.id}`}>
+                              {product.name}
+                            </Link>
+                          </td>
+                          <td className="price-column">
+                            {new Intl.NumberFormat("vi-VN", {
+                              style: "currency",
+                              currency: "VND",
+                            }).format(product.price)}
+                          </td>
+                          <td className="quantity-column">
+                            <div className="quantity-control">
+                              <button
+                                className="quantity-btn decrease"
+                                onClick={(e) =>
+                                  handleUpdateQuantity(
+                                    e,
+                                    productId,
+                                    quantity - 1
+                                  )
+                                }
+                                disabled={quantity <= 1}
+                              >
+                                -
+                              </button>
+                              <span className="quantity">{quantity}</span>
+                              <button
+                                className="quantity-btn increase"
+                                onClick={(e) =>
+                                  handleUpdateQuantity(
+                                    e,
+                                    productId,
+                                    quantity + 1
+                                  )
+                                }
+                              >
+                                +
+                              </button>
+                            </div>
+                          </td>
+                          <td className="total-column">
+                            {new Intl.NumberFormat("vi-VN", {
+                              style: "currency",
+                              currency: "VND",
+                            }).format(product.price * quantity)}
+                          </td>
+                          <td className="action-column">
+                            <MdDelete
+                              className="delete-icon"
+                              onClick={(e) => handleRemoveItem(e, productId)}
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="cart-summary">
+                <div className="summary-header">Tổng thanh toán</div>
+                <div className="summary-row">
+                  <span>Số sản phẩm đã chọn:</span>
+                  <span>{selectedItems.length}</span>
+                </div>
+                <div className="summary-row">
+                  <span>Tổng tiền:</span>
+                  <span className="total-price">
+                    {new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(totalAmount)}
+                  </span>
+                </div>
+                <button
+                  className="checkout-btn"
+                  onClick={handleCheckout}
+                  disabled={selectedItems.length === 0}
+                >
+                  Thanh toán
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+        <Footer />
       </div>
     </>
   );

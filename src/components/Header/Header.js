@@ -14,9 +14,7 @@ function Header() {
   const [modalInfor, setModalInfor] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
-  const { id } = useParams();
   const [avatar, setAvatar] = useState(defaultAvatar);
-    // Lấy số lượng sản phẩm từ Redux store
   const cartCount = useSelector((state) => state.cart.cartCount || 0);
 
   const handleSearchSubmit = (e) => {
@@ -31,16 +29,21 @@ function Header() {
   };
 
   useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    console.log(userId);
+    if (!userId) return;
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/users/${id}`);
+        const res = await axios.get(
+          `http://localhost:5000/api/users/${userId}`
+        );
         setAvatar(res.data.image || defaultAvatar);
       } catch (err) {
         console.error("Không thể lấy thông tin người dùng:", err);
       }
     };
     fetchUser();
-  }, [id]);
+  }, []);
 
   const handleLogout = async () => {
     await axios.post("http://localhost:5000/api/users/logout");
@@ -61,7 +64,8 @@ function Header() {
       <header className={`header-main ${isScrolled ? "scrolled" : ""}`}>
         <div className="left-header">
           <Link to="/" className="navbar-brand">
-            <img src="/Logo.png" alt="Logo" className="logo" />
+            <img src="/cfimages.png" alt="Logo" className="logo" />
+            <p>Drug Hust</p>
           </Link>
         </div>
 
@@ -116,8 +120,9 @@ function Header() {
           )}
         </nav>
       </header>
-      <div></div>
-      <Category />
+      <div className="category-bar-sticky">
+        <Category />
+      </div>
 
       {modalInfor && (
         <div className="modalInfor">

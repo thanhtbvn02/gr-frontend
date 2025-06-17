@@ -1,6 +1,5 @@
 .category-menu {
   font-family: 'Inter', 'Inter Fallback' !important;
-  margin-top: 10px;
   position: relative;
   z-index: 99;
 }
@@ -8,7 +7,6 @@
 .category-top-nav {
   display: flex;
   background: #ffffff;
-  border-radius: 16px 16px 0 0;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -26,7 +24,6 @@
   user-select: none;
   font-size: 1.14rem;
   font-weight: 600;
-  border-radius: 16px 16px 0 0;
   transition: background 0.25s, color 0.15s;
 }
 .category-top-nav li:hover {
@@ -95,6 +92,7 @@
   border-right: 1.5px solid #e6e3f7;
   background: #ffffff;
   overflow-y: auto;
+  text-align: left;
   padding-top: 12px;
 }
 .dropdown-left ul {

@@ -24,19 +24,34 @@ const ProductInformation = () => {
 
   const [showMoreAll, setShowMoreAll] = useState(false);
   const [contentOverflow, setContentOverflow] = useState(false);
+  const [pendingScrollToDescription, setPendingScrollToDescription] =
+    useState(false);
 
   const descriptionRef = useRef(null);
   const ingredientRef = useRef(null);
   const usesRef = useRef(null);
   const directionRef = useRef(null);
   const sideEffectRef = useRef(null);
+  const noteRef = useRef(null);
   const preserveRef = useRef(null);
   const contentWrapRef = useRef(null);
-
+  const tabContentRef = useRef(null);
   const isLoggedIn = useSelector((state) => state.cart.isLoggedIn);
   const dispatch = useDispatch();
 
   const [activeTab, setActiveTab] = useState("description");
+
+  const [fontSizeMode, setFontSizeMode] = useState("default");
+
+  useEffect(() => {
+    if (!showMoreAll && pendingScrollToDescription) {
+      descriptionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      setPendingScrollToDescription(false);
+    }
+  }, [showMoreAll, pendingScrollToDescription]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -79,11 +94,6 @@ const ProductInformation = () => {
     }
   }, [product, details, ingredients]);
 
-  const handleQuantityChange = (event) => {
-    const value = parseInt(event.target.value);
-    if (value > 0) setQuantity(value);
-  };
-
   const decreaseQuantity = () => {
     if (quantity > 1) setQuantity(quantity - 1);
   };
@@ -116,7 +126,7 @@ const ProductInformation = () => {
     }).format(price);
   };
 
-  const handleMenuClick = (ref, tabKey, alignTo = "center") => {
+  const handleMenuClick = (ref, tabKey, alignTo = "start") => {
     setActiveTab(tabKey);
     setShowMoreAll(true);
     setTimeout(() => {
@@ -184,7 +194,7 @@ const ProductInformation = () => {
   const onMouseLeave = () => setIsDragging(false);
 
   return (
-    <div className="product-detail-container">
+    <div className="product-detail-main-content" style={{ paddingTop: 90 }}>
       <Header />
 
       {showAlert && (
@@ -297,17 +307,26 @@ const ProductInformation = () => {
             Tác dụng phụ
           </button>
           <button
+            className={activeTab === "note" ? "active" : ""}
+            onClick={() => handleMenuClick(noteRef, "note")}
+          >
+            Lưu ý
+          </button>
+          <button
             className={activeTab === "preserve" ? "active" : ""}
             onClick={() => handleMenuClick(preserveRef, "preserve")}
           >
-            Lưu ý & Bảo quản
+            Bảo quản
           </button>
         </div>
         <div
           className="tab-content"
-          ref={contentWrapRef}
-          style={
-            !showMoreAll
+          ref={(el) => {
+            contentWrapRef.current = el; // giữ lại ref cũ nếu đang dùng chỗ khác
+            tabContentRef.current = el; // ref mới để scroll
+          }}
+          style={{
+            ...(!showMoreAll
               ? {
                   maxHeight: MAX_CONTENT_HEIGHT,
                   overflow: "hidden",
@@ -317,9 +336,33 @@ const ProductInformation = () => {
                   maxHeight: "80vh",
                   overflowY: "auto",
                   position: "relative",
-                }
-          }
+                }),
+            fontSize: fontSizeMode === "large" ? 18 : 16,
+            letterSpacing: fontSizeMode === "large" ? 0.02 : 0.005,
+            transition: "font-size 0.18s, letter-spacing 0.18s",
+          }}
         >
+          <div className="font-size-switcher">
+            <span className="font-size-switcher-label">Kích thước chữ</span>
+            <div className="font-size-btn-group">
+              <button
+                className={`font-size-btn${
+                  fontSizeMode === "default" ? " active" : ""
+                }`}
+                onClick={() => setFontSizeMode("default")}
+              >
+                Mặc định
+              </button>
+              <button
+                className={`font-size-btn${
+                  fontSizeMode === "large" ? " active" : ""
+                }`}
+                onClick={() => setFontSizeMode("large")}
+              >
+                Lớn hơn
+              </button>
+            </div>
+          </div>
           <div ref={descriptionRef}>
             <div className="tab-content-title">Mô tả</div>
             <div style={{ whiteSpace: "pre-line" }}>{product.description}</div>
@@ -363,24 +406,66 @@ const ProductInformation = () => {
             <div style={{ whiteSpace: "pre-line" }}>{product.side_effects}</div>
           </div>
 
+          <div ref={noteRef}>
+            <div className="tab-content-title" style={{ color: "#ad6800" }}>
+              Lưu ý
+            </div>
+            <div
+              className="preserve-highlight"
+              style={{ whiteSpace: "pre-line" }}
+            >
+              {product.notes}
+            </div>
+          </div>
+
           <div ref={preserveRef}>
-            <div className="tab-content-title">Lưu ý & Bảo quản</div>
+            <div className="tab-content-title">Bảo quản</div>
             <div style={{ whiteSpace: "pre-line" }}>{product.preserve}</div>
           </div>
 
+          {contentOverflow && !showMoreAll && (
+            <>
+              <button
+                className="show-more-btn"
+                aria-expanded={showMoreAll}
+                onClick={() => {
+                  setShowMoreAll(true);
+                  setActiveTab("description");
+                }}
+              >
+                Xem thêm
+              </button>
+              <div className="desc-gradient-fade" />
+            </>
+          )}
+          {contentOverflow && showMoreAll && (
+            <button
+              className="show-more-btn"
+              aria-expanded={showMoreAll}
+              onClick={() => {
+                setShowMoreAll(false);
+                setTimeout(() => {
+                  if (tabContentRef.current) {
+                    tabContentRef.current.scrollTop = 0;
+                  }
+                }, 120);
+              }}
+              style={{
+                position: "static",
+                margin: "18px auto 0 auto",
+                left: "unset",
+                bottom: "unset",
+                transform: "none",
+              }}
+            >
+              Ẩn bớt
+            </button>
+          )}
           {!showMoreAll && contentOverflow && (
             <div className="desc-gradient-fade" />
           )}
         </div>
       </div>
-      {contentOverflow && (
-        <button
-          className="show-more-btn"
-          onClick={() => setShowMoreAll((v) => !v)}
-        >
-          {showMoreAll ? "Ẩn bớt ▲" : "Xem thêm ▼"}
-        </button>
-      )}
 
       {showImageModal && (
         <div className="product-image-modal" onClick={closeImageModal}>

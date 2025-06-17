@@ -349,8 +349,8 @@ function VNPayReturn() {
 
   return (
     <>
-      <Header />
-      <div className="vnpay-return-container">
+      <div className="vnpay-return-container" style={{ paddingTop: 90 }}>
+        <Header />
         <div className="vnpay-return-card">
           {loading ? (
             <div className="loading-spinner">

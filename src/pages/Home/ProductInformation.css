@@ -7,8 +7,11 @@
 
 .product-detail-top {
   display: flex;
+  padding-top: 50px;
   gap: 40px;
   margin-bottom: 30px;
+  margin-left: 20px;
+  margin-right: 20px;
 }
 
 .product-detail-images {
@@ -150,6 +153,7 @@
 .product-detail-tabs {
   display: flex;
   min-height: 450px;
+  padding-top: 30px;
   background: #f5f7fa;
   border-radius: 12px;
   overflow: hidden;
@@ -157,6 +161,8 @@
   text-align: left;
   white-space: pre-line;
   overflow-wrap: break-word;
+  line-height: 1.7;         
+  letter-spacing: 0.005em;
 }
 
 .tab-buttons {
@@ -194,6 +200,7 @@
 }
 
 .tab-content {
+  position: relative;
   flex: 1;
   padding: 20px 30px;
   background: #fff;
@@ -237,7 +244,77 @@
   font-size: 20px;
   font-weight: bold;
   margin-bottom: 10px;
-}/* Phần che mờ mô tả khi chưa "Xem thêm" */
+}
+.ingredient-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  background: #fafcff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,110,255,0.04);
+}
+
+.ingredient-table th, .ingredient-table td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 15px;
+}
+
+.ingredient-table th {
+  background: #c3cbd6;
+  color: #1a2233;
+  font-weight: 600;
+  border-right: 2px solid #fff;
+  border-radius: 0;
+}
+
+.ingredient-table th:last-child {
+  border-right: none;
+}
+
+.ingredient-table td {
+  background: #f6f8fa;
+  color: #1a2233;
+  border-right: 2px solid #fff;
+  border-radius: 0;
+}
+
+.ingredient-table td:last-child {
+  border-right: none;
+}
+
+.ingredient-table tr:last-child td {
+  border-bottom: none;
+}
+
+.ingredient-table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.preserve-highlight {
+  background: #fffbe6;
+  border: 1.5px solid #ffe58f;
+  border-radius: 8px;
+  padding: 18px 20px;
+  margin-top: 18px;
+  margin-bottom: 10px;
+  color: #ad6800;
+  font-weight: 500;
+  font-size: 16px;
+  position: relative;
+  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.07);
+}
+
+.preserve-highlight::before {
+  position: absolute;
+  left: 18px;
+  top: 16px;
+  font-size: 20px;
+}
+
 .desc-fade-wrapper {
   position: relative;
   transition: max-height 0.3s;
@@ -256,25 +333,48 @@
   left: 0;
   right: 0;
   bottom: 0;
-  height: 48px;
-  background: linear-gradient(to bottom, rgba(255,255,255,0), #fff 80%);
+  height: 54px; /* tăng nhẹ so với cũ để che trơn */
+  background: linear-gradient(to bottom, rgba(255,255,255,0), #fff 85%);
   pointer-events: none;
-  z-index: 2;
+  z-index: 10;
 }
 
 .show-more-btn {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 12px;
+  z-index: 20;
   background: #fff;
-  color: #006eff;
-  border: 1px solid #006eff;
-  padding: 6px 16px;
-  border-radius: 8px;
+  color: #1769e0;
+  border: 1px solid #e6e6e6;
+  border-radius: 22px;
   font-weight: 500;
+  padding: 8px 22px;
+  font-size: 15px;
   cursor: pointer;
-  width: fit-content;
-  margin: 0 auto 10px auto;
-  display: block;
-  box-shadow: 0 1px 6px 0 #e5e5ea;
+  box-shadow: 0 2px 8px rgba(0,110,255,0.04);
+  display: flex;
+  align-items: center;
+  transition: color 0.18s, border 0.18s, box-shadow 0.18s;
 }
+
+.show-more-btn:hover {
+  color: #006eff;
+  border-color: #b3d2ff;
+  box-shadow: 0 4px 24px rgba(0,110,255,0.10);
+}
+
+.show-more-btn::before {
+  content: "\25BC";
+  font-size: 18px;
+  margin-right: 8px;
+  transition: transform 0.18s;
+}
+.show-more-btn[aria-expanded="true"]::before {
+  content: "\25B2";
+}
+
 
 .product-image-modal {
   position: fixed;
@@ -402,6 +502,41 @@
 }
 .modal-thumb:hover {
   border: 2px solid #87b9ff;
+}
+
+.font-size-switcher {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.font-size-switcher-label {
+  font-size: 15px;
+  color: #222;
+  margin-right: 8px;
+}
+.font-size-btn-group {
+  display: flex;
+  border: 1.2px solid #c3cbd6;
+  border-radius: 22px;
+  overflow: hidden;
+  background: #fff;
+}
+.font-size-btn {
+  background: #fff;
+  color: #1769e0;
+  border: none;
+  outline: none;
+  padding: 6px 18px;
+  font-weight: 500;
+  font-size: 15px;
+  border-radius: 22px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.font-size-btn.active {
+  background: #1769e0;
+  color: #fff;
 }
 
 

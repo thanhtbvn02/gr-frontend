@@ -218,7 +218,20 @@ body {
   font-size: 15px;
   cursor: pointer;
 }
-
+.is-cancel-order {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+.is-cancel-order-button {
+  background: #eb5757;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 15px;
+  cursor: pointer;
+}
 .badge {
   padding: 4px 12px;
   border-radius: 12px;

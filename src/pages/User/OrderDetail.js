@@ -266,6 +266,18 @@ function OrderDetail({ orderCode }) {
             </button>
           </div>
         )}
+        {(order.status === "pending" || order.status === "processing") &&
+          !isCancelled && (
+            <div className="is-cancel-order">
+              <button
+                className="is-cancel-order-button"
+                onClick={() => handleUpdateStatus("cancelled")}
+                disabled={isUpdating}
+              >
+                {isUpdating ? "Đang huỷ..." : "Huỷ đơn hàng"}
+              </button>
+            </div>
+          )}
       </div>
     </div>
   );

@@ -5,6 +5,7 @@ import axiosInstance from "../../utils/axiosConfig";
 import axios from "axios";
 import { removeFromCart, setSelectedItems } from "../../redux/addCart";
 import Header from "../../components/Header/Header";
+import Footer from "../../components/Footer/Footer";
 import "./CheckOut.css";
 
 function CheckOut() {
@@ -429,205 +430,215 @@ function CheckOut() {
 
   return (
     <>
-      <Header />
-      <div className="checkout-container">
-        <h1 className="checkout-title">Xác nhận đơn hàng</h1>
+      <div className="checkout-main-content" style={{ paddingTop: 90 }}>
+        <Header />
+        <div className="checkout-container">
+          <h1 className="checkout-title">Xác nhận đơn hàng</h1>
 
-        {showAlert && (
-          <div
-            className={`alert ${
-              alertType === "error"
-                ? "alert-error"
-                : alertType === "warning"
-                ? "alert-warning"
-                : "alert-success"
-            }`}
-          >
-            {alertMessage}
-          </div>
-        )}
-
-        {error && <div className="error-message">{error}</div>}
-
-        {loading ? (
-          <div className="loading">Đang tải...</div>
-        ) : (
-          <div className="checkout-content">
-            <div className="checkout-items">
-              <h2>Sản phẩm đã chọn</h2>
-              <table className="checkout-table">
-                <thead>
-                  <tr>
-                    <th className="image-column">Hình ảnh</th>
-                    <th className="name-column">Tên sản phẩm</th>
-                    <th className="price-column">Đơn giá</th>
-                    <th className="quantity-column">Số lượng</th>
-                    <th className="total-column">Thành tiền</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedProductIds.map((productId) => {
-                    if (!productId) return null;
-
-                    const product = products[productId];
-                    const quantity = itemQuantities[productId] || 0;
-
-                    if (!product || quantity <= 0) return null;
-
-                    return (
-                      <tr key={productId} className="checkout-item">
-                        <td className="image-column">
-                          <div className="product-image">
-                            {productImages[productId] ? (
-                              <img
-                                src={productImages[productId]}
-                                alt={product.name || "Sản phẩm"}
-                              />
-                            ) : (
-                              <div className="no-image">Không có ảnh</div>
-                            )}
-                          </div>
-                        </td>
-                        <td className="name-column">
-                          {product.name || "Không có tên"}
-                        </td>
-                        <td className="price-column">
-                          {new Intl.NumberFormat("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                          }).format(product.price || 0)}
-                        </td>
-                        <td className="quantity-column">{quantity}</td>
-                        <td className="total-column">
-                          {new Intl.NumberFormat("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                          }).format((product.price || 0) * quantity)}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+          {showAlert && (
+            <div
+              className={`alert ${
+                alertType === "error"
+                  ? "alert-error"
+                  : alertType === "warning"
+                  ? "alert-warning"
+                  : "alert-success"
+              }`}
+            >
+              {alertMessage}
             </div>
+          )}
 
-            <div className="checkout-address">
-              <h2>Địa chỉ giao hàng</h2>
-              {defaultAddress ? (
-                <div className="address-detail">
-                  <p>
-                    <strong>Người nhận:</strong>{" "}
-                    {defaultAddress.recipient_name || "Không có tên"}
-                  </p>
-                  <p>
-                    <strong>Số điện thoại:</strong>{" "}
-                    {defaultAddress.phone || "Không có số điện thoại"}
-                  </p>
-                  <p>
-                    <strong>Địa chỉ:</strong> {defaultAddress.address || ""},{" "}
-                    {defaultAddress.ward || ""}, {defaultAddress.district || ""}
-                    , {defaultAddress.province || ""}
-                  </p>
+          {error && <div className="error-message">{error}</div>}
+
+          {loading ? (
+            <div className="loading">Đang tải...</div>
+          ) : (
+            <div className="checkout-content">
+              <div className="checkout-left">
+                <div className="checkout-items">
+                  <table className="checkout-table">
+                    <thead>
+                      <tr>
+                        <th className="image-column">Hình ảnh</th>
+                        <th className="name-column">Tên sản phẩm</th>
+                        <th className="price-column">Đơn giá</th>
+                        <th className="quantity-column">Số lượng</th>
+                        <th className="total-column">Thành tiền</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedProductIds.map((productId) => {
+                        if (!productId) return null;
+
+                        const product = products[productId];
+                        const quantity = itemQuantities[productId] || 0;
+
+                        if (!product || quantity <= 0) return null;
+
+                        return (
+                          <tr key={productId} className="checkout-item">
+                            <td className="image-column">
+                              <div className="product-image">
+                                {productImages[productId] ? (
+                                  <img
+                                    src={productImages[productId]}
+                                    alt={product.name || "Sản phẩm"}
+                                  />
+                                ) : (
+                                  <div className="no-image">Không có ảnh</div>
+                                )}
+                              </div>
+                            </td>
+                            <td className="name-column">
+                              {product.name || "Không có tên"}
+                            </td>
+                            <td className="price-column">
+                              {new Intl.NumberFormat("vi-VN", {
+                                style: "currency",
+                                currency: "VND",
+                              }).format(product.price || 0)}
+                            </td>
+                            <td className="quantity-column">{quantity}</td>
+                            <td className="total-column">
+                              {new Intl.NumberFormat("vi-VN", {
+                                style: "currency",
+                                currency: "VND",
+                              }).format((product.price || 0) * quantity)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
-              ) : (
-                <div className="no-address">
-                  <p>Bạn chưa có địa chỉ giao hàng</p>
+
+                <div className="checkout-address">
+                  <h2>Địa chỉ giao hàng</h2>
+                  {defaultAddress ? (
+                    <div className="address-detail">
+                      <p>
+                        <strong>Người nhận:</strong>{" "}
+                        {defaultAddress.recipient_name || "Không có tên"}
+                      </p>
+                      <p>
+                        <strong>Số điện thoại:</strong>{" "}
+                        {defaultAddress.phone || "Không có số điện thoại"}
+                      </p>
+                      <p>
+                        <strong>Địa chỉ:</strong> {defaultAddress.address || ""}
+                        , {defaultAddress.ward || ""},{" "}
+                        {defaultAddress.district || ""},{" "}
+                        {defaultAddress.province || ""}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="no-address">
+                      <p>Bạn chưa có địa chỉ giao hàng</p>
+                      <button
+                        onClick={() => navigate("/profile/address")}
+                        className="add-address-btn"
+                      >
+                        Thêm địa chỉ mới
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="order-note">
+                  <h2>Ghi chú đơn hàng</h2>
+                  <textarea
+                    placeholder="Nhập ghi chú đơn hàng (tùy chọn)"
+                    value={orderNote}
+                    onChange={(e) => setOrderNote(e.target.value)}
+                    rows={3}
+                    className="note-input"
+                  />
+                </div>
+              </div>
+              <div className="checkout-right">
+                <div className="payment-method">
+                  <h2>Phương thức thanh toán</h2>
+                  <div className="payment-options">
+                    <label className="payment-option">
+                      <input
+                        type="radio"
+                        name="payment-method"
+                        value="cash_on_delivery"
+                        checked={paymentMethod === "cash_on_delivery"}
+                        onChange={handlePaymentMethodChange}
+                      />
+                      <span className="payment-label">
+                        Thanh toán khi nhận hàng (COD)
+                      </span>
+                    </label>
+
+                    <label className="payment-option">
+                      <input
+                        type="radio"
+                        name="payment-method"
+                        value="vnpay"
+                        checked={paymentMethod === "vnpay"}
+                        onChange={handlePaymentMethodChange}
+                      />
+                      <span className="payment-label">
+                        Thanh toán qua VNPay
+                      </span>
+                      <img
+                        src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Icon-VNPAY-QR.png"
+                        alt="VNPay"
+                        className="payment-icon"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="checkout-summary">
+                  <div className="summary-header">Tổng thanh toán</div>
+                  <div className="summary-row">
+                    <span>Tổng tiền hàng:</span>
+                    <span>
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(subtotal)}
+                    </span>
+                  </div>
+                  <div className="summary-row">
+                    <span>Phí vận chuyển:</span>
+                    <span>
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(shippingFee)}
+                    </span>
+                  </div>
+                  <div className="summary-row total">
+                    <span>Tổng thanh toán:</span>
+                    <span className="total-price">
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(totalAmount)}
+                    </span>
+                  </div>
                   <button
-                    onClick={() => navigate("/profile/address")}
-                    className="add-address-btn"
+                    className="place-order-btn"
+                    onClick={handlePlaceOrder}
+                    disabled={
+                      !defaultAddress || selectedProductIds.length === 0
+                    }
                   >
-                    Thêm địa chỉ mới
+                    {paymentMethod === "vnpay"
+                      ? "Thanh toán qua VNPay"
+                      : "Đặt hàng"}
                   </button>
                 </div>
-              )}
-            </div>
-
-            <div className="order-note">
-              <h2>Ghi chú đơn hàng</h2>
-              <textarea
-                placeholder="Nhập ghi chú đơn hàng (tùy chọn)"
-                value={orderNote}
-                onChange={(e) => setOrderNote(e.target.value)}
-                rows={3}
-                className="note-input"
-              />
-            </div>
-
-            <div className="payment-method">
-              <h2>Phương thức thanh toán</h2>
-              <div className="payment-options">
-                <label className="payment-option">
-                  <input
-                    type="radio"
-                    name="payment-method"
-                    value="cash_on_delivery"
-                    checked={paymentMethod === "cash_on_delivery"}
-                    onChange={handlePaymentMethodChange}
-                  />
-                  <span className="payment-label">
-                    Thanh toán khi nhận hàng (COD)
-                  </span>
-                </label>
-
-                <label className="payment-option">
-                  <input
-                    type="radio"
-                    name="payment-method"
-                    value="vnpay"
-                    checked={paymentMethod === "vnpay"}
-                    onChange={handlePaymentMethodChange}
-                  />
-                  <span className="payment-label">Thanh toán qua VNPay</span>
-                  <img
-                    src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Icon-VNPAY-QR.png"
-                    alt="VNPay"
-                    className="payment-icon"
-                  />
-                </label>
               </div>
             </div>
-
-            <div className="checkout-summary">
-              <div className="summary-header">Tổng thanh toán</div>
-              <div className="summary-row">
-                <span>Tổng tiền hàng:</span>
-                <span>
-                  {new Intl.NumberFormat("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                  }).format(subtotal)}
-                </span>
-              </div>
-              <div className="summary-row">
-                <span>Phí vận chuyển:</span>
-                <span>
-                  {new Intl.NumberFormat("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                  }).format(shippingFee)}
-                </span>
-              </div>
-              <div className="summary-row total">
-                <span>Tổng thanh toán:</span>
-                <span className="total-price">
-                  {new Intl.NumberFormat("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                  }).format(totalAmount)}
-                </span>
-              </div>
-              <button
-                className="place-order-btn"
-                onClick={handlePlaceOrder}
-                disabled={!defaultAddress || selectedProductIds.length === 0}
-              >
-                {paymentMethod === "vnpay"
-                  ? "Thanh toán qua VNPay"
-                  : "Đặt hàng"}
-              </button>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
+        <Footer />
       </div>
     </>
   );

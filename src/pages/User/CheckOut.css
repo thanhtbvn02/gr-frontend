@@ -12,13 +12,65 @@
   font-weight: bold;
   margin-bottom: 20px;
   color: #333;
-  text-align: center;
+  text-align: left;
 }
 
 .checkout-content {
   display: flex;
+  gap: 32px;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.checkout-left {
+  width: 70%;
+  display: flex;
   flex-direction: column;
   gap: 20px;
+}
+
+.checkout-right {
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: sticky;
+  top: 110px;
+  height: fit-content;
+}
+
+/* Responsive */
+@media screen and (max-width: 900px) {
+  .checkout-content {
+    flex-direction: column;
+    gap: 0;
+  }
+  .checkout-left,
+  .checkout-right {
+    width: 100%;
+    position: static;
+  }
+}
+
+/* Đẹp hơn cho phần tóm tắt */
+.checkout-summary {
+  background: #fafcff;
+  border: 1.5px solid #dde7ee;
+  box-shadow: 0 2px 8px rgba(44, 123, 255, 0.04);
+  border-radius: 12px;
+}
+
+.place-order-btn {
+  border-radius: 8px;
+  font-size: 18px;
+  padding: 16px 0;
+  margin-top: 20px;
+  background: linear-gradient(90deg,#e53935 0%,#fd5900 100%);
+  box-shadow: 0 2px 8px rgba(255,89,0,0.10);
+  transition: background 0.3s;
+}
+.place-order-btn:hover:not(:disabled) {
+  background: linear-gradient(90deg,#fd5900 0%,#e53935 100%);
 }
 
 .checkout-items {
@@ -92,7 +144,7 @@
 
 .price-column, .quantity-column, .total-column {
   width: 15%;
-  text-align: right;
+  text-align: left;
 }
 
 .checkout-address {
@@ -101,6 +153,7 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   padding: 15px;
   margin-bottom: 20px;
+  text-align: left;
 }
 
 .checkout-address h2 {
@@ -155,6 +208,7 @@
   font-size: 18px;
   margin-bottom: 15px;
   color: #333;
+  text-align: left;
 }
 
 .note-input {

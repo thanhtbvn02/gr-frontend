@@ -32,7 +32,7 @@ const Account = () => {
     }
   }, [location]);
   return (
-    <div>
+    <div style={{ paddingTop: 90 }}>
       <Header />
       <div className="account-wrapper">
         <div className="account-tabs">
