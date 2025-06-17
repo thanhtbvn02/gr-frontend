@@ -134,12 +134,11 @@ const ProductInformation = () => {
     }, 100);
   };
 
-  // Modal xem ảnh
   const [showImageModal, setShowImageModal] = useState(false);
   const [modalImageIdx, setModalImageIdx] = useState(0);
   const [zoomLevel, setZoomLevel] = useState(1);
 
-  const [imgOffset, setImgOffset] = useState({ x: 0, y: 0 }); // offset khi kéo ảnh
+  const [imgOffset, setImgOffset] = useState({ x: 0, y: 0 }); 
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
@@ -173,7 +172,6 @@ const ProductInformation = () => {
     setImgOffset({ x: 0, y: 0 });
   };
 
-  // Xử lý kéo ảnh
   const onMouseDown = (e) => {
     if (zoomLevel === 1) return;
     e.preventDefault();
@@ -322,8 +320,8 @@ const ProductInformation = () => {
         <div
           className="tab-content"
           ref={(el) => {
-            contentWrapRef.current = el; // giữ lại ref cũ nếu đang dùng chỗ khác
-            tabContentRef.current = el; // ref mới để scroll
+            contentWrapRef.current = el; 
+            tabContentRef.current = el; 
           }}
           style={{
             ...(!showMoreAll

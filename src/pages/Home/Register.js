@@ -15,32 +15,12 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false); 
   const [showConfirm, setShowConfirm] = useState(false); 
 
-  // const [captchaInput, setCaptchaInput] = useState('');
-  // const [captchaImg, setCaptchaImg] = useState('');
   const [captchaToken, setCaptchaToken] = useState(null);
 
-//   const isRefreshing = useRef(false);
 
-// const refreshCaptcha = () => {
-//   if (isRefreshing.current) return;
-//   isRefreshing.current = true;
 
-//   fetch('http://localhost:5000/api/captcha', {
-//     credentials: 'include'
-//   })
-//     .then(res => res.text())
-//     .then(setCaptchaImg)
-//     .catch(() => setCaptchaImg('<p>Không tải được Captcha</p>'))
-//     .finally(() => {
-//       setTimeout(() => { isRefreshing.current = false }, 300);
-//     });
-// };
   
-//   useEffect(() => {
-//     if (!captchaImg) {
-//       refreshCaptcha();
-//     }
-//   }, [captchaImg]);
+
 
   const handleRegistration = async (e) => {
     e.preventDefault();
@@ -67,7 +47,6 @@ const Register = () => {
         return;
       }
       
-      // Xác thực reCAPTCHA
       const verifyRes = await axios.post(
         'http://localhost:5000/api/captcha/verify-captcha',
         { token: captchaToken }

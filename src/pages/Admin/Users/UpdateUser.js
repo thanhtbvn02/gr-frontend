@@ -15,7 +15,6 @@ const UpdateUser = () => {
   const [avatar, setAvatar] = useState(defaultAvatar);
   const [avatarUploading, setAvatarUploading] = useState(false);
 
-  // State cho form
   const [fullName, setFullName] = useState("");
   const [username, setUsername] = useState("");
   const [birthDate, setBirthDate] = useState("");

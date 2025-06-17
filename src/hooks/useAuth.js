@@ -30,15 +30,13 @@ export const useAuth = () => {
           const decoded = jwtDecode(token);
           setUser({ token, userId: decoded.userId });
           
-          // Đặt trạng thái đã đăng nhập trước
           dispatch({
             type: CART_ACTIONS.SET_LOGIN_STATUS,
             payload: true
           });
           
-          // Đồng bộ giỏ hàng chỉ một lần khi khởi động và chỉ khi chưa thực hiện
           if (!syncDone && !syncAttemptRef.current) {
-            syncAttemptRef.current = true; // Đánh dấu đã cố gắng đồng bộ
+            syncAttemptRef.current = true; 
             
             const timer = setTimeout(() => {
               dispatch(syncCartAfterLogin());
@@ -67,13 +65,11 @@ export const useAuth = () => {
       const decoded = jwtDecode(token);
       setUser({ token, userId: decoded.userId });
       
-      // Đặt trạng thái đã đăng nhập trước
       dispatch({
         type: CART_ACTIONS.SET_LOGIN_STATUS,
         payload: true
       });
       
-      // Đặt lại trạng thái đồng bộ
       setSyncDone(false);
       syncAttemptRef.current = false;
     } catch (error) {

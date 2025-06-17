@@ -1,9 +1,6 @@
-/* src/redux/addCart.js */
 import axiosInstance from "../utils/axiosConfig";
 
-// Action types
 export const CART_ACTIONS = {
-  // Cart management
   ADD_TO_CART: "cart/addToCart",
   REMOVE_FROM_CART: "cart/removeFromCart",
   UPDATE_QUANTITY: "cart/updateQuantity",
@@ -11,19 +8,15 @@ export const CART_ACTIONS = {
   SET_CART: "cart/setCart",
   SET_SELECTED_ITEMS: "cart/setSelectedItems",
 
-  // Cart loading states
   LOADING: "cart/loading",
   ERROR: "cart/error",
   RESET_ERROR: "cart/resetError",
 
-  // Login status
   SET_LOGIN_STATUS: "cart/setLoginStatus",
 
-  // Sync with server
   SYNC_CART: "cart/syncCart",
 };
 
-// Initial state
 const initialState = {
   cartItems: {},
   cartId: [],
@@ -35,13 +28,10 @@ const initialState = {
   lastUpdated: Date.now(),
 };
 
-// Helper function to calculate cart count
 const calculateCartCount = (items) => {
-  // Tính tổng số lượng sản phẩm trong giỏ hàng
   return Object.values(items).reduce((total, quantity) => total + quantity, 0);
 };
 
-// Helper function to save cart to localStorage
 const saveCartToLocalStorage = (cartItems) => {
   try {
     const cartId = Object.keys(cartItems);
@@ -55,7 +45,6 @@ const saveCartToLocalStorage = (cartItems) => {
   }
 };
 
-// Helper function to get cart from localStorage
 const getCartFromLocalStorage = () => {
   try {
     const cartData = localStorage.getItem("cartData");
@@ -66,7 +55,6 @@ const getCartFromLocalStorage = () => {
       return null;
     }
 
-    // Đảm bảo cartCount được tính lại từ cartItems
     const cartItems = parsed.cartItems || {};
     const cartId = Object.keys(cartItems);
     const cartCount = calculateCartCount(cartItems);
@@ -79,7 +67,6 @@ const getCartFromLocalStorage = () => {
   }
 };
 
-// Helper function to get authorization header with current token
 const getAuthHeader = () => {
   const token = localStorage.getItem("accessToken");
   if (!token) {
@@ -90,7 +77,6 @@ const getAuthHeader = () => {
   return { Authorization: `Bearer ${token}` };
 };
 
-// Reducer
 export default function cartReducer(state = initialState, action) {
   switch (action.type) {
     case CART_ACTIONS.SET_CART:
@@ -148,7 +134,6 @@ export default function cartReducer(state = initialState, action) {
   }
 }
 
-// Action creators
 export const setCart = (cartData) => ({
   type: CART_ACTIONS.SET_CART,
   payload: cartData,
@@ -182,7 +167,6 @@ export const setSelectedItems = (selectedIds) => ({
   payload: selectedIds,
 });
 
-// Thunk: Khởi tạo giỏ hàng
 export const initCart = () => async (dispatch) => {
   try {
     const token = localStorage.getItem("accessToken");
@@ -191,10 +175,8 @@ export const initCart = () => async (dispatch) => {
     dispatch(setLoginStatus(isLoggedIn));
 
     if (isLoggedIn) {
-      // Nếu đã đăng nhập, lấy giỏ hàng từ server
       dispatch(fetchCartFromServer());
     } else {
-      // Nếu chưa đăng nhập, lấy giỏ hàng từ localStorage
       const localCart = getCartFromLocalStorage();
       if (localCart) {
         dispatch(setCart(localCart));
@@ -206,7 +188,6 @@ export const initCart = () => async (dispatch) => {
   }
 };
 
-// Thunk: Lấy giỏ hàng từ server
 export const fetchCartFromServer = () => async (dispatch) => {
   dispatch(setLoading(true));
   try {
@@ -228,12 +209,10 @@ export const fetchCartFromServer = () => async (dispatch) => {
 
       dispatch(setCart({ cartItems, cartId, cartCount }));
 
-      // Lưu trữ vào localStorage để đồng bộ
       saveCartToLocalStorage(cartItems);
     }
     dispatch(setLoading(false));
   } catch (err) {
-    // Kiểm tra lỗi 401/403
     if (
       err.response &&
       (err.response.status === 401 || err.response.status === 403)
@@ -248,11 +227,9 @@ export const fetchCartFromServer = () => async (dispatch) => {
   }
 };
 
-// Thunk: Thêm sản phẩm vào giỏ hàng
 export const addToCart =
   (productId, quantity = 1) =>
   async (dispatch, getState) => {
-    // Đảm bảo productId luôn là string để đồng nhất
     productId = String(productId);
     dispatch(resetError());
     dispatch(setLoading(true));
@@ -260,17 +237,14 @@ export const addToCart =
     try {
       const { isLoggedIn, cartItems, cartId } = getState().cart;
 
-      // Tạo bản sao cartItems để không ảnh hưởng đến state hiện tại
       const updatedCartItems = { ...cartItems };
 
-      // Cập nhật số lượng sản phẩm
       if (updatedCartItems[productId]) {
         updatedCartItems[productId] += quantity;
       } else {
         updatedCartItems[productId] = quantity;
       }
 
-      // Cập nhật cartId nếu sản phẩm chưa có trong giỏ hàng
       const updatedCartId = cartId.includes(productId)
         ? [...cartId]
         : [...cartId, productId];
@@ -279,7 +253,6 @@ export const addToCart =
 
       if (isLoggedIn) {
         try {
-          // Đã đăng nhập: Lưu vào database
           const headers = getAuthHeader();
           await axiosInstance.post(
             "http://localhost:5000/api/cart",
@@ -290,18 +263,14 @@ export const addToCart =
             { headers }
           );
 
-          // Fetch lại giỏ hàng từ server để đảm bảo dữ liệu đồng bộ
           await dispatch(fetchCartFromServer());
         } catch (err) {
           console.error("Lỗi khi thêm vào giỏ hàng trong database:", err);
 
-          // Nếu lỗi 401, có thể token đã hết hạn
           if (err.response && err.response.status === 401) {
-            // Cập nhật trạng thái đăng nhập
             dispatch(setLoginStatus(false));
             localStorage.removeItem("accessToken");
 
-            // Vẫn lưu vào localStorage để không mất dữ liệu
             const cartData = {
               cartItems: updatedCartItems,
               cartId: updatedCartId,
@@ -310,12 +279,10 @@ export const addToCart =
             saveCartToLocalStorage(updatedCartItems);
             dispatch(setCart(cartData));
           } else {
-            // Các lỗi khác ném lên để xử lý ở catch bên ngoài
             throw err;
           }
         }
       } else {
-        // Chưa đăng nhập: Lưu vào localStorage
         const cartData = {
           cartItems: updatedCartItems,
           cartId: updatedCartId,
@@ -333,10 +300,8 @@ export const addToCart =
     }
   };
 
-// Thunk: Cập nhật số lượng sản phẩm
 export const updateQuantity =
   (productId, quantity) => async (dispatch, getState) => {
-    // Đảm bảo productId luôn là string để đồng nhất
     productId = String(productId);
 
     if (quantity <= 0) {
@@ -350,7 +315,6 @@ export const updateQuantity =
     try {
       const { isLoggedIn, cartItems, cartId } = getState().cart;
 
-      // Cập nhật UI ngay lập tức
       const updatedCartItems = { ...cartItems, [productId]: quantity };
       const cartCount = calculateCartCount(updatedCartItems);
 
@@ -362,12 +326,10 @@ export const updateQuantity =
         })
       );
 
-      // Lưu vào localStorage
       saveCartToLocalStorage(updatedCartItems);
 
       if (isLoggedIn) {
         try {
-          // Sử dụng allowDuplicate để đảm bảo request này không bị hủy
           const cartResponse = await axiosInstance.get(
             "http://localhost:5000/api/cart",
             {
@@ -424,9 +386,7 @@ export const updateQuantity =
     }
   };
 
-// Thunk: Xóa sản phẩm khỏi giỏ hàng
 export const removeFromCart = (productId) => async (dispatch, getState) => {
-  // Đảm bảo productId luôn là string để đồng nhất
   productId = String(productId);
 
   dispatch(resetError());
@@ -443,7 +403,6 @@ export const removeFromCart = (productId) => async (dispatch, getState) => {
       })}`
     );
 
-    // Cập nhật UI ngay lập tức
     const updatedCartItems = { ...cartItems };
     delete updatedCartItems[productId];
 
@@ -457,10 +416,8 @@ export const removeFromCart = (productId) => async (dispatch, getState) => {
       })}`
     );
 
-    // Lưu vào localStorage để đảm bảo UI được cập nhật ngay
     saveCartToLocalStorage(updatedCartItems);
 
-    // Cập nhật state trong Redux
     dispatch(
       setCart({
         cartItems: updatedCartItems,
@@ -471,20 +428,17 @@ export const removeFromCart = (productId) => async (dispatch, getState) => {
 
     if (isLoggedIn) {
       try {
-        // Đã đăng nhập: Xóa sản phẩm từ database
         const headers = getAuthHeader();
 
-        // Trước tiên lấy thông tin giỏ hàng hiện tại để biết cart item ID
         const cartResponse = await axiosInstance.get(
           "http://localhost:5000/api/cart",
           {
             headers,
-            allowDuplicate: true, // Thêm allowDuplicate để tránh bị cancel request
+            allowDuplicate: true,
           }
         );
 
         if (cartResponse.data && Array.isArray(cartResponse.data)) {
-          // Tìm cart item có product_id tương ứng
           const cartItem = cartResponse.data.find(
             (item) => String(item.product_id) === productId
           );
@@ -493,12 +447,11 @@ export const removeFromCart = (productId) => async (dispatch, getState) => {
             console.log(
               `Tìm thấy item trong giỏ hàng: ${cartItem.id}, xóa khỏi database`
             );
-            // Gọi API với cart item ID thay vì product ID
             await axiosInstance.delete(
               `http://localhost:5000/api/cart/${cartItem.id}`,
               {
                 headers,
-                allowDuplicate: true, // Thêm allowDuplicate để tránh bị cancel request
+                allowDuplicate: true,
               }
             );
             console.log(
@@ -513,13 +466,10 @@ export const removeFromCart = (productId) => async (dispatch, getState) => {
       } catch (err) {
         console.error("Lỗi khi xóa sản phẩm khỏi database:", err);
 
-        // Nếu lỗi 401, có thể token đã hết hạn
         if (err.response && err.response.status === 401) {
-          // Cập nhật trạng thái đăng nhập
           dispatch(setLoginStatus(false));
           localStorage.removeItem("accessToken");
-        } else {
-          // Hiển thị thông báo nhưng không khôi phục state vì đã cập nhật UI
+        } else {  
           console.warn(
             "Không thể xóa sản phẩm khỏi server, nhưng đã xóa khỏi localStorage"
           );
@@ -527,10 +477,8 @@ export const removeFromCart = (productId) => async (dispatch, getState) => {
       }
     }
 
-    // Thông báo xóa thành công
     console.log(`Đã xóa sản phẩm ${productId} khỏi giỏ hàng thành công`);
 
-    // Cập nhật lại cart vào localStorage một lần nữa để đảm bảo
     const currentState = getState().cart;
     if (currentState.cartItems[productId]) {
       console.warn(
@@ -541,7 +489,6 @@ export const removeFromCart = (productId) => async (dispatch, getState) => {
       const fixedCartId = currentState.cartId.filter((id) => id !== productId);
       const fixedCartCount = calculateCartCount(fixedCartItems);
 
-      // Cập nhật lại state
       dispatch(
         setCart({
           cartItems: fixedCartItems,
@@ -550,7 +497,6 @@ export const removeFromCart = (productId) => async (dispatch, getState) => {
         })
       );
 
-      // Lưu lại vào localStorage
       saveCartToLocalStorage(fixedCartItems);
     }
 
@@ -562,7 +508,6 @@ export const removeFromCart = (productId) => async (dispatch, getState) => {
   }
 };
 
-// Thunk: Đồng bộ giỏ hàng sau khi đăng nhập
 export const syncCartAfterLogin = () => async (dispatch, getState) => {
   dispatch(resetError());
   dispatch(setLoading(true));
@@ -578,7 +523,6 @@ export const syncCartAfterLogin = () => async (dispatch, getState) => {
       return;
     }
 
-    // Lấy giỏ hàng từ localStorage
     const localCart = getCartFromLocalStorage();
     console.log("Dữ liệu giỏ hàng từ localStorage:", localCart);
 
@@ -595,7 +539,6 @@ export const syncCartAfterLogin = () => async (dispatch, getState) => {
 
       const headers = getAuthHeader();
 
-      // Có sản phẩm trong localStorage, đồng bộ lên server
       for (const [productId, quantity] of Object.entries(localCart.cartItems)) {
         try {
           console.log(`Thêm sản phẩm ID: ${productId}, Số lượng: ${quantity}`);
@@ -609,17 +552,14 @@ export const syncCartAfterLogin = () => async (dispatch, getState) => {
           );
         } catch (error) {
           console.error(`Lỗi khi đồng bộ sản phẩm ${productId}:`, error);
-          // Tiếp tục với sản phẩm tiếp theo nếu có lỗi
         }
       }
     } else {
       console.log("Không có sản phẩm cần đồng bộ từ localStorage");
     }
 
-    // Sau khi đồng bộ, lấy giỏ hàng từ server
     await dispatch(fetchCartFromServer());
 
-    // Cập nhật trạng thái đăng nhập
     dispatch(setLoginStatus(true));
     dispatch(setLoading(false));
     console.log("Đồng bộ hoàn tất");

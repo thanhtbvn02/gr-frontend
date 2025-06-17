@@ -45,26 +45,20 @@ const Login = () => {
         password,
       });
 
-      // Giải mã token để lấy thông tin user
       const decodedToken = jwtDecode(res.data.token);
       console.log("Decoded token:", decodedToken);
 
-      // Lưu token trước để đảm bảo API cart có thể xác thực
       localStorage.setItem("accessToken", res.data.token);
 
-      // Đồng bộ giỏ hàng từ localStorage lên server
       await dispatch(syncCartAfterLogin());
 
-      // Lưu thông tin người dùng và cập nhật trạng thái đăng nhập
       login(res.data.token);
       dispatch(setLoginStatus(true));
 
-      // Lưu userId (nếu cần)
       localStorage.setItem("userId", res.data.user.id);
 
       localStorage.setItem("userRole", res.data.user.role);
 
-      // Chuyển hướng sau khi đăng nhập thành công
       if (res.data.user.role === "admin") {
         navigate("/admin");
       } else {

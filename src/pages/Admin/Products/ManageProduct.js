@@ -62,7 +62,7 @@ const ManageProduct = () => {
         setOffset((prev) => prev + limit);
       }
     } catch (err) {
-      // Handle error
+      console.error("Error fetching products:", err);
     }
     setLoading(false);
   };

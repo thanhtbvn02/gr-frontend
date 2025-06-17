@@ -1,4 +1,3 @@
-/* Container tổng */
 .container {
   display: flex;
   justify-content: center;
@@ -7,7 +6,6 @@
   background-color: #f2f2f2;
 }
 
-/* Box chính gồm panel và form */
 .login-box {
   width: 850px;
   height: 570px;
@@ -18,7 +16,6 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
 
-/* Panel bên trái */
 .panel {
   width: 40%;
   padding: 40px 20px;
@@ -56,7 +53,6 @@
   background-color: #fff0f0;
 }
 
-/* Form container bên phải */
 .form-container {
   width: 60%;
   padding: 40px 30px;
@@ -74,7 +70,6 @@
   color: #333;
 }
 
-/* Custom input style */
 .custom-input,
 .form input {
   padding: 10px;
@@ -86,7 +81,6 @@
   box-sizing: border-box;
 }
 
-/* Password rules box */
 .password-rules {
   font-size: 14px;
   background: #f9f9f9;
@@ -120,7 +114,6 @@
   color: gray;
 }
 
-/* Nút submit */
 .submit-btn {
   background-color: #f33f3f;
   color: white;
@@ -142,7 +135,6 @@
   cursor: not-allowed;
 }
 
-/* Skip link */
 .skip-login {
   display: block;
   text-align: center;
@@ -156,7 +148,6 @@
   text-decoration: underline;
 }
 
-/* Google Login */
 .google-login-btn {
   background-color: white;
   color: #444;
@@ -173,7 +164,6 @@
   background-color: #f5f5f5;
 }
 
-/* Toggle Password */
 .input-password-wrapper {
   position: relative;
   width: 100%;
@@ -216,14 +206,13 @@
 }
 
 .passed {
-  color: #16a34a; /* green */
+  color: #16a34a; 
 }
 
 .not-passed {
-  color: #dc2626; /* red */
+  color: #dc2626; 
 }
 
-/* Captcha */
 .captcha-container {
   display: flex;
   gap: 12px;

@@ -27,7 +27,6 @@ function CheckOut() {
   const [orderNote, setOrderNote] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cash_on_delivery");
 
-  // Shipping fee
   const shippingFee = 20000;
 
   const reduxSelectedItems = useSelector(
@@ -35,7 +34,6 @@ function CheckOut() {
   );
   const [selectedProductIds, setSelectedProductIds] = useState([]);
 
-  // Handle payment method change
   const handlePaymentMethodChange = (e) => {
     setPaymentMethod(e.target.value);
   };
@@ -88,27 +86,16 @@ function CheckOut() {
       return;
     }
 
-    // if (!selectedProductIds || selectedProductIds.length === 0) {
-    //   setAlertMessage('Không có sản phẩm nào được chọn để thanh toán');
-    //   setAlertType('error');
-    //   setShowAlert(true);
-    //   setTimeout(() => {
-    //     navigate('/cart');
-    //   }, 2000);
-    //   return;
-    // }
 
     const fetchData = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        // Fetch user address
         const cleanUserId = encodeURIComponent(userId);
         let addressResponse, addresses, defaultAddr;
 
         try {
-          // Sử dụng axios trực tiếp với URL đầy đủ
           const token = localStorage.getItem("accessToken");
           const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
@@ -148,7 +135,6 @@ function CheckOut() {
           throw new Error("Không thể tải địa chỉ giao hàng");
         }
 
-        // Fetch cart items for IDs
         let cartResponse;
         try {
           const token = localStorage.getItem("accessToken");
@@ -172,10 +158,8 @@ function CheckOut() {
           setCartItemIds(itemIdMap);
         } catch (cartErr) {
           console.error("Lỗi khi tải giỏ hàng:", cartErr);
-          // Không throw lỗi ở đây, tiếp tục tải sản phẩm
         }
 
-        // Fetch product data and images
         const productsData = {};
         const imagesData = {};
 
@@ -183,7 +167,7 @@ function CheckOut() {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
         for (const id of selectedProductIds) {
-          if (!id) continue; // Skip invalid IDs
+          if (!id) continue; 
 
           try {
             const response = await axios.get(
@@ -198,7 +182,6 @@ function CheckOut() {
               const product = response.data;
               productsData[product.id] = product;
 
-              // Get first image for product
               try {
                 const imgRes = await axios.get(
                   `http://localhost:5000/api/images?product_id=${product.id}`,
@@ -215,12 +198,10 @@ function CheckOut() {
                   `Không thể tải ảnh cho sản phẩm ID ${id}:`,
                   imgErr
                 );
-                // Không có ảnh vẫn tiếp tục
               }
             }
           } catch (err) {
             console.error(`Không thể tải sản phẩm ID ${id}:`, err);
-            // Không throw lỗi, tiếp tục với sản phẩm khác
           }
         }
 
@@ -237,7 +218,6 @@ function CheckOut() {
     fetchData();
   }, [selectedProductIds, isLoggedIn, navigate]);
 
-  // Calculate total amount
   const subtotal = selectedProductIds.reduce((total, productId) => {
     const product = products[productId];
     const quantity = itemQuantities[productId] || 0;
@@ -259,7 +239,6 @@ function CheckOut() {
     try {
       setLoading(true);
 
-      // Prepare payment data for VNPay
       const paymentData = {
         amount: totalAmount,
         orderDescription: `Thanh toán đơn hàng - ${new Date().toISOString()}`,
@@ -275,14 +254,12 @@ function CheckOut() {
           }
         : {};
 
-      // Call VNPay API to create payment URL
       const response = await axios.post(
         "http://localhost:5000/api/vnpay/create_payment_url",
         paymentData,
         { headers }
       );
 
-      // Store order data in localStorage to use after payment completion
       const orderData = {
         user_id: localStorage.getItem("userId"),
         address_id: defaultAddress.id,
@@ -298,7 +275,6 @@ function CheckOut() {
 
       localStorage.setItem("pendingOrder", JSON.stringify(orderData));
 
-      // Redirect to VNPay payment URL
       if (response.data && response.data.url) {
         window.location.href = response.data.url;
       } else {
@@ -339,7 +315,6 @@ function CheckOut() {
         throw new Error("Không tìm thấy thông tin người dùng");
       }
 
-      // Prepare order items
       const orderItems = [];
       for (const productId of selectedProductIds) {
         const product = products[productId];
@@ -367,7 +342,6 @@ function CheckOut() {
       };
       console.log(orderData);
 
-      // Chỉ gọi API tạo đơn hàng khi thanh toán COD
       if (paymentMethod === "cash_on_delivery") {
         const token = localStorage.getItem("accessToken");
         const headers = token
@@ -377,13 +351,11 @@ function CheckOut() {
             }
           : {};
 
-        // Gọi API tạo đơn hàng
         await axios.post("http://localhost:5000/api/orders", orderData, {
           headers,
           timeout: 10000,
         });
 
-        // Remove ordered products from cart
         for (const productId of selectedProductIds) {
           if (!productId) continue;
 
@@ -404,7 +376,6 @@ function CheckOut() {
               );
             }
           }
-          // Update Redux state
           dispatch(removeFromCart(productId));
         }
 
@@ -413,7 +384,6 @@ function CheckOut() {
         setAlertType("success");
         setShowAlert(true);
 
-        // Navigate back to home or orders page after successful order
         setTimeout(() => {
           localStorage.removeItem("selectedItems");
           navigate("/");

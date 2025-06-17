@@ -66,7 +66,7 @@ export default function Dashboard() {
     fetchStats();
   }, []);
 
-  // Fetch category tree with aggregated counts
+  
   useEffect(() => {
     const fetchCategoryTree = async () => {
       try {

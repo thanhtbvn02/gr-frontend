@@ -101,7 +101,6 @@ const Information = () => {
     }
   };
 
-  // Hiển thị phone ẩn đi 1 phần
   const maskPhone = (phone) => {
     if (!phone) return "";
     if (phone.length < 4) return phone;

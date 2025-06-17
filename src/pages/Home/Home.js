@@ -9,7 +9,6 @@ import { addToCart } from "../../redux/addCart";
 export default function Home() {
   const navigate = useNavigate();
 
-  // Sử dụng Redux thay vì useCart hook
   const isLoggedIn = useSelector((state) => state.cart.isLoggedIn);
   const dispatch = useDispatch();
 
@@ -52,7 +51,6 @@ export default function Home() {
     if (!productId) return;
 
     try {
-      // Sử dụng Redux dispatch trực tiếp
       dispatch(addToCart(productId, 1));
 
       setAlertMessage(
@@ -66,7 +64,6 @@ export default function Home() {
     } catch (error) {
       console.error("Lỗi khi thêm vào giỏ hàng:", error);
       if (error.response?.status === 403) {
-        // Phiên hết hạn, chuyển đến trang đăng nhập
         navigate("/login");
         setAlertMessage("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
       } else {
@@ -125,7 +122,6 @@ export default function Home() {
             </div>
           ))}
         </div>
-        {/* Nút hiển thị thêm */}
         <div className="load-more-container">
           {!loading && products.length > 0 && (
             <button className="load-more-btn" onClick={fetchProducts}>

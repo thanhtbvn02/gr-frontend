@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from "react";
 import SideBar from "../../../components/SideBar/SideBar";
-import categoryTree from "./Category-tree.json";
+import categoryTree from "./Category_tree.json";
 import { MdDelete } from "react-icons/md";
 import axios from "axios";
 import "./AddProduct.css";
 
 const TABS = ["Thông tin chung", "Thuộc tính", "Thành phần"];
 const MULTILINE_FIELDS = [
-  "description", // Mô tả
-  "uses", // Công dụng
-  "how_use", // Cách dùng
-  "side_effects", // Tác dụng phụ
-  "notes", // Ghi chú
-  "preserve", // Bảo quản
+  "description", 
+  "uses", 
+  "how_use", 
+  "side_effects", 
+  "notes", 
+  "preserve", 
 ];
 const MAX_IMAGES = 4;
 
@@ -27,7 +27,6 @@ function AddProduct() {
 
   const [activeTab, setActiveTab] = useState(TABS[0]);
 
-  // State cho form data
   const [formData, setFormData] = useState({
     name: "",
     unit: "",
@@ -41,7 +40,6 @@ function AddProduct() {
     stock: "",
   });
 
-  // State cho details và ingredients
   const [details, setDetails] = useState([{ key_name: "", value: "" }]);
   const [ingredients, setIngredients] = useState([{ name: "", quantity: "" }]);
 
@@ -131,7 +129,6 @@ function AddProduct() {
     setIngredients(newIngredients);
   };
 
-  // Xử lý chọn ảnh
   const handleImageChange = (index, file) => {
     const newImages = [...images];
     newImages[index] = file;
@@ -191,7 +188,6 @@ function AddProduct() {
 
       const productId = productResponse.data.product.id;
 
-      // Thêm thuộc tính
       for (const detail of details) {
         if (detail.key_name && detail.value) {
           await axios.post("http://localhost:5000/api/details", {
@@ -202,7 +198,6 @@ function AddProduct() {
         }
       }
 
-      // Thêm thành phần
       for (const ingredient of ingredients) {
         if (ingredient.name && ingredient.quantity) {
           await axios.post("http://localhost:5000/api/ingredients", {
@@ -238,7 +233,6 @@ function AddProduct() {
     }
   };
 
-  // Hiển thị label tiếng Việt cho từng trường
   const getFieldLabel = (field) => {
     switch (field) {
       case "name":
@@ -266,7 +260,6 @@ function AddProduct() {
     }
   };
 
-  // Thêm thông tin chung
   const renderAddGeneralInfo = () => (
     <div className="tab-content">
       {editableFields.map((field) => (
@@ -398,7 +391,7 @@ function AddProduct() {
     </div>
   );
 
-    const renderImageInputs = () => (
+  const renderImageInputs = () => (
     <div className="form-group image-upload-group">
       <label>Ảnh sản phẩm (tối đa 4 ảnh)</label>
       <div className="image-grid">
@@ -430,11 +423,10 @@ function AddProduct() {
     </div>
   );
 
-  // Các ô danh mục nhỏ, sát nhau
   return (
     <div className="add-product-page">
       <div className="sidebar-wrapper">
-        <SideBar /> 
+        <SideBar />
       </div>
       <div className="main-wrapper">
         <div className="add-product-container">

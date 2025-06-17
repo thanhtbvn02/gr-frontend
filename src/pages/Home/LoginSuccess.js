@@ -19,17 +19,13 @@ const LoginSuccess = () => {
   
       if (token) {
         try {
-          // Lưu token trước để đảm bảo API cart có thể xác thực
           localStorage.setItem('accessToken', token);
           console.log('Token đã được lưu vào localStorage');
           
-          // Cập nhật trạng thái đăng nhập để Redux nhận biết
           dispatch(setLoginStatus(true));
           
-          // Đồng bộ giỏ hàng từ localStorage lên server
           await dispatch(syncCartAfterLogin());
           
-          // Hoàn tất đăng nhập
           login(token);
           
           const decoded = jwtDecode(token);

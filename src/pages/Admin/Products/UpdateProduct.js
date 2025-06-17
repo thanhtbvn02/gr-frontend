@@ -7,17 +7,16 @@ import "./UpdateProduct.css";
 
 const TABS = ["Thông tin chung", "Thuộc tính", "Thành phần"];
 const MULTILINE_FIELDS = [
-  "description", // Mô tả
-  "uses", // Công dụng
-  "how_use", // Cách dùng
-  "side_effects", // Tác dụng phụ
-  "notes", // Ghi chú
-  "preserve", // Bảo quản
+  "description", 
+  "uses", 
+  "how_use", 
+  "side_effects", 
+  "notes", 
+  "preserve", 
 ];
 
 const editableFields = ["name", "unit", "price", ...MULTILINE_FIELDS, "stock"];
 
-// Hàm hiển thị label tiếng Việt cho các trường
 const getFieldLabel = (field) => {
   switch (field) {
     case "name":
@@ -124,7 +123,6 @@ const UpdateProduct = () => {
     }
   };
 
-  // Tab: Thông tin chung
   const renderGeneralInfo = () => (
     <div className="tab-content">
       {editableFields.map((field) => (
@@ -154,7 +152,6 @@ const UpdateProduct = () => {
     </div>
   );
 
-  // Tab: Thuộc tính
   const renderDetails = () => (
     <div className="tab-content">
       <table className="custom-table">
@@ -206,7 +203,6 @@ const UpdateProduct = () => {
     </div>
   );
 
-  // Tab: Thành phần
   const renderIngredients = () => (
     <div className="tab-content">
       <table className="custom-table">

@@ -59,7 +59,6 @@ function OrderDetail({ orderCode }) {
     fetchOrder();
   }, [orderCode]);
 
-  // Lấy thông tin địa chỉ nhận hàng
   useEffect(() => {
     if (order && order.address_id) {
       axios
@@ -69,7 +68,6 @@ function OrderDetail({ orderCode }) {
     }
   }, [order]);
 
-  // Lấy ảnh sản phẩm cho từng item
   useEffect(() => {
     if (order && order.items) {
       const fetchImages = async () => {
@@ -100,18 +98,14 @@ function OrderDetail({ orderCode }) {
   const isProcessing = order.status === "processing";
   const { label: statusLabel, className } = getStatus(order.status);
 
-  // Địa chỉ nhận
   const recipient = address?.recipient_name || "Người nhận";
   const phone = address?.phone || "";
   const addressStr = address
     ? `${address.street}, ${address.ward}, ${address.district}, ${address.province}`
     : "";
 
-  // Sản phẩm
   const items = order.items || [];
-  // Tổng tiền
   const total = Number(order.total_amount || 0);
-  // Phương thức thanh toán
   let paymentLabel = "";
   if (order.payment_method === "cash_on_delivery") paymentLabel = "Tiền mặt";
   else if (order.payment_method === "vnpay")

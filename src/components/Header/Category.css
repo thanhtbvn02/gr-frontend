@@ -63,7 +63,7 @@
   opacity: 0.85;
 }
 
-/* --- Dropdown chung --- */
+
 .category-dropdown {
   display: none;
   position: absolute;
@@ -86,7 +86,7 @@
   max-height: 340px;
 }
 
-/* --- Left panel: sub-categories --- */
+
 .dropdown-left {
   width: 290px;
   border-right: 1.5px solid #e6e3f7;
@@ -122,7 +122,7 @@
   color: #1250dc;
 }
 
-/* --- Right panel: third-level cards --- */
+
 .dropdown-right {
   flex: 1;
   padding: 24px 22px 16px 22px;
@@ -162,7 +162,7 @@
   line-height: 1.3;
 }
 
-/* Responsive */
+
 @media (max-width: 1024px) {
   .category-dropdown { width: 99vw; }
   .dropdown-right { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }

@@ -36,7 +36,6 @@ function CartPage() {
 
         if (cartItems.length > 0) {
           if (isLoggedIn) {
-            // Thêm allowDuplicate để ngăn việc hủy request
             const cartResponse = await axiosInstance.get("/cart", {
               allowDuplicate: true,
             });
@@ -52,7 +51,6 @@ function CartPage() {
               axiosInstance.get(`/products/${id}`, { allowDuplicate: true })
             );
 
-            // Xử lý từng promise riêng lẻ, không dừng khi một request lỗi
             const productsData = {};
             const imagesData = {};
 
@@ -64,7 +62,6 @@ function CartPage() {
                 const product = response.data;
                 productsData[product.id] = product;
 
-                // Lấy ảnh đầu tiên cho sản phẩm
                 const imgRes = await axiosInstance.get(
                   `/images?product_id=${product.id}`,
                   { allowDuplicate: true }
@@ -73,14 +70,12 @@ function CartPage() {
                 imagesData[product.id] = firstImage;
               } catch (productErr) {
                 console.error(`Không thể tải sản phẩm ID ${id}:`, productErr);
-                // Chỉ log lỗi, không dừng toàn bộ tiến trình
               }
             }
 
             setProducts(productsData);
             setProductImages(imagesData);
           } else {
-            // Xử lý khi chưa đăng nhập
             const productsData = {};
             const imagesData = {};
 
@@ -92,7 +87,6 @@ function CartPage() {
                 const product = response.data;
                 productsData[product.id] = product;
 
-                // Lấy ảnh đầu tiên cho sản phẩm
                 const imgRes = await axiosInstance.get(
                   `/images?product_id=${product.id}`,
                   { allowDuplicate: true }
@@ -110,7 +104,6 @@ function CartPage() {
         }
       } catch (err) {
         console.error("Lỗi khi tải dữ liệu giỏ hàng:", err);
-        // Chỉ hiển thị lỗi khi không có sản phẩm nào được tải thành công
         if (Object.keys(products).length === 0) {
           setError("Không thể tải thông tin sản phẩm");
         }
@@ -147,13 +140,11 @@ function CartPage() {
     try {
       setLoading(true);
 
-      // Nếu số lượng <= 0, chuyển sang xóa sản phẩm
       if (newQuantity <= 0) {
         await handleRemoveItem(e, productId);
         return;
       }
 
-      // Gọi action updateQuantity từ Redux
       await dispatch(updateQuantity(productId, newQuantity));
 
       setLoading(false);
@@ -178,18 +169,14 @@ function CartPage() {
     try {
       setLoading(true);
 
-      // Cập nhật UI trước khi thực hiện các API call
       const updatedProducts = { ...products };
       delete updatedProducts[productId];
       setProducts(updatedProducts);
 
-      // Cập nhật danh sách sản phẩm đã chọn
       setSelectedItemsState((prev) => prev.filter((id) => id !== productId));
 
-      // Gọi action removeFromCart từ Redux
       await dispatch(removeFromCart(productId));
 
-      // Hiển thị thông báo xóa thành công
       setAlertMessage("Đã xóa sản phẩm khỏi giỏ hàng");
       setAlertType("success");
       setShowAlert(true);
@@ -205,12 +192,10 @@ function CartPage() {
     }
   };
 
-  // Lọc sản phẩm có số lượng > 0 để hiển thị trong giỏ hàng
   const validCartItems = Object.keys(products).filter(
     (id) => itemQuantities[id] && itemQuantities[id] > 0
   );
 
-  // Kiểm tra xem giỏ hàng có thực sự trống không
   const isCartEmpty = validCartItems.length === 0;
 
   const handleCheckout = async (e) => {
@@ -226,13 +211,10 @@ function CartPage() {
     }
 
     try {
-      // Cập nhật Redux store với các mục đã chọn - sử dụng action creator từ Redux
       dispatch(setSelectedItems(selectedItems));
 
-      // Kiểm tra người dùng có địa chỉ chưa
       const userId = localStorage.getItem("userId");
 
-      // Sửa lỗi: Kiểm tra userId trước khi sử dụng
       if (!userId) {
         setError("Không tìm thấy thông tin người dùng");
         return;
@@ -242,11 +224,9 @@ function CartPage() {
         `/addresses/user/${userId}`
       );
 
-      // Sửa lỗi: Kiểm tra dữ liệu trả về
       const addresses = addressResponse.data || [];
 
       if (!addresses || addresses.length === 0) {
-        // Hiển thị thông báo và xác nhận
         const confirmNavigation = window.confirm(
           "Bạn chưa có địa chỉ giao hàng. Bạn muốn thêm địa chỉ ngay bây giờ không?"
         );
@@ -258,10 +238,8 @@ function CartPage() {
         }
       }
 
-      // Lưu danh sách sản phẩm đã chọn
       localStorage.setItem("selectedItems", JSON.stringify(selectedItems));
 
-      // Chuyển hướng sang trang thanh toán
       navigate("/checkout");
     } catch (err) {
       console.error("Lỗi khi chuẩn bị thanh toán:", err);

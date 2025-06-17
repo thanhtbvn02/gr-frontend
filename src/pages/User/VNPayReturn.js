@@ -10,7 +10,6 @@ function VNPayReturn() {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  // Sử dụng useRef để tạo flag kiểm soát việc tạo đơn hàng
   const orderProcessedRef = useRef(false);
 
   const [loading, setLoading] = useState(true);
@@ -24,20 +23,17 @@ function VNPayReturn() {
 
   useEffect(() => {
     const processPaymentResult = async () => {
-      // Nếu đơn hàng đã được xử lý, không thực hiện lại
       if (orderProcessedRef.current) {
         console.log("Đơn hàng đã được xử lý, không tạo đơn hàng lại");
         return;
       }
 
       try {
-        // Lấy trạng thái thanh toán từ query params
         const params = new URLSearchParams(location.search);
         const paymentStatus = params.get("status");
 
         setStatus(paymentStatus);
 
-        // Thu thập thông tin từ VNPAY
         const vnpayData = {};
         for (const [key, value] of params.entries()) {
           if (key.startsWith("vnp_")) {
@@ -46,7 +42,6 @@ function VNPayReturn() {
         }
         setVnpayInfo(vnpayData);
 
-        // Lấy dữ liệu từ localStorage
         const pendingOrderData = localStorage.getItem("pendingOrder");
         const selectedItemsData = localStorage.getItem("selectedItems");
         const cartData = localStorage.getItem("cartData");
@@ -58,7 +53,6 @@ function VNPayReturn() {
           localOrderData = JSON.parse(pendingOrderData);
           console.log("Pending order data:", localOrderData);
 
-          // Lấy thông tin sản phẩm trực tiếp từ pendingOrder
           if (
             localOrderData.orderItems &&
             Array.isArray(localOrderData.orderItems)
@@ -69,7 +63,6 @@ function VNPayReturn() {
             localOrderData.products &&
             Array.isArray(localOrderData.products)
           ) {
-            // Hỗ trợ tương thích ngược với format cũ
             orderProducts = localOrderData.products;
             console.log(
               "Products from pendingOrder (old format):",
@@ -78,16 +71,13 @@ function VNPayReturn() {
           }
         }
 
-        // Nếu không có sản phẩm trong pendingOrder, thử lấy từ selectedItems
         if (orderProducts.length === 0 && selectedItemsData) {
           const selectedIds = JSON.parse(selectedItemsData);
           console.log("Selected items IDs:", selectedIds);
 
-          // Nếu selectedItems chỉ chứa ID, cần kết hợp với dữ liệu từ cartData
           if (cartData) {
             const cart = JSON.parse(cartData);
             if (Array.isArray(cart) && cart.length > 0) {
-              // Lọc sản phẩm từ giỏ hàng dựa trên ID đã chọn
               if (Array.isArray(selectedIds)) {
                 orderProducts = cart.filter((item) =>
                   selectedIds.includes(item.product_id.toString())
@@ -102,7 +92,6 @@ function VNPayReturn() {
 
         setProductDetails(orderProducts);
 
-        // Lấy thông tin chi tiết sản phẩm từ API
         if (orderProducts.length > 0) {
           await fetchProductDetails(orderProducts);
         }
@@ -112,27 +101,23 @@ function VNPayReturn() {
             "Thanh toán thành công! Đơn hàng của bạn đang được xử lý."
           );
 
-          // Xử lý thông tin đơn hàng
           if (
             Object.keys(vnpayData).length > 0 &&
             pendingOrderData &&
             orderProducts.length > 0
           ) {
             try {
-              // Kiểm tra lại trước khi gọi API
               if (orderProcessedRef.current) {
                 console.log("Đơn hàng đã được xử lý, không tạo đơn hàng lại");
                 return;
               }
 
-              // Đánh dấu đơn hàng đã xử lý trước khi gọi API
               orderProcessedRef.current = true;
               console.log(
                 "Đánh dấu đơn hàng đã xử lý:",
                 orderProcessedRef.current
               );
 
-              // Tạo đơn hàng trên server
               const token = localStorage.getItem("accessToken");
               const headers = token
                 ? {
@@ -141,7 +126,6 @@ function VNPayReturn() {
                   }
                 : {};
 
-              // Chuẩn bị dữ liệu đơn hàng
               const apiOrderData = {
                 user_id: localOrderData.user_id,
                 address_id: localOrderData.address_id,
@@ -156,7 +140,6 @@ function VNPayReturn() {
 
               console.log("Sending order data to API:", apiOrderData);
 
-              // Gửi yêu cầu tạo đơn hàng
               const response = await axios.post(
                 "http://localhost:5000/api/orders",
                 apiOrderData,
@@ -168,11 +151,8 @@ function VNPayReturn() {
 
               console.log("Order API response:", response.data);
 
-              // Xóa các sản phẩm đã đặt khỏi giỏ hàng
               for (const product of orderProducts) {
-                // Gọi API để xóa sản phẩm khỏi giỏ hàng trong database
                 try {
-                  // Lấy cartItemId từ API
                   const cartResponse = await axios.get(
                     "http://localhost:5000/api/cart",
                     {
@@ -182,7 +162,6 @@ function VNPayReturn() {
                   );
 
                   if (cartResponse.data && Array.isArray(cartResponse.data)) {
-                    // Tìm cart item tương ứng với product_id
                     const cartItem = cartResponse.data.find(
                       (item) =>
                         item.product_id.toString() ===
@@ -193,7 +172,6 @@ function VNPayReturn() {
                       console.log(
                         `Xóa sản phẩm ${product.product_id} với cart ID: ${cartItem.id}`
                       );
-                      // Gọi API xóa sản phẩm
                       await axios.delete(
                         `http://localhost:5000/api/cart/${cartItem.id}`,
                         {
@@ -210,17 +188,14 @@ function VNPayReturn() {
                   );
                 }
 
-                // Cập nhật Redux store
                 dispatch(removeFromCart(product.product_id));
               }
 
-              // Xóa dữ liệu đơn hàng tạm thời
               localStorage.removeItem("pendingOrder");
               localStorage.removeItem("selectedItems");
 
-              // Hiển thị thông tin đơn hàng
               const orderData = {
-                totalAmount: parseInt(vnpayData.vnp_Amount || 0) / 100, // Chuyển đổi về VND
+                totalAmount: parseInt(vnpayData.vnp_Amount || 0) / 100, 
                 orderInfo: vnpayData.vnp_OrderInfo || "Không có thông tin",
                 transactionNo:
                   vnpayData.vnp_TransactionNo || "Không có mã giao dịch",
@@ -234,7 +209,6 @@ function VNPayReturn() {
               };
               setOrderDetails(orderData);
             } catch (error) {
-              // Xảy ra lỗi, đặt lại trạng thái xử lý
               orderProcessedRef.current = false;
               console.error("Lỗi khi xử lý đơn hàng:", error);
               setMessage(
@@ -264,7 +238,6 @@ function VNPayReturn() {
     processPaymentResult();
   }, [location.search, dispatch, navigate]);
 
-  // Hàm lấy thông tin chi tiết sản phẩm
   const fetchProductDetails = async (products) => {
     try {
       const productIds = products.map((product) => product.product_id);
@@ -279,18 +252,15 @@ function VNPayReturn() {
           }
         : {};
 
-      // Lấy thông tin từng sản phẩm
       await Promise.all(
         productIds.map(async (productId) => {
           try {
-            // Lấy thông tin sản phẩm
             const response = await axios.get(
               `http://localhost:5000/api/products/${productId}`
             );
             const productInfo = response.data;
             productDetailsMap[productId] = productInfo;
 
-            // Lấy hình ảnh sản phẩm từ API images
             try {
               const imgRes = await axios.get(
                 `http://localhost:5000/api/images?product_id=${productId}`,
@@ -307,7 +277,6 @@ function VNPayReturn() {
                 `Không thể tải ảnh cho sản phẩm ID ${productId}:`,
                 imgErr
               );
-              // Không có ảnh vẫn tiếp tục
             }
           } catch (error) {
             console.error(
@@ -333,11 +302,9 @@ function VNPayReturn() {
     navigate("/profile/orders");
   };
 
-  // Hàm format ngày thanh toán
   const formatPayDate = (payDate) => {
     if (!payDate || payDate === "Không có ngày thanh toán") return payDate;
 
-    // Format từ YYYYMMDDHHmmss thành ngày/tháng/năm giờ:phút
     const year = payDate.substring(0, 4);
     const month = payDate.substring(4, 6);
     const day = payDate.substring(6, 8);

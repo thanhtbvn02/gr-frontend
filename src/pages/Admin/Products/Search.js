@@ -19,7 +19,6 @@ const SearchResults = () => {
   const query = new URLSearchParams(location.search).get("q");
   const categoryId = new URLSearchParams(location.search).get("category_id");
 
-  // Sử dụng Redux thay vì useCart hook
   const isLoggedIn = useSelector((state) => state.cart.isLoggedIn);
   const dispatch = useDispatch();
 
@@ -27,7 +26,6 @@ const SearchResults = () => {
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState("success");
 
-  // Lấy danh sách tất cả danh mục
   const fetchAllCategories = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/category");
@@ -37,7 +35,6 @@ const SearchResults = () => {
     }
   };
 
-  // Tìm tất cả ID con/cháu từ ID cha
   const getAllChildCategoryIds = (parentId) => {
     const result = [];
     const stack = [parseInt(parentId)];
@@ -52,7 +49,6 @@ const SearchResults = () => {
     return result;
   };
 
-  // Tìm theo từ khóa
   const fetchSearchResults = async () => {
     if (!query) return;
     setLoading(true);
@@ -91,7 +87,6 @@ const SearchResults = () => {
     }
   };
 
-  // Tìm theo category ID + con/cháu
   const fetchByCategoryTree = async () => {
     if (!categoryId || allCategories.length === 0) return;
     setLoading(true);
@@ -132,7 +127,6 @@ const SearchResults = () => {
   const handleAddToCart = (productId) => {
     if (!productId) return;
     try {
-      // Sử dụng Redux dispatch trực tiếp
       dispatch(addToCart(productId, 1));
 
       setAlertMessage(
@@ -155,12 +149,10 @@ const SearchResults = () => {
     }
   };
 
-  // Load danh mục 1 lần
   useEffect(() => {
     fetchAllCategories();
   }, []);
 
-  // Load sản phẩm khi query thay đổi
   useEffect(() => {
     setProducts([]);
     setOffset(0);
