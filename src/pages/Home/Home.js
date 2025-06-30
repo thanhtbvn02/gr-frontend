@@ -1,104 +1,89 @@
-import React, { useEffect, useState, useRef } from "react";
-import axiosInstance from "../../utils/axiosConfig";
+import React, { useState, useEffect } from "react";
+import useProduct from "../../hooks/useProduct";
 import { Link, useNavigate } from "react-router-dom";
 import "./home.css";
-import { Header, Footer, ScrollingBar } from "../../components";
+import { Header, Footer, ScrollingBar, Slider } from "../../components";
 import { useSelector, useDispatch } from "react-redux";
 import { addToCart } from "../../redux/addCart";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function Home() {
   const navigate = useNavigate();
-
   const isLoggedIn = useSelector((state) => state.cart.isLoggedIn);
   const dispatch = useDispatch();
 
-  const [products, setProducts] = useState([]);
   const [offset, setOffset] = useState(0);
-  const [limit, setLimit] = useState(20);
-  const [loading, setLoading] = useState(false);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertType, setAlertType] = useState("success");
+  const [limit] = useState(8);
+  const [productList, setProductList] = useState([]);
+  const [isEnd, setIsEnd] = useState(false);
 
-  const fetchOne = useRef(false);
+  const {
+    products = [],
+    isLoading,
+    isFetching,
+  } = useProduct({ offset, limit });
 
-  const fetchProducts = async () => {
-    setLoading(true);
-    try {
-      const res = await axiosInstance.get(
-        `http://localhost:5000/api/products/paginated?offset=${offset}&limit=${limit}&include_image=true`
-      );
-      const productsWithImages = res.data.products;
+  const slides = [
+    "/slider-1.jpg",
+    "/slider-2.jpg",
+    "/slider-3.jpg",
+    "/slider-4.jpg",
+    "/slider-5.jpg",
+    "/slider-6.jpg",
+    "/slider-7.jpg",
+    "/slider-8.jpg",
+    "/slider-9.jpg"
+  ];
 
-      setProducts((prev) => {
-        const merged = [...prev, ...productsWithImages];
-        const unique = Array.from(
-          new Map(merged.map((p) => [p.id, p])).values()
-        );
-        return unique;
-      });
-
-      setOffset((prev) => prev + limit);
-      if (offset === 0) setLimit(8);
-    } catch (err) {
-      console.error("Lỗi khi load sản phẩm:", err);
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (!products || products.length === 0) {
+      if (offset > 0) setIsEnd(true);
+      return;
     }
-  };
+    setProductList((prev) =>
+      offset === 0 ? products : [...prev, ...products]
+    );
+  }, [products, offset]);
 
-  const handleAddToCart = (productId) => {
-    if (!productId) return;
-
+  const handleAddToCart = (product) => {
+    if (!product.id) return;
+    if (product.stock === 0) {
+      toast.info("Sản phẩm đã hết hàng!");
+      return;
+    }
     try {
-      dispatch(addToCart(productId, 1));
-
-      setAlertMessage(
+      dispatch(addToCart(product.id, 1));
+      toast.success(
         isLoggedIn
           ? "Thêm vào giỏ hàng thành công!"
           : "Sản phẩm đã được thêm vào giỏ hàng tạm thời"
       );
-      setAlertType("success");
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 2000);
     } catch (error) {
       console.error("Lỗi khi thêm vào giỏ hàng:", error);
       if (error.response?.status === 403) {
         navigate("/login");
-        setAlertMessage("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
+        toast.error("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
       } else {
-        setAlertMessage("Có lỗi xảy ra khi thêm vào giỏ hàng!");
+        toast.error("Có lỗi xảy ra khi thêm vào giỏ hàng!");
       }
-      setAlertType("error");
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 2000);
     }
   };
 
-  useEffect(() => {
-    if (fetchOne.current) return;
-    fetchOne.current = true;
-
-    fetchProducts();
-  }, []);
+  const handleLoadMore = () => {
+    setOffset((prev) => prev + limit);
+  };
 
   return (
     <div className="home-main-content" style={{ paddingTop: 90 }}>
-      {showAlert && (
-        <div
-          className={`alert ${
-            alertType === "success" ? "alert-success" : "alert-error"
-          }`}
-        >
-          {alertMessage}
-        </div>
-      )}
+      <ToastContainer position="top-right" autoClose={2200} />
       <div>
         <Header />
+        <Slider slides={slides} />
       </div>
       <div className="home-container">
         <div className="product-list">
-          {products.map((product) => (
+          {productList.map((product) => (
             <div className="product-card" key={product.id}>
               {product.image && <img src={product.image} alt={product.name} />}
               <div className="product-info">
@@ -115,20 +100,33 @@ export default function Home() {
               </div>
               <button
                 className="add-to-cart-btn"
-                onClick={() => handleAddToCart(product.id)}
+                onClick={() => handleAddToCart(product)}
+                disabled={product.stock === 0}
+                style={
+                  product.stock === 0
+                    ? {
+                        background: "#ccc",
+                        color: "#888",
+                        cursor: "not-allowed",
+                        fontWeight: "bold",
+                      }
+                    : {}
+                }
               >
-                Thêm vào giỏ hàng
+                {product.stock === 0 ? "Hết hàng" : "Thêm vào giỏ hàng"}
               </button>
             </div>
           ))}
         </div>
         <div className="load-more-container">
-          {!loading && products.length > 0 && (
-            <button className="load-more-btn" onClick={fetchProducts}>
+          {!isLoading && productList.length > 0 && (
+            <button className="load-more-btn" onClick={handleLoadMore}>
               Hiển thị thêm
             </button>
           )}
-          {loading && <div className="loading">Đang tải...</div>}
+          {(isLoading || isFetching) && (
+            <div className="loading">Đang tải...</div>
+          )}
         </div>
       </div>
       <div>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import SideBar from "../../../components/SideBar/SideBar";
-import axios from "axios";
+import useUser from "../../../hooks/useUser";
 import "./UpdateUser.css";
 
 const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
@@ -10,6 +10,8 @@ const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const UpdateUser = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const inputAvatarRef = useRef();
+
   const [user, setUser] = useState(null);
   const [disableSave, setDisableSave] = useState(true);
   const [avatar, setAvatar] = useState(defaultAvatar);
@@ -23,23 +25,21 @@ const UpdateUser = () => {
   const [role, setRole] = useState("user");
   const [status, setStatus] = useState("active");
 
-  const inputAvatarRef = useRef();
+  const { getUserById, updateUser, updateAvatar, deleteUser } = useUser();
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/users/${id}`);
-        setUser(res.data);
-        setFullName(res.data.full_name || "");
-        setUsername(res.data.username || "");
-        setBirthDate(
-          res.data.birth_date ? res.data.birth_date.substring(0, 10) : ""
-        );
-        setPhone(res.data.phone || "");
-        setEmail(res.data.email || "");
-        setRole(res.data.role || "user");
-        setStatus(res.data.status || "active");
-        setAvatar(res.data.image || defaultAvatar);
+        const res = await getUserById(id);
+        setUser(res);
+        setFullName(res.full_name || "");
+        setUsername(res.username || "");
+        setBirthDate(res.birth_date ? res.birth_date.substring(0, 10) : "");
+        setPhone(res.phone || "");
+        setEmail(res.email || "");
+        setRole(res.role || "user");
+        setStatus(res.status || "active");
+        setAvatar(res.image || defaultAvatar);
       } catch (err) {
         alert("Không thể lấy thông tin người dùng");
       }
@@ -76,12 +76,8 @@ const UpdateUser = () => {
       try {
         const formData = new FormData();
         formData.append("image", file);
-        const res = await axios.post(
-          `http://localhost:5000/api/users/${id}/avatar`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-        setAvatar(res.data.data.url);
+        const res = await updateAvatar({ id, formData });
+        setAvatar(res.url || res.data?.url || defaultAvatar);
         setDisableSave(false);
         alert("Cập nhật ảnh đại diện thành công!");
       } catch (error) {
@@ -96,7 +92,7 @@ const UpdateUser = () => {
   const handleDelete = async (e) => {
     e.preventDefault();
     try {
-      await axios.delete(`http://localhost:5000/api/users/${id}`);
+      await deleteUser(id);
       alert("Xóa tài khoản thành công!");
       navigate("/admin/users");
     } catch (err) {
@@ -107,14 +103,17 @@ const UpdateUser = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5000/api/users/${id}`, {
-        full_name: fullName,
-        username: username,
-        birth_date: birthDate,
-        phone: phone,
-        email: email,
-        role: role,
-        status: status,
+      await updateUser({
+        id,
+        data: {
+          full_name: fullName,
+          username: username,
+          birth_date: birthDate,
+          phone: phone,
+          email: email,
+          role: role,
+          status: status,
+        },
       });
       alert("Cập nhật thông tin thành công!");
       setDisableSave(true);
@@ -210,7 +209,7 @@ const UpdateUser = () => {
               <button type="submit" className="save-btn" disabled={disableSave}>
                 Lưu thay đổi
               </button>
-              <button type="submit" className="save-btn" onClick={handleDelete}>
+              <button className="save-btn" onClick={handleDelete} type="button">
                 Xóa tài khoản
               </button>
             </form>

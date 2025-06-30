@@ -135,3 +135,38 @@
 .child-category-item:hover {
   background-color: #f1f1f1;
 }
+
+.search-title {
+  margin-left: 10px;
+  text-align: left;
+  font-family: 'Inter', 'Inter Fallback' !important;
+}
+
+.breadcrumb {
+  font-weight: 400;
+  font-size: 18px;
+  color: #222;
+  margin-left: 10px;
+  font-family: 'Inter', 'Inter Fallback' !important;
+}
+
+.breadcrumb-home {
+  color: #2563eb;
+  text-decoration: none;
+  margin-left: 10px;
+}
+
+.breadcrumb-separator {
+  color: #888;
+  margin: 0 4px;
+}
+
+.breadcrumb-link {
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.breadcrumb-current {
+  color: #222;
+  font-weight: 500;
+}

@@ -1,15 +1,15 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useParams } from "react-router-dom";
 import "./UpdateEmail.css";
+import useUser from "../../hooks/useUser";
 
 function UpdateEmail() {
   const { id } = useParams();
   const [email, setEmail] = useState("");
-
+  const { updateEmail } = useUser();
   const handleUpdateEmail = async () => {
     try {
-      await axios.post(`http://localhost:5000/api/users/${id}`, { email });
+      await updateEmail({ id, email });
       alert("Email đã được cập nhật thành công");
     } catch (error) {
       console.log(error);

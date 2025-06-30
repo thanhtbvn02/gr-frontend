@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
 import "./UpdatePass.css";
+import useUser from "../../hooks/useUser";
 
 const UpdatePass = () => {
   const { id } = useParams();
+  const { changePassword } = useUser();
   const [passwordData, setPasswordData] = useState({
     oldPassword: "",
     newPassword: "",
@@ -50,13 +51,11 @@ const UpdatePass = () => {
     }
     setLoading(true);
     try {
-      await axios.put(
-        `http://localhost:5000/api/users/${id}/change-password`,
-        {
-          oldPassword: passwordData.oldPassword,
-          newPassword: passwordData.newPassword,
-        }
-      );
+      await changePassword({
+        id,
+        oldPassword: passwordData.oldPassword,
+        newPassword: passwordData.newPassword,
+      });
       alert("Đổi mật khẩu thành công!");
       setPasswordData({
         oldPassword: "",
@@ -64,9 +63,7 @@ const UpdatePass = () => {
         confirmPassword: "",
       });
     } catch (err) {
-      alert(
-        err.response?.data?.message || "Có lỗi xảy ra khi đổi mật khẩu."
-      );
+      alert(err.response?.data?.message || "Có lỗi xảy ra khi đổi mật khẩu.");
     }
     setLoading(false);
   };
@@ -131,11 +128,7 @@ const UpdatePass = () => {
             </span>
           </div>
         </div>
-        <button
-          className="update-pass-btn"
-          type="submit"
-          disabled={loading}
-        >
+        <button className="update-pass-btn" type="submit" disabled={loading}>
           {loading ? "Đang đổi..." : "Đổi mật khẩu"}
         </button>
       </form>

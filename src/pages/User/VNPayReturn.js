@@ -5,12 +5,14 @@ import axios from "axios";
 import { removeFromCart } from "../../redux/addCart";
 import Header from "../../components/Header/Header";
 import "./VNPayReturn.css";
+import useProduct from "../../hooks/useProduct";
 
 function VNPayReturn() {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const orderProcessedRef = useRef(false);
+  const { getProductById } = useProduct();
 
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState(null);
@@ -195,7 +197,7 @@ function VNPayReturn() {
               localStorage.removeItem("selectedItems");
 
               const orderData = {
-                totalAmount: parseInt(vnpayData.vnp_Amount || 0) / 100, 
+                totalAmount: parseInt(vnpayData.vnp_Amount || 0) / 100,
                 orderInfo: vnpayData.vnp_OrderInfo || "Không có thông tin",
                 transactionNo:
                   vnpayData.vnp_TransactionNo || "Không có mã giao dịch",
@@ -243,7 +245,6 @@ function VNPayReturn() {
       const productIds = products.map((product) => product.product_id);
       const productDetailsMap = {};
       const productImagesMap = {};
-
       const token = localStorage.getItem("accessToken");
       const headers = token
         ? {
@@ -251,16 +252,11 @@ function VNPayReturn() {
             "Content-Type": "application/json",
           }
         : {};
-
       await Promise.all(
         productIds.map(async (productId) => {
           try {
-            const response = await axios.get(
-              `http://localhost:5000/api/products/${productId}`
-            );
-            const productInfo = response.data;
+            const productInfo = await getProductById(productId);
             productDetailsMap[productId] = productInfo;
-
             try {
               const imgRes = await axios.get(
                 `http://localhost:5000/api/images?product_id=${productId}`,
@@ -286,7 +282,6 @@ function VNPayReturn() {
           }
         })
       );
-
       setProductData(productDetailsMap);
       setProductImages(productImagesMap);
     } catch (error) {

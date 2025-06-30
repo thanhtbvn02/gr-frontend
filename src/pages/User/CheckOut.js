@@ -7,6 +7,7 @@ import { removeFromCart, setSelectedItems } from "../../redux/addCart";
 import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import "./CheckOut.css";
+import useProduct from "../../hooks/useProduct";
 
 function CheckOut() {
   const navigate = useNavigate();
@@ -33,6 +34,8 @@ function CheckOut() {
     (state) => state.cart.selectedItems || []
   );
   const [selectedProductIds, setSelectedProductIds] = useState([]);
+
+  const { getProductById } = useProduct();
 
   const handlePaymentMethodChange = (e) => {
     setPaymentMethod(e.target.value);
@@ -85,7 +88,6 @@ function CheckOut() {
       }, 2000);
       return;
     }
-
 
     const fetchData = async () => {
       try {
@@ -167,21 +169,11 @@ function CheckOut() {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
         for (const id of selectedProductIds) {
-          if (!id) continue; 
-
+          if (!id) continue;
           try {
-            const response = await axios.get(
-              `http://localhost:5000/api/products/${id}`,
-              {
-                headers,
-                timeout: 10000,
-              }
-            );
-
-            if (response.data) {
-              const product = response.data;
+            const product = await getProductById(id);
+            if (product) {
               productsData[product.id] = product;
-
               try {
                 const imgRes = await axios.get(
                   `http://localhost:5000/api/images?product_id=${product.id}`,

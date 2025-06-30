@@ -1,92 +1,94 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import './Register.css';
-
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import ReCAPTCHA from "react-google-recaptcha";
+import axios from "axios";
+import "./Register.css";
+import useUser from "../../hooks/useUser";
 const Register = () => {
   const navigate = useNavigate();
-  const isRefreshing = useRef(false);
-  const [captchaImg, setCaptchaImg] = useState('');
+
+  const recaptchaRef = useRef(null);
+
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const { registerUser } = useUser();
+  const [captchaToken, setCaptchaToken] = useState(null);
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm({
-    mode: 'onChange',
-    defaultValues: {
-      username: '',
-      password: '',
-      confirmPassword: '',
-      captchaInput: ''
+  const handleRegistration = async (e) => {
+    e.preventDefault();
+
+    if (!username || !password) {
+      alert("Bạn cần nhập đầy đủ tài khoản và mật khẩu!");
+      return;
     }
-  });
 
-  const password = watch('password');
-  const confirmPassword = watch('confirmPassword');
+    if (password !== confirmPassword) {
+      alert("Mật khẩu không khớp!");
+      return;
+    }
+    if (!captchaToken) {
+      alert("Vui lòng xác nhận bạn không phải robot!");
+      return;
+    }
 
-  const refreshCaptcha = () => {
-    if (isRefreshing.current) return;
-    isRefreshing.current = true;
+    try {
+      const token = recaptchaRef.current.getValue();
 
-    fetch('http://localhost:5000/api/captcha', {
-      credentials: 'include'
-    })
-      .then(res => res.text())
-      .then(setCaptchaImg)
-      .catch(() => setCaptchaImg('<p>Không tải được Captcha</p>'))
-      .finally(() => setTimeout(() => (isRefreshing.current = false), 300));
+      if (!token) {
+        alert("Vui lòng xác nhận bạn không phải robot!");
+        return;
+      }
+
+      const verifyRes = await axios.post(
+        "http://localhost:5000/api/captcha/verify-captcha",
+        { token: captchaToken }
+      );
+      if (!verifyRes.data.success) {
+        alert("Captcha không hợp lệ");
+        recaptchaRef.current.reset();
+        setCaptchaToken(null);
+        return;
+      }
+
+      const res = await registerUser({ username, password, captchaToken });
+
+      if (res.message === "Đăng ký thành công") {
+        alert("Đăng ký thành công! Mời bạn đăng nhập.");
+        navigate("/login");
+      }
+    } catch (err) {
+      console.error(
+        "Registration error:",
+        err,
+        err?.response,
+        err?.response?.data
+      );
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Đăng ký thất bại. Vui lòng thử lại.";
+      alert("Đăng ký thất bại: " + errorMessage);
+      recaptchaRef.current.reset();
+      setCaptchaToken(null);
+    }
   };
-
-  useEffect(() => {
-    if (!captchaImg) refreshCaptcha();
-  }, [captchaImg]);
 
   const requirements = {
     length: password.length >= 6,
     uppercase: /[A-Z]/.test(password),
     lowercase: /[a-z]/.test(password),
-    number: /[0-9]/.test(password)
+    number: /[0-9]/.test(password),
   };
+
   const passedCount = Object.values(requirements).filter(Boolean).length;
   const isPasswordMatched = password === confirmPassword;
 
-  const onSubmit = async (data) => {
-    const { username, password, captchaInput } = data;
-
-    try {
-      const captchaValidRes = await axios.post(
-        'http://localhost:5000/api/captcha/verify-captcha',
-        { captcha: captchaInput },
-        { withCredentials: true }
-      );
-      if (!captchaValidRes.data.success) {
-        alert('Mã xác nhận không đúng!');
-        refreshCaptcha();
-        return;
-      }
-
-      const res = await axios.post('http://localhost:5000/api/users/register', {
-        username,
-        password,
-        email: '',
-        full_name: '',
-        birth_date: '',
-        phone: '',
-        address: ''
-      });
-
-      if (res.data.message === 'Đăng ký thành công') {
-        alert('Đăng ký thành công! Mời bạn đăng nhập.');
-        navigate('/login');
-      }
-    } catch (err) {
-      alert('Lỗi: ' + (err.response?.data?.message || err.message));
-    }
-  };
-
   const renderRequirement = (label, isPassed) => (
-    <p className={isPassed ? 'passed' : 'not-passed'}>
-      <span>{isPassed ? '✓' : '✖'}</span> {label}
+    <p className={isPassed ? "passed" : "not-passed"}>
+      <span>{isPassed ? "✓" : "✖"}</span> {label}
     </p>
   );
 
@@ -96,97 +98,96 @@ const Register = () => {
         <div className="panel left-panel">
           <h2>Welcome Back!</h2>
           <p>Enter your personal details to use all of site features</p>
-          <button onClick={() => navigate('/login')} className="switch-btn">SIGN IN</button>
+          <button onClick={() => navigate("/login")} className="switch-btn">
+            SIGN IN
+          </button>
         </div>
         <div className="form-container">
-          <form className="form sign-up-form" onSubmit={handleSubmit(onSubmit)}>
+          <form className="form sign-up-form" onSubmit={handleRegistration}>
             <h2>Create Account</h2>
 
             <input
+              type="text"
               placeholder="Tài khoản"
               className="custom-input"
-              {...register('username', { required: 'Tài khoản là bắt buộc' })}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             />
-            {errors.username && <p className="error">{errors.username.message}</p>}
 
             <div className="input-password-wrapper">
               <input
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 placeholder="Password, ex: Abc@123"
                 className="custom-input"
-                {...register('password', { required: 'Mật khẩu là bắt buộc' })}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
               <span
                 className="toggle-eye"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? '🙈' : '👁️'}
+                {showPassword ? "🙈" : "👁️"}
               </span>
             </div>
 
             <div className="password-rules">
-              {renderRequirement('At least 6 characters long', requirements.length)}
-              {renderRequirement('Upper-case (A-Z)', requirements.uppercase)}
-              {renderRequirement('Lower-case (a-z)', requirements.lowercase)}
-              {renderRequirement('Numbers (0-9)', requirements.number)}
+              {renderRequirement(
+                "At least 6 characters long",
+                requirements.length
+              )}
+              {renderRequirement("Upper-case (A-Z)", requirements.uppercase)}
+              {renderRequirement("Lower-case (a-z)", requirements.lowercase)}
+              {renderRequirement("Numbers (0-9)", requirements.number)}
             </div>
 
             <div className="input-password-wrapper">
               <input
-                type={showConfirm ? 'text' : 'password'}
+                type={showConfirm ? "text" : "password"}
                 placeholder="Confirm Password"
                 className="custom-input"
-                {...register('confirmPassword', {
-                  required: 'Xác nhận mật khẩu là bắt buộc',
-                  validate: value => value === password || 'Mật khẩu không khớp'
-                })}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
               />
               <span
                 className="toggle-eye"
                 onClick={() => setShowConfirm(!showConfirm)}
               >
-                {showConfirm ? '🙈' : '👁️'}
+                {showConfirm ? "🙈" : "👁️"}
               </span>
             </div>
-            {errors.confirmPassword && (
-              <p className="error">{errors.confirmPassword.message}</p>
+
+            {confirmPassword && (
+              <p className={isPasswordMatched ? "passed" : "not-passed"}>
+                <span>{isPasswordMatched ? "✓" : "✖"}</span>{" "}
+                {isPasswordMatched ? "Mật khẩu khớp" : "Mật khẩu không khớp"}
+              </p>
             )}
 
-            <div className="captcha-container">
-              <div className="input-group">
-                <label>Mã xác nhận</label>
-                <input
-                  type="text"
-                  className="custom-input"
-                  {...register('captchaInput', { required: 'Vui lòng nhập mã captcha' })}
-                />
-                {errors.captchaInput && (
-                  <p className="error">{errors.captchaInput.message}</p>
-                )}
-              </div>
-              <div
-                className="captcha-image"
-                onClick={refreshCaptcha}
-                dangerouslySetInnerHTML={{ __html: captchaImg }}
-                style={{ cursor: 'pointer' }}
-              />
-            </div>
+            <ReCAPTCHA
+              ref={recaptchaRef}
+              sitekey={process.env.REACT_APP_SITE_KEY}
+              onChange={(token) => setCaptchaToken(token)}
+            />
 
             <button
               type="submit"
               className="submit-btn"
-              disabled={passedCount < 3 || !requirements.length || !isPasswordMatched}
+              disabled={
+                passedCount < 4 || !requirements.length || !isPasswordMatched
+              }
             >
               SIGN UP
             </button>
 
-            <a href="/home" className="skip-login">Skip Register?</a>
+            <a href="/home" className="skip-login">
+              Skip Register?
+            </a>
 
             <button
               type="button"
               className="google-login-btn"
               onClick={() => {
-                window.location.href = 'http://localhost:5000/api/auth/google';
+                window.location.href = "http://localhost:5000/api/auth/google";
               }}
             >
               G

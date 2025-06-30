@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import SideBar from "../../../components/SideBar/SideBar";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "./ManageUser.css";
 import {
@@ -9,32 +8,46 @@ import {
   MdClear,
   MdDelete,
 } from "react-icons/md";
+import useUser from "../../../hooks/useUser";
+
+const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
 
 function ManageUser() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState("");
   const navigate = useNavigate();
+  const { users, isLoading, refetch, keyword, setKeyword, deleteUsers } =
+    useUser();
+
   const [selectedUsers, setSelectedUsers] = useState([]);
-  const fetchUsers = async (keyword = "") => {
-    setLoading(true);
-    try {
-      let url = "http://localhost:5000/api/users";
-      if (keyword && keyword.trim() !== "")
-        url = `http://localhost:5000/api/users/find-by-name-or-email?keyword=${encodeURIComponent(
-          keyword.trim()
-        )}`;
-      const res = await axios.get(url);
-      setUsers(res.data);
-    } catch (error) {
-      setUsers([]);
-    }
-    setLoading(false);
+
+  const handleSearch = () => refetch();
+  const handleReset = () => {
+    setKeyword("");
+    refetch();
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  const handleSelectAll = (checked) => {
+    if (checked) setSelectedUsers(users.map((u) => u.id));
+    else setSelectedUsers([]);
+  };
+  const handleSelectUser = (id, checked) => {
+    setSelectedUsers((prev) =>
+      checked ? [...prev, id] : prev.filter((selectedId) => selectedId !== id)
+    );
+  };
+
+  const handleDelete = async () => {
+    if (selectedUsers.length === 0) return;
+    if (!window.confirm("Bạn có chắc chắn muốn xóa các tài khoản đã chọn?"))
+      return;
+    try {
+      await deleteUsers(selectedUsers);
+      alert("Xóa tài khoản thành công!");
+      setSelectedUsers([]);
+      refetch();
+    } catch (err) {
+      alert("Có lỗi khi xóa tài khoản.");
+    }
+  };
 
   function renderStatus(status) {
     if (!status) return <span className="badge badge-other">Chưa rõ</span>;
@@ -44,44 +57,6 @@ function ManageUser() {
       return <span className="badge badge-banned">Bị khoá</span>;
     return <span className="badge badge-other">{status}</span>;
   }
-
-  const handleSearch = () => fetchUsers(search);
-  const handleReset = () => {
-    setSearch("");
-    fetchUsers("");
-  };
-
-  const handleSelectAll = (checked) => {
-    if (checked) {
-      setSelectedUsers(users.map((user) => user.id));
-    } else {
-      setSelectedUsers([]);
-    }
-  };
-
-  const handleSelectUser = (id, checked) => {
-    if (checked) {
-      setSelectedUsers([...selectedUsers, id]);
-    } else {
-      setSelectedUsers(selectedUsers.filter((selectedId) => selectedId !== id));
-    }
-  };
-
-  const handleDelete = async () => {
-    if (selectedUsers.length === 0) return;
-    if (!window.confirm("Bạn có chắc chắn muốn xóa các tài khoản đã chọn?"))
-      return;
-    try {
-      for (const id of selectedUsers) {
-        await axios.delete(`http://localhost:5000/api/users/${id}`);
-      }
-      alert("Xóa tài khoản thành công!");
-      setSelectedUsers([]);
-      fetchUsers();
-    } catch (err) {
-      alert("Có lỗi khi xóa tài khoản.");
-    }
-  };
 
   return (
     <div className="admin-container">
@@ -102,11 +77,11 @@ function ManageUser() {
               type="text"
               className="user-search-input"
               placeholder="Tìm kiếm theo tên hoặc email..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}
             />
-            {search && (
+            {keyword && (
               <button className="btn-clear" onClick={handleReset}>
                 <MdClear />
               </button>
@@ -114,14 +89,14 @@ function ManageUser() {
             <button className="btn-search" onClick={handleSearch}>
               <MdOutlineSearch />
             </button>
-            <button
-              className="btn-delete"
-              onClick={handleDelete}
-              disabled={selectedUsers.length === 0}
-            >
-              <MdDelete />
-            </button>
           </div>
+          <button
+            className="btn-delete"
+            onClick={handleDelete}
+            disabled={selectedUsers.length === 0}
+          >
+            <MdDelete />
+          </button>
         </div>
         <table className="user-table">
           <thead>
@@ -146,7 +121,7 @@ function ManageUser() {
             </tr>
           </thead>
           <tbody>
-            {loading ? (
+            {isLoading ? (
               <tr>
                 <td
                   colSpan={8}
@@ -193,9 +168,9 @@ function ManageUser() {
                     />
                   </td>
                   <td>
-                    {user.image || user.avatar ? (
+                    {user.image || defaultAvatar ? (
                       <img
-                        src={user.image || user.avatar}
+                        src={user.image || defaultAvatar}
                         alt={user.full_name}
                         className="user-avatar"
                       />

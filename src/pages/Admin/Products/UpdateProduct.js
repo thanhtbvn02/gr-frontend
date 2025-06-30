@@ -4,15 +4,17 @@ import { useParams, useNavigate } from "react-router-dom";
 import SideBar from "../../../components/SideBar/SideBar";
 import { MdDelete } from "react-icons/md";
 import "./UpdateProduct.css";
+import useProduct from "../../../hooks/useProduct";
 
+const MAX_IMAGES = 4; // Thay đổi nếu muốn tối đa nhiều/ít hơn
 const TABS = ["Thông tin chung", "Thuộc tính", "Thành phần"];
 const MULTILINE_FIELDS = [
-  "description", 
-  "uses", 
-  "how_use", 
-  "side_effects", 
-  "notes", 
-  "preserve", 
+  "description",
+  "uses",
+  "how_use",
+  "side_effects",
+  "notes",
+  "preserve",
 ];
 
 const editableFields = ["name", "unit", "price", ...MULTILINE_FIELDS, "stock"];
@@ -47,19 +49,23 @@ const getFieldLabel = (field) => {
 const UpdateProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-
   const [activeTab, setActiveTab] = useState(TABS[0]);
   const [product, setProduct] = useState({});
   const [details, setDetails] = useState([{ key_name: "", value: "" }]);
   const [ingredients, setIngredients] = useState([{ name: "", quantity: "" }]);
+  const { getProductById } = useProduct();
 
+  // --- State cho images: mỗi phần tử { url, file }
+  const [imageUrls, setImageUrls] = useState(Array(MAX_IMAGES).fill(null));
+  const [uploadingIdx, setUploadingIdx] = useState(-1);
+
+  // Load dữ liệu sản phẩm + ảnh cũ
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const productRes = await axios.get(
-          `http://localhost:5000/api/products/${id}`
-        );
-        setProduct(productRes.data);
+        const productData = await getProductById(id);
+        setProduct(productData);
+
         const detailRes = await axios.get(
           `http://localhost:5000/api/details?product_id=${id}`
         );
@@ -76,12 +82,22 @@ const UpdateProduct = () => {
             ? ingredientRes.data
             : [{ name: "", quantity: "" }]
         );
+
+        // Lấy ảnh cũ
+        const imageRes = await axios.get(
+          `http://localhost:5000/api/images?product_id=${id}`
+        );
+        const imgsArray = Array(MAX_IMAGES).fill(null);
+        imageRes.data.slice(0, MAX_IMAGES).forEach((img, i) => {
+          imgsArray[i] = { url: img.url, file: null };
+        });
+        setImageUrls(imgsArray);
       } catch (err) {
         console.error("Error fetching data:", err);
       }
     };
     fetchData();
-  }, [id]);
+  }, [id, getProductById]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -108,13 +124,54 @@ const UpdateProduct = () => {
   const removeIngredient = (index) =>
     setIngredients(ingredients.filter((_, i) => i !== index));
 
+  // Xử lý chọn/xoá ảnh
+  const handleImageChange = (idx, file) => {
+    if (!file) return;
+    setUploadingIdx(idx);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const updated = [...imageUrls];
+      updated[idx] = { url: reader.result, file }; // preview + file
+      setImageUrls(updated);
+      setUploadingIdx(-1);
+    };
+    reader.readAsDataURL(file);
+  };
+  const handleDeleteImage = (idx) => {
+    const updated = [...imageUrls];
+    updated[idx] = null;
+    setImageUrls(updated);
+  };
+
+  // Gửi formData khi update
   const handleUpdate = async () => {
     try {
-      await axios.put(`http://localhost:5000/api/products/${id}`, {
-        ...product,
-        details,
-        ingredients,
+      const formData = new FormData();
+      Object.entries(product).forEach(([key, value]) =>
+        formData.append(key, value)
+      );
+      // Đẩy detail, ingredient lên nếu cần
+      formData.append("details", JSON.stringify(details));
+      formData.append("ingredients", JSON.stringify(ingredients));
+
+      // Xử lý file và url ảnh
+      const urlsToKeep = [];
+      imageUrls.forEach((img) => {
+        if (img) {
+          if (img.file) {
+            formData.append("images", img.file);
+          } else if (img.url) {
+            urlsToKeep.push(img.url);
+          }
+        }
       });
+      urlsToKeep.forEach((url) => formData.append("images", url));
+
+      await axios.put(
+        `http://localhost:5000/api/products/update-with-images/${id}`,
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
       alert("Cập nhật sản phẩm thành công!");
       navigate("/admin/products");
     } catch (err) {
@@ -122,6 +179,68 @@ const UpdateProduct = () => {
       alert("Lỗi khi cập nhật sản phẩm");
     }
   };
+
+  const renderImageInputs = () => (
+    <div className="form-group image-upload-group">
+      <div className="image-grid">
+        {imageUrls.map((img, idx) => (
+          <div
+            key={idx}
+            className="image-upload-update"
+            style={{ position: "relative" }}
+            onClick={() => document.getElementById(`img-input-${idx}`).click()}
+          >
+            {uploadingIdx === idx ? (
+              <div
+                style={{  
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 16,
+                  color: "#3498db",
+                }}
+              >
+                Đang tải...
+              </div>
+            ) : img && img.url ? (
+              <>
+                <img
+                  src={img.url}
+                  alt={`preview-${idx}`}
+                  className="image-preview"
+                />
+                <MdDelete
+                  className="delete-icon"
+                  style={{
+                    position: "absolute",
+                    top: 2,
+                    right: 2,
+                    fontSize: 22,
+                    zIndex: 2,
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteImage(idx);
+                  }}
+                />
+              </>
+            ) : (
+              <span className="plus-sign">+</span>
+            )}
+            <input
+              type="file"
+              accept="image/*"
+              style={{ display: "none" }}
+              id={`img-input-${idx}`}
+              onChange={(e) => handleImageChange(idx, e.target.files[0])}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   const renderGeneralInfo = () => (
     <div className="tab-content">
@@ -262,6 +381,7 @@ const UpdateProduct = () => {
       <div className="main-wrapper">
         <div className="add-product-container">
           <h2>Cập nhật sản phẩm</h2>
+          {renderImageInputs()}
           <div className="tab-nav">
             {TABS.map((tab) => (
               <div

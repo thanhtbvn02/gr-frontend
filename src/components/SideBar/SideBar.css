@@ -58,3 +58,18 @@
     border-left-color: #4fc3f7;
     box-shadow: 0 2px 8px rgba(41, 128, 185, 0.08);
 }
+
+.sidebar-footer {
+    margin-top: auto;    
+    padding: 0 0 18px 0;
+  }
+  
+  .sidebar-footer .nav-link {
+    color: #ff7675;      
+  }
+  .sidebar-footer .nav-link:hover {
+    background: rgba(255, 99, 71, 0.12);
+    color: #fff;
+    border-left-color: #ff7675;
+  }
+  

@@ -6,6 +6,10 @@ import Category from "../../../components/Header/Category";
 import "./ManageProduct.css";
 import { MdDelete, MdOutlineSearch } from "react-icons/md";
 import { RiRefreshFill } from "react-icons/ri";
+import useProduct from "../../../hooks/useProduct";
+
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function formatPrice(price) {
   return Number(price).toLocaleString("vi-VN");
@@ -22,16 +26,29 @@ const ManageProduct = () => {
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
 
-  const fetchProducts = async (categoryId = null, reset = false) => {
+  const {
+    fetchProductsByCategory,
+    searchProductPaginated,
+    deleteProducts,
+    fetchProducts,
+  } = useProduct();
+
+  const fetchProductsData = async (categoryId = null, reset = false) => {
     setLoading(true);
     try {
-      const url = categoryId
-        ? `http://localhost:5000/api/products/category/${categoryId}?offset=${reset ? 0 : offset}&limit=${limit}`
-        : `http://localhost:5000/api/products/paginated?offset=${reset ? 0 : offset}&limit=${limit}`;
-      const res = await axios.get(url);
-      const productsData = Array.isArray(res.data)
-        ? res.data
-        : res.data.products || [];
+      let productsData = [];
+      if (categoryId) {
+        productsData = await fetchProductsByCategory({
+          categoryId,
+          offset: reset ? 0 : offset,
+          limit,
+        });
+      } else {
+        productsData = await fetchProducts({
+          offset: reset ? 0 : offset,
+          limit,
+        });
+      }
       const withImages = [];
       for (const product of productsData) {
         try {
@@ -51,24 +68,28 @@ const ManageProduct = () => {
       } else {
         setProducts((prev) => {
           const merged = [...prev, ...withImages];
-          const unique = Array.from(new Map(merged.map((p) => [p.id, p])).values());
-          return unique;
+          const unique = Array.from(
+            new Map(merged.map((p) => [p.id, p])).values()
+            );
+            return unique;
         });
         setFilteredProducts((prev) => {
           const merged = [...prev, ...withImages];
-          const unique = Array.from(new Map(merged.map((p) => [p.id, p])).values());
+          const unique = Array.from(
+            new Map(merged.map((p) => [p.id, p])).values()
+          );
           return unique;
         });
         setOffset((prev) => prev + limit);
       }
     } catch (err) {
-      console.error("Error fetching products:", err);
+      toast.error("Lỗi khi tải danh sách sản phẩm!");
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    fetchProducts(selectedCategory, true);
+    fetchProductsData(selectedCategory, true);
     setSelectedProducts([]);
   }, [selectedCategory]);
 
@@ -82,9 +103,11 @@ const ManageProduct = () => {
   const handleSearch = async () => {
     setLoading(true);
     try {
-      const url = `http://localhost:5000/api/products/search?query=${search}`;
-      const res = await axios.get(url);
-      const productsData = res.data || [];
+      const productsData = await searchProductPaginated({
+        keyword: search,
+        offset: 0,
+        limit,
+      });
       const withImages = [];
       for (const product of productsData) {
         try {
@@ -101,7 +124,9 @@ const ManageProduct = () => {
       setFilteredProducts(withImages);
       setSelectedProducts([]);
       setOffset(0);
+      if (withImages.length === 0) toast.info("Không tìm thấy sản phẩm nào!");
     } catch {
+      toast.error("Lỗi khi tìm kiếm sản phẩm!");
       setProducts([]);
       setFilteredProducts([]);
     }
@@ -110,7 +135,7 @@ const ManageProduct = () => {
 
   const handleReset = () => {
     setSearch("");
-    fetchProducts(selectedCategory, true);
+    fetchProductsData(selectedCategory, true);
     setSelectedProducts([]);
   };
 
@@ -132,23 +157,28 @@ const ManageProduct = () => {
 
   const handleDeleteSelected = async () => {
     if (selectedProducts.length === 0) return;
-    if (!window.confirm("Bạn có chắc chắn muốn xóa các sản phẩm đã chọn?")) return;
+    if (!window.confirm("Bạn có chắc chắn muốn xóa các sản phẩm đã chọn?"))
+      return;
     setLoading(true);
     try {
-      for (const id of selectedProducts) {
-        await axios.delete(`http://localhost:5000/api/products/${id}`);
-      }
-      setProducts((prev) => prev.filter((p) => !selectedProducts.includes(p.id)));
-      setFilteredProducts((prev) => prev.filter((p) => !selectedProducts.includes(p.id)));
+      await deleteProducts(selectedProducts);
+      setProducts((prev) =>
+        prev.filter((p) => !selectedProducts.includes(p.id))
+      );
+      setFilteredProducts((prev) =>
+        prev.filter((p) => !selectedProducts.includes(p.id))
+      );
       setSelectedProducts([]);
+      toast.success("Xóa sản phẩm thành công!");
     } catch {
-      alert("Xóa sản phẩm thất bại");
+      toast.error("Xóa sản phẩm thất bại!");
     }
     setLoading(false);
   };
 
   return (
     <div className="admin-container">
+      <ToastContainer position="top-right" autoClose={2200} />
       <div className="sidebar-wrapper">
         <SideBar />
       </div>
@@ -217,7 +247,7 @@ const ManageProduct = () => {
                     background: selectedProducts.includes(product.id)
                       ? "#f5f5fa"
                       : "",
-                    cursor: "pointer"
+                    cursor: "pointer",
                   }}
                   onClick={() => navigate(`/update/${product.id}`)}
                 >
@@ -256,7 +286,7 @@ const ManageProduct = () => {
             {!loading && filteredProducts.length >= limit && (
               <button
                 className="load-more-btn"
-                onClick={() => fetchProducts(selectedCategory)}
+                onClick={() => fetchProductsData(selectedCategory)}
               >
                 Hiển thị thêm
               </button>

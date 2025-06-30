@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import useUser from "../../hooks/useUser";
 import "./Information.css";
 
 const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
@@ -21,22 +22,20 @@ const Information = () => {
   const [email, setEmail] = useState("");
 
   const inputAvatarRef = useRef();
-
+  const { getUserById, updateAvatar, updateUser } = useUser();
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/users/${id}`);
-        setUser(res.data);
-        setFullName(res.data.full_name || "");
-        setUsername(res.data.username || "");
-        setBirthDate(
-          res.data.birth_date ? res.data.birth_date.substring(0, 10) : ""
-        );
-        setPhone(res.data.phone || "");
-        setEmail(res.data.email || "");
-        setAvatar(res.data.image || defaultAvatar);
+        const res = await getUserById(id);
+        setUser(res);
+        setFullName(res.full_name || "");
+        setUsername(res.username || "");
+        setBirthDate(res.birth_date ? res.birth_date.substring(0, 10) : "");
+        setPhone(res.phone || "");
+        setEmail(res.email || "");
+        setAvatar(res.image || defaultAvatar);
       } catch (err) {
-        console.error("Không thể lấy thông tin người dùng:", err);
+        alert("Không thể lấy thông tin người dùng");
       }
     };
     fetchUser();
@@ -69,12 +68,8 @@ const Information = () => {
       try {
         const formData = new FormData();
         formData.append("image", file);
-        const res = await axios.post(
-          `http://localhost:5000/api/users/${id}/avatar`,
-          formData,
-          { headers: { "Content-Type": "multipart/form-data" } }
-        );
-        setAvatar(res.data.data.url);
+        const res = await updateAvatar({ id, formData });
+        setAvatar(res.url || res.data?.url || defaultAvatar);
         setDisableSave(false);
         alert("Cập nhật ảnh đại diện thành công!");
       } catch (error) {
@@ -89,10 +84,13 @@ const Information = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5000/api/users/${id}`, {
-        full_name: fullName,
-        username: username,
-        birth_date:"",
+      await updateUser({
+        id,
+        data: {
+          full_name: fullName,
+          username: username,
+          birth_date: birthDate,
+        },
       });
       alert("Cập nhật thông tin thành công!");
       setDisableSave(true);
@@ -100,7 +98,6 @@ const Information = () => {
       alert("Có lỗi khi cập nhật.");
     }
   };
-
   const maskPhone = (phone) => {
     if (!phone) return "";
     if (phone.length < 4) return phone;

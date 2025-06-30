@@ -2,21 +2,42 @@ import React, { useState, useEffect } from "react";
 import SideBar from "../../../components/SideBar/SideBar";
 import categoryTree from "./Category_tree.json";
 import { MdDelete } from "react-icons/md";
+import useProduct from "../../../hooks/useProduct";
 import axios from "axios";
+import * as Yup from "yup";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./AddProduct.css";
 
 const TABS = ["Thông tin chung", "Thuộc tính", "Thành phần"];
 const MULTILINE_FIELDS = [
-  "description", 
-  "uses", 
-  "how_use", 
-  "side_effects", 
-  "notes", 
-  "preserve", 
+  "description",
+  "uses",
+  "how_use",
+  "side_effects",
+  "notes",
+  "preserve",
 ];
 const MAX_IMAGES = 4;
 
+const productSchema = Yup.object().shape({
+  name: Yup.string(),
+  unit: Yup.string(),
+  price: Yup.number().typeError("Giá phải là số").required("Giá là bắt buộc"),
+  description: Yup.string(),
+  uses: Yup.string(),
+  how_use: Yup.string(),
+  side_effects: Yup.string(),
+  notes: Yup.string(),
+  preserve: Yup.string(),
+  stock: Yup.number()
+    .typeError("Tồn kho phải là số")
+    .integer("Tồn kho phải là số nguyên")
+    .required("Tồn kho là bắt buộc"),
+});
+
 function AddProduct() {
+  const { addProduct } = useProduct();
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedSubCategory, setSelectedSubCategory] = useState("");
   const [selectedSubSubCategory, setSelectedSubSubCategory] = useState("");
@@ -42,8 +63,9 @@ function AddProduct() {
 
   const [details, setDetails] = useState([{ key_name: "", value: "" }]);
   const [ingredients, setIngredients] = useState([{ name: "", quantity: "" }]);
-
   const [images, setImages] = useState(Array(MAX_IMAGES).fill(null));
+
+  const [loading, setLoading] = useState(false);
 
   const editableFields = [
     "name",
@@ -62,7 +84,7 @@ function AddProduct() {
       (category) => category.name === selectedCategory
     );
     if (foundCategory) {
-      setSubCategories(foundCategory.children);
+      setSubCategories(foundCategory.children || []);
       setSelectedSubCategory("");
       setSubSubCategories([]);
       setSelectedSubSubCategory("");
@@ -74,7 +96,7 @@ function AddProduct() {
       (sub) => sub.name === selectedSubCategory
     );
     if (foundSubCategory) {
-      setSubSubCategories(foundSubCategory.children);
+      setSubSubCategories(foundSubCategory.children || []);
       setSelectedSubSubCategory("");
     }
   }, [selectedSubCategory, subCategories]);
@@ -136,7 +158,10 @@ function AddProduct() {
   };
 
   const handleSubmit = async () => {
+    setLoading(true);
     try {
+      await productSchema.validate(formData, { abortEarly: false });
+
       let categoryId = null;
       if (selectedSubSubCategory) {
         const subSubCat = subSubCategories.find(
@@ -154,7 +179,8 @@ function AddProduct() {
       }
 
       if (!categoryId) {
-        alert("Vui lòng chọn danh mục sản phẩm");
+        toast.error("Vui lòng chọn danh mục sản phẩm");
+        setLoading(false);
         return;
       }
 
@@ -170,21 +196,14 @@ function AddProduct() {
       formDataToSend.append("preserve", formData.preserve);
       formDataToSend.append("stock", formData.stock);
       formDataToSend.append("category_id", categoryId);
-      images.forEach((img, idx) => {
+
+      images.forEach((img) => {
         if (img) {
           formDataToSend.append("images", img);
         }
       });
 
-      const productResponse = await axios.post(
-        "http://localhost:5000/api/products/with-image",
-        formDataToSend,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const productResponse = await addProduct(formDataToSend);
 
       const productId = productResponse.data.product.id;
 
@@ -208,7 +227,8 @@ function AddProduct() {
         }
       }
 
-      alert("Thêm sản phẩm thành công!");
+      toast.success("Thêm sản phẩm thành công!");
+
       setFormData({
         name: "",
         unit: "",
@@ -228,9 +248,21 @@ function AddProduct() {
       setSelectedSubSubCategory("");
       setImages(Array(MAX_IMAGES).fill(null));
     } catch (error) {
-      console.error("Error adding product:", error);
-      alert("Có lỗi xảy ra khi thêm sản phẩm");
+      if (error.name === "ValidationError" && error.inner) {
+        error.inner.forEach((err) => {
+          toast.error(err.message);
+        });
+      } else if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error("Có lỗi xảy ra khi thêm sản phẩm");
+      }
     }
+    setLoading(false);
   };
 
   const getFieldLabel = (field) => {
@@ -264,7 +296,12 @@ function AddProduct() {
     <div className="tab-content">
       {editableFields.map((field) => (
         <div key={field} className="input-group">
-          <label>{getFieldLabel(field)}</label>
+          <label>
+            {getFieldLabel(field)}
+            {(field === "price" || field === "stock") && (
+              <span style={{ color: "red" }}>*</span>
+            )}
+          </label>
           {MULTILINE_FIELDS.includes(field) ? (
             <textarea
               name={field}
@@ -276,11 +313,12 @@ function AddProduct() {
             />
           ) : (
             <input
-              type="text"
+              type={field === "price" || field === "stock" ? "number" : "text"}
               name={field}
               className="no-border-input"
               placeholder={"Nhập " + getFieldLabel(field).toLowerCase()}
               value={formData[field]}
+              min={field === "price" || field === "stock" ? "0" : undefined}
               onChange={handleInputChange}
             />
           )}
@@ -334,7 +372,7 @@ function AddProduct() {
           ))}
         </tbody>
       </table>
-      <button className="add-button" onClick={addDetail}>
+      <button className="add-button" type="button" onClick={addDetail}>
         +
       </button>
     </div>
@@ -385,7 +423,7 @@ function AddProduct() {
           ))}
         </tbody>
       </table>
-      <button className="add-button" onClick={addIngredient}>
+      <button className="add-button" type="button" onClick={addIngredient}>
         +
       </button>
     </div>
@@ -425,13 +463,13 @@ function AddProduct() {
 
   return (
     <div className="add-product-page">
+      <ToastContainer position="top-right" autoClose={2200} />
       <div className="sidebar-wrapper">
         <SideBar />
       </div>
       <div className="main-wrapper">
         <div className="add-product-container">
           <h2>Thêm sản phẩm</h2>
-
           <div className="form-group category-row">
             <div className="category-group">
               <label>Danh mục</label>
@@ -481,7 +519,6 @@ function AddProduct() {
               </select>
             </div>
           </div>
-
           {renderImageInputs()}
         </div>
         <div className="tab-nav">
@@ -500,8 +537,12 @@ function AddProduct() {
           {activeTab === "Thuộc tính" && renderAddDetail()}
           {activeTab === "Thành phần" && renderAddIngredient()}
         </div>
-        <button className="update-button" onClick={handleSubmit}>
-          Thêm mới
+        <button
+          className="update-button"
+          onClick={handleSubmit}
+          disabled={loading}
+        >
+          {loading ? "Đang lưu..." : "Thêm mới"}
         </button>
       </div>
     </div>

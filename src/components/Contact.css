@@ -1,0 +1,146 @@
+.contact {
+    background: #f5f7fa;
+    border-radius: 16px;
+    padding: 50px 16px;
+    margin: 32px auto;
+    max-width: 1100px;
+    box-shadow: 0 4px 24px rgba(80, 120, 200, 0.07);
+  }
+  
+  .contact-section-header {
+    margin-bottom: 32px;
+  }
+  .contact-section-header p {
+    color: #276ef1;
+    font-weight: 500;
+    font-size: 18px;
+    margin: 0;
+  }
+  .contact-section-header h2 {
+    color: #111c2e;
+    font-size: 34px;
+    margin: 10px 0 0 0;
+    font-weight: 700;
+  }
+  
+  .contact-information {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    background: #fff;
+    border-radius: 10px;
+    padding: 36px 0 18px 0;
+    box-shadow: 0 2px 8px rgba(39,110,241,0.06);
+    margin-bottom: 32px;
+  }
+  
+  .contact-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 0;
+    background: #f2f6fc;
+    border-radius: 10px;
+    padding: 18px 12px;
+    min-width: 220px;
+    flex: 1 1 160px;
+    transition: box-shadow 0.2s;
+  }
+  .contact-info:hover {
+    box-shadow: 0 2px 12px rgba(39,110,241,0.12);
+  }
+  
+  .contact-info-icon img {
+    width: 34px;
+    height: 34px;
+    background: #276ef1;
+    border-radius: 50%;
+    padding: 8px;
+    box-shadow: 0 2px 8px #276ef125;
+  }
+  
+  .contact-info-text h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #276ef1;
+    margin: 0;
+  }
+  .contact-info-text p {
+    color: #3d4667;
+    margin: 6px 0 0 0;
+    font-size: 15px;
+  }
+  
+  .contact-info-social {
+    margin-top: 8px;
+    display: flex;
+    gap: 10px;
+  }
+  .contact-info-social img {
+    width: 28px;
+    height: 28px;
+    filter: grayscale(20%);
+    opacity: 0.7;
+    transition: filter 0.2s, opacity 0.2s;
+  }
+  .contact-info-social img:hover {
+    filter: none;
+    opacity: 1;
+  }
+  
+  .contact-benefit-bar {
+    background: #f9fafb;
+    border-radius: 12px;
+    padding: 18px 0;
+    margin: 0 0 12px 0;
+    box-shadow: 0 1px 6px rgba(39,110,241,0.04);
+  }
+  
+  .contact-benefit-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-around;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+  .contact-benefit-item {
+    background: #fff;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 8px #276ef10c;
+    min-width: 200px;
+    padding: 16px 12px;
+    flex: 1 1 170px;
+  }
+  .contact-benefit-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    background: #e8f1ff;
+    padding: 6px;
+    object-fit: contain;
+  }
+  .contact-benefit-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #276ef1;
+  }
+  .contact-benefit-desc {
+    color: #4a5b85;
+    font-size: 14px;
+    margin-top: 2px;
+  }
+  
+  @media (max-width: 800px) {
+    .contact-information, .contact-benefit-container {
+      flex-direction: column;
+      gap: 14px;
+    }
+    .contact-section-header h2 {
+      font-size: 25px;
+    }
+  }
+  

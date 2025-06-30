@@ -32,6 +32,7 @@
   flex-wrap: wrap;
   padding: 16px;
   background-color: #f5f7fa;
+  font-family: 'Inter', 'Inter Fallback' !important;
 }
 
 .product-card {
@@ -67,6 +68,7 @@
 
 .product-info h3 {
   font-size: 14px;
+  height: 50px;
   color: #4d4949;
   margin-bottom: 4px;
   overflow: hidden;
@@ -95,6 +97,7 @@
   border-radius: 20px;
   font-weight: bold;
   cursor: pointer;
+  font-family: 'Inter', 'Inter Fallback' !important;
   transition: background-color 0.3s ease;
 }
 

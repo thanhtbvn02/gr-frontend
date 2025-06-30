@@ -3,7 +3,6 @@ import SideBar from "../../../components/SideBar/SideBar";
 import axios from "axios";
 import vietnamData from "./Vietnam.json";
 import "./ManageOrder.css";
-
 import { RiRefreshFill } from "react-icons/ri";
 import {
   MdDelete,
@@ -11,6 +10,8 @@ import {
   MdOutlineSearch,
 } from "react-icons/md";
 import { exportToExcel } from "../../../utils/exportExcel";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const provinces = vietnamData.map((item) =>
   item.name.replace(/^Tỉnh |^Thành phố /, "")
@@ -50,6 +51,37 @@ function formatDateTime(datetimeStr) {
   );
 }
 
+function formatDateToYMDLocal(dateInput) {
+  if (!dateInput) return "";
+  const d = new Date(dateInput);
+  if (isNaN(d.getTime())) return "";
+  const year = d.getFullYear();
+  const month = (d.getMonth() + 1).toString().padStart(2, "0");
+  const day = d.getDate().toString().padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function SortButton({ column, sort, handleSort, label, hideIcon }) {
+  return (
+    <span
+      style={{ cursor: "pointer", fontWeight: 600 }}
+      onClick={() => handleSort(column)}
+      title={label || column}
+    >
+      {label || ""}
+      {!hideIcon && (
+        <>
+          {sort.column === column
+            ? sort.direction === "asc"
+              ? " ▲"
+              : " ▼"
+            : " ↕"}
+        </>
+      )}
+    </span>
+  );
+}
+
 function ManageOrder() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -67,23 +99,17 @@ function ManageOrder() {
     status: "",
     province: "",
     payment: "",
+    order_code: "",
+  });
+
+  const [sort, setSort] = useState({
+    column: "created_at",
+    direction: "asc",
   });
 
   useEffect(() => {
     fetchOrders();
   }, []);
-
-  const fetchOrders = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await axios.get("http://localhost:5000/api/orders/all");
-      setOrders(res.data);
-    } catch (err) {
-      setError("Không thể tải danh sách đơn hàng");
-    }
-    setLoading(false);
-  };
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -106,61 +132,49 @@ function ManageOrder() {
     fetchImages();
   }, [orderItems]);
 
-  const closeModal = () => {
-    setShowModal(false);
-    setSelectedOrder(null);
-  };
+  const getSortedOrders = () => {
+    let sorted = [...orders];
+    if (sort.column) {
+      sorted.sort((a, b) => {
+        let valA = a[sort.column];
+        let valB = b[sort.column];
 
-  const handleRowClick = async (order) => {
-    setSelectedOrder(order);
-    setShowModal(true);
-
-    setItemsLoading(true);
-    setItemsError("");
-    try {
-      const res = await axios.get(
-        `http://localhost:5000/api/orders/${order.order_code}`
-      );
-      setOrderItems(res.data.items || []);
-    } catch (err) {
-      setItemsError("Không thể tải thông tin sản phẩm");
-      setOrderItems([]);
-    } finally {
-      setItemsLoading(false);
-    }
-  };
-
-  const handleUpdateStatus = async (newStatus) => {
-    if (!selectedOrder) return;
-    setIsUpdating(true);
-    try {
-      await axios.put(`http://localhost:5000/api/orders/${selectedOrder.id}`, {
-        status: newStatus,
+        if (sort.column === "created_at" || sort.column === "updated_at") {
+          valA = new Date(valA).getTime() || 0;
+          valB = new Date(valB).getTime() || 0;
+        }
+        if (sort.column === "total_amount") {
+          valA = parseFloat(valA) || 0;
+          valB = parseFloat(valB) || 0;
+        }
+        if (valA < valB) return sort.direction === "asc" ? -1 : 1;
+        if (valA > valB) return sort.direction === "asc" ? 1 : -1;
+        return 0;
       });
-      setOrders((prev) =>
-        prev.map((order) =>
-          order.id === selectedOrder.id
-            ? { ...order, status: newStatus }
-            : order
-        )
-      );
-      closeModal();
-    } catch {
-      alert("Cập nhật trạng thái thất bại");
-    } finally {
-      setIsUpdating(false);
     }
+    return sorted;
   };
 
-  function formatDateToYMDLocal(dateInput) {
-    if (!dateInput) return "";
-    const d = new Date(dateInput);
-    if (isNaN(d.getTime())) return "";
-    const year = d.getFullYear();
-    const month = (d.getMonth() + 1).toString().padStart(2, "0");
-    const day = d.getDate().toString().padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  }
+  const handleSort = (column) => {
+    setSort((prev) => ({
+      column,
+      direction:
+        prev.column === column && prev.direction === "asc" ? "desc" : "asc",
+    }));
+  };
+
+  const fetchOrders = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await axios.get("http://localhost:5000/api/orders/all");
+      setOrders(res.data);
+    } catch (err) {
+      setError("Không thể tải danh sách đơn hàng");
+      toast.error("Không thể tải danh sách đơn hàng!");
+    }
+    setLoading(false);
+  };
 
   const handleSearch = async () => {
     setLoading(true);
@@ -189,10 +203,18 @@ function ManageOrder() {
           (order) => order.payment_method === filter.payment
         );
       }
+      if (filter.order_code) {
+        filtered = filtered.filter((order) =>
+          order.order_code
+            ?.toLowerCase()
+            .includes(filter.order_code.toLowerCase())
+        );
+      }
       setOrders(filtered);
       setSelectedOrders([]);
     } catch {
       setError("Lọc đơn hàng thất bại");
+      toast.error("Lọc đơn hàng thất bại!");
     }
     setLoading(false);
   };
@@ -203,6 +225,7 @@ function ManageOrder() {
       status: "",
       province: "",
       payment: "",
+      order_code: "",
     });
     await fetchOrders();
     setSelectedOrders([]);
@@ -218,8 +241,10 @@ function ManageOrder() {
       }
       setOrders(orders.filter((order) => !selectedOrders.includes(order.id)));
       setSelectedOrders([]);
+      toast.success("Xóa đơn hàng thành công!");
     } catch {
       setError("Xóa đơn hàng thất bại");
+      toast.error("Xóa đơn hàng thất bại!");
     }
     setLoading(false);
   };
@@ -253,18 +278,68 @@ function ManageOrder() {
       "Trạng thái": order.status,
       "Thanh toán": order.payment_method,
       "Ngày tạo": order.created_at,
+      "Ngày cập nhật": order.updated_at,
     }));
     exportToExcel(data, "Danh-sach-don-hang", "Orders");
+    toast.info("Đã xuất file Excel!");
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedOrder(null);
+  };
+
+  const handleRowClick = async (order) => {
+    setSelectedOrder(order);
+    setShowModal(true);
+
+    setItemsLoading(true);
+    setItemsError("");
+    try {
+      const res = await axios.get(
+        `http://localhost:5000/api/orders/${order.order_code}`
+      );
+      setOrderItems(res.data.items || []);
+    } catch (err) {
+      setItemsError("Không thể tải thông tin sản phẩm");
+      toast.error("Không thể tải thông tin sản phẩm!");
+      setOrderItems([]);
+    } finally {
+      setItemsLoading(false);
+    }
+  };
+
+  const handleUpdateStatus = async (newStatus) => {
+    if (!selectedOrder) return;
+    setIsUpdating(true);
+    try {
+      await axios.put(`http://localhost:5000/api/orders/${selectedOrder.id}`, {
+        status: newStatus,
+      });
+      setOrders((prev) =>
+        prev.map((order) =>
+          order.id === selectedOrder.id
+            ? { ...order, status: newStatus }
+            : order
+        )
+      );
+      toast.success("Cập nhật trạng thái thành công!");
+      closeModal();
+    } catch {
+      toast.error("Cập nhật trạng thái thất bại!");
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   return (
     <div className="manage-order-container">
+      <ToastContainer position="top-right" autoClose={2000} />
       <div className="sidebar-wrapper">
         <SideBar />
       </div>
       <div className="order-main-wrapper">
         <h1>Quản lý đơn hàng</h1>
-
         <div className="order-filter-bar">
           <input
             type="date"
@@ -311,6 +386,16 @@ function ManageOrder() {
               </option>
             ))}
           </select>
+          <input
+            type="text"
+            value={filter.order_code}
+            onChange={(e) =>
+              setFilter((f) => ({ ...f, order_code: e.target.value }))
+            }
+            className="filter-input"
+            placeholder="Nhập mã đơn"
+            style={{ minWidth: 120 }}
+          />
           <button className="btn btn-search" onClick={handleSearch}>
             <MdOutlineSearch />
           </button>
@@ -347,17 +432,48 @@ function ManageOrder() {
                     onChange={(e) => handleSelectAll(e.target.checked)}
                   />
                 </th>
-                <th>ID</th>
+                <th>
+                  ID{" "}
+                  <SortButton
+                    column="order_code"
+                    sort={sort}
+                    handleSort={handleSort}
+                    label="Mã đơn"
+                    hideIcon
+                  />
+                </th>
                 <th>Tên khách hàng</th>
                 <th>Địa chỉ</th>
-                <th>Tổng tiền</th>
+                <th>
+                  Tổng tiền{" "}
+                  <SortButton
+                    column="total_amount"
+                    sort={sort}
+                    handleSort={handleSort}
+                  />
+                </th>
                 <th>Trạng thái</th>
                 <th>Thanh toán</th>
-                <th>Ngày tạo</th>
+                <th>
+                  Ngày tạo{" "}
+                  <SortButton
+                    column="created_at"
+                    sort={sort}
+                    handleSort={handleSort}
+                  />
+                </th>
+                <th>
+                  Ngày cập nhật{" "}
+                  <SortButton
+                    column="updated_at"
+                    sort={sort}
+                    handleSort={handleSort}
+                  />
+                </th>
               </tr>
             </thead>
             <tbody>
-              {orders.map((order) => (
+              {getSortedOrders().map((order) => (
                 <tr
                   key={order.id}
                   onClick={() => handleRowClick(order)}
@@ -400,117 +516,118 @@ function ManageOrder() {
                       : order.payment_method}
                   </td>
                   <td>{formatDateTime(order.created_at)}</td>
+                  <td>{formatDateTime(order.updated_at)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         )}
-      </div>
 
-      {showModal && selectedOrder && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>Chi tiết đơn hàng</h2>
-            <div className="modal-row">
-              <b>Mã đơn:</b> <span>{selectedOrder.order_code}</span>
-            </div>
-            <div className="modal-row">
-              <b>Khách hàng:</b> <span>{selectedOrder.User?.full_name}</span>
-            </div>
-            <div className="modal-row">
-              <b>Địa chỉ:</b>{" "}
-              <span>
-                {selectedOrder.Address
-                  ? `${selectedOrder.Address.street}, ${selectedOrder.Address.ward}, ${selectedOrder.Address.district}, ${selectedOrder.Address.province}`
-                  : ""}
-              </span>
-            </div>
-            <div className="modal-row">
-              <b>Sản phẩm:</b>
-            </div>
-            {itemsLoading ? (
-              <div>Đang tải sản phẩm...</div>
-            ) : itemsError ? (
-              <div style={{ color: "red" }}>{itemsError}</div>
-            ) : (
-              <div>
-                <table className="modal-product-table">
-                  <thead>
-                    <tr>
-                      <th>Hình ảnh</th>
-                      <th>Tên sản phẩm</th>
-                      <th>Số lượng</th>
-                      <th>Giá</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {orderItems.map((item, idx) => (
-                      <tr key={idx}>
-                        <td>
-                          {productImages[item.product_id] ? (
-                            <img
-                              src={productImages[item.product_id]}
-                              alt={item.product?.name}
-                              className="modal-product-img"
-                            />
-                          ) : (
-                            <div className="modal-product-img-placeholder" />
-                          )}
-                        </td>
-                        <td>{item.product?.name || "Sản phẩm"}</td>
-                        <td>{item.quantity}</td>
-                        <td>{Number(item.unit_price).toLocaleString()} ₫</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+        {showModal && selectedOrder && (
+          <div className="modal-overlay" onClick={closeModal}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <h2>Chi tiết đơn hàng</h2>
+              <div className="modal-row">
+                <b>Mã đơn:</b> <span>{selectedOrder.order_code}</span>
               </div>
-            )}
-            <div className="modal-row">
-              <b>Tổng tiền:</b>{" "}
-              <span>{selectedOrder.total_amount?.toLocaleString()} đ</span>
-            </div>
-            <div className="modal-row">
-              <b>Trạng thái:</b>{" "}
-              <span>{getStatusStyle(selectedOrder.status).label}</span>
-            </div>
-            <div className="modal-actions">
-              {selectedOrder.status !== "delivered" &&
-                selectedOrder.status !== "cancelled" && (
-                  <>
-                    <button
-                      className="btn btn-confirm"
-                      disabled={
-                        isUpdating ||
-                        selectedOrder.status === "processing" ||
-                        selectedOrder.status === "delivered"
-                      }
-                      onClick={() => handleUpdateStatus("processing")}
-                    >
-                      Xác nhận
-                    </button>
-                    <button
-                      className="btn btn-cancel"
-                      disabled={
-                        isUpdating || selectedOrder.status === "cancelled"
-                      }
-                      onClick={() => handleUpdateStatus("cancelled")}
-                    >
-                      Hủy đơn
-                    </button>
-                  </>
-                )}
-              <button className="btn btn-close" onClick={closeModal}>
-                Đóng
-              </button>
-            </div>
+              <div className="modal-row">
+                <b>Khách hàng:</b> <span>{selectedOrder.User?.full_name}</span>
+              </div>
+              <div className="modal-row">
+                <b>Địa chỉ:</b>{" "}
+                <span>
+                  {selectedOrder.Address
+                    ? `${selectedOrder.Address.street}, ${selectedOrder.Address.ward}, ${selectedOrder.Address.district}, ${selectedOrder.Address.province}`
+                    : ""}
+                </span>
+              </div>
+              <div className="modal-row">
+                <b>Sản phẩm:</b>
+              </div>
+              {itemsLoading ? (
+                <div>Đang tải sản phẩm...</div>
+              ) : itemsError ? (
+                <div style={{ color: "red" }}>{itemsError}</div>
+              ) : (
+                <div>
+                  <table className="modal-product-table">
+                    <thead>
+                      <tr>
+                        <th>Hình ảnh</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Số lượng</th>
+                        <th>Giá</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {orderItems.map((item, idx) => (
+                        <tr key={idx}>
+                          <td>
+                            {productImages[item.product_id] ? (
+                              <img
+                                src={productImages[item.product_id]}
+                                alt={item.product?.name}
+                                className="modal-product-img"
+                              />
+                            ) : (
+                              <div className="modal-product-img-placeholder" />
+                            )}
+                          </td>
+                          <td>{item.product?.name || "Sản phẩm"}</td>
+                          <td>{item.quantity}</td>
+                          <td>{Number(item.unit_price).toLocaleString()} ₫</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+              <div className="modal-row">
+                <b>Tổng tiền:</b>{" "}
+                <span>{formatPrice(selectedOrder.total_amount)} đ</span>
+              </div>
+              <div className="modal-row">
+                <b>Trạng thái:</b>{" "}
+                <span>{getStatusStyle(selectedOrder.status).label}</span>
+              </div>
+              <div className="modal-actions">
+                {selectedOrder.status !== "delivered" &&
+                  selectedOrder.status !== "cancelled" && (
+                    <>
+                      <button
+                        className="btn btn-confirm"
+                        disabled={
+                          isUpdating ||
+                          selectedOrder.status === "processing" ||
+                          selectedOrder.status === "delivered"
+                        }
+                        onClick={() => handleUpdateStatus("processing")}
+                      >
+                        Xác nhận
+                      </button>
+                      <button
+                        className="btn btn-cancel"
+                        disabled={
+                          isUpdating || selectedOrder.status === "cancelled"
+                        }
+                        onClick={() => handleUpdateStatus("cancelled")}
+                      >
+                        Hủy đơn
+                      </button>
+                    </>
+                  )}
+                <button className="btn btn-close" onClick={closeModal}>
+                  Đóng
+                </button>
+              </div>
 
-            {isUpdating && (
-              <div className="modal-updating">Đang cập nhật...</div>
-            )}
+              {isUpdating && (
+                <div className="modal-updating">Đang cập nhật...</div>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

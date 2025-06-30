@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import axios from "axios";
-import { useNavigate, Link, useParams } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import useUser from "../../hooks/useUser";
 import "./Header.css";
 import Category from "./Category";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import * as Yup from "yup";
 
 const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
 
@@ -16,11 +19,24 @@ function Header() {
   const navigate = useNavigate();
   const [avatar, setAvatar] = useState(defaultAvatar);
   const cartCount = useSelector((state) => state.cart.cartCount || 0);
+  const { getUserById, logoutUser } = useUser();
 
-  const handleSearchSubmit = (e) => {
+  const searchSchema = Yup.object().shape({
+    searchTerm: Yup.string()
+      .min(2, "Nhập ít nhất 2 ký tự để tìm kiếm")
+      .required("Không được để trống ô tìm kiếm"),
+  });
+
+  const handleSearchSubmit = async (e) => {
     e.preventDefault();
-    if (searchTerm.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
+    try {
+      await searchSchema.validate({ searchTerm });
+      if (searchTerm.trim()) {
+        navigate(`/search?q=${encodeURIComponent(searchTerm)}`);
+        toast.success("Tìm kiếm thành công!");
+      }
+    } catch (err) {
+      toast.error(err.message || "Lỗi tìm kiếm!");
     }
   };
 
@@ -30,25 +46,27 @@ function Header() {
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
-    console.log(userId);
     if (!userId) return;
     const fetchUser = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:5000/api/users/${userId}`
-        );
-        setAvatar(res.data.image || defaultAvatar);
+        const res = await getUserById(userId);
+        setAvatar(res.image || defaultAvatar);
       } catch (err) {
-        console.error("Không thể lấy thông tin người dùng:", err);
+        toast.error("Không thể lấy thông tin người dùng!");
       }
     };
     fetchUser();
   }, []);
 
   const handleLogout = async () => {
-    await axios.post("http://localhost:5000/api/users/logout");
-    logout();
-    navigate("/login");
+    try {
+      await logoutUser();
+      logout();
+      toast.success("Đăng xuất thành công!");
+      navigate("/login");
+    } catch {
+      toast.error("Có lỗi khi đăng xuất!");
+    }
   };
 
   useEffect(() => {
@@ -57,10 +75,9 @@ function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const userInitial = user?.username?.charAt(4).toUpperCase() || "U";
-
   return (
     <>
+      <ToastContainer position="top-right" autoClose={2000} />
       <header className={`header-main ${isScrolled ? "scrolled" : ""}`}>
         <div className="left-header">
           <Link to="/" className="navbar-brand">
@@ -135,7 +152,6 @@ function Header() {
             >
               Thông tin
             </Link>
-
             <Link
               to={`/account/${user.userId}`}
               state={{ tab: "address" }}
@@ -143,7 +159,6 @@ function Header() {
             >
               Sổ địa chỉ
             </Link>
-
             <Link
               to={`/account/${user.userId}`}
               state={{ tab: "order" }}
@@ -151,7 +166,6 @@ function Header() {
             >
               Đơn hàng
             </Link>
-
             <button
               type="button"
               className="dropdown-item logout-button"

@@ -1,11 +1,15 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import axiosInstance from "../../../utils/axiosConfig";
 import { Link, useLocation } from "react-router-dom";
 import "./Search.css";
+import categoryTree from "./Category_tree.json";
 import Header from "../../../components/Header/Header";
+import Footer from "../../../components/Footer/Footer";
 import { useSelector, useDispatch } from "react-redux";
 import { addToCart } from "../../../redux/addCart";
+import useProduct from "../../../hooks/useProduct";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const SearchResults = () => {
   const [products, setProducts] = useState([]);
@@ -22,51 +26,55 @@ const SearchResults = () => {
   const isLoggedIn = useSelector((state) => state.cart.isLoggedIn);
   const dispatch = useDispatch();
 
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertType, setAlertType] = useState("success");
+  const { searchProductPaginated, fetchProductsByCategory } = useProduct();
 
   const fetchAllCategories = async () => {
     try {
       const res = await axios.get("http://localhost:5000/api/category");
       setAllCategories(res.data);
     } catch (err) {
-      console.error("Lỗi khi tải danh mục:", err);
+      toast.error("Lỗi khi tải danh mục!");
     }
   };
 
   const getAllChildCategoryIds = (parentId) => {
     const result = [];
     const stack = [parseInt(parentId)];
-
     while (stack.length > 0) {
       const current = stack.pop();
       result.push(current);
       const children = allCategories.filter((cat) => cat.parent_id === current);
       children.forEach((child) => stack.push(child.id));
     }
-
     return result;
+  };
+
+  const attachImages = async (productList) => {
+    return await Promise.all(
+      productList.map(async (product) => {
+        try {
+          const imgRes = await axios.get(
+            `http://localhost:5000/api/images?product_id=${product.id}`
+          );
+          const firstImage = imgRes.data?.[0]?.url || null;
+          return { ...product, image: firstImage };
+        } catch {
+          return { ...product, image: null };
+        }
+      })
+    );
   };
 
   const fetchSearchResults = async () => {
     if (!query) return;
     setLoading(true);
     try {
-      const res = await axios.get(
-        `http://localhost:5000/api/products/search?query=${query}&offset=${offset}&limit=${limit}`
-      );
-
-      const withImages = await Promise.all(
-        res.data.map(async (product) => {
-          const imgRes = await axios.get(
-            `http://localhost:5000/api/images?product_id=${product.id}`
-          );
-          const firstImage = imgRes.data?.[0]?.url || null;
-          return { ...product, image: firstImage };
-        })
-      );
-
+      const res = await searchProductPaginated({
+        keyword: query,
+        offset,
+        limit,
+      });
+      const withImages = await attachImages(res);
       setProducts((prev) => {
         const merged = [...prev, ...withImages];
         const unique = Array.from(
@@ -74,14 +82,14 @@ const SearchResults = () => {
         );
         return unique;
       });
-
       setOffset((prev) => prev + limit);
       if (isFirstLoad.current) {
         setLimit(8);
         isFirstLoad.current = false;
       }
+      if (withImages.length === 0) toast.info("Không tìm thấy sản phẩm nào!");
     } catch (err) {
-      console.error("Lỗi khi tìm sản phẩm:", err);
+      toast.error("Lỗi khi tìm sản phẩm!");
     } finally {
       setLoading(false);
     }
@@ -90,62 +98,41 @@ const SearchResults = () => {
   const fetchByCategoryTree = async () => {
     if (!categoryId || allCategories.length === 0) return;
     setLoading(true);
-
     try {
       const ids = getAllChildCategoryIds(categoryId);
-
-      const allProducts = [];
+      let allProducts = [];
       for (const id of ids) {
-        const res = await axios.get(
-          `http://localhost:5000/api/products/category/${id}`
-        );
-        allProducts.push(...res.data);
+        const res = await fetchProductsByCategory({ categoryId: id });
+        allProducts.push(...res);
       }
-
       const unique = Array.from(
         new Map(allProducts.map((p) => [p.id, p])).values()
       );
-
-      const withImages = await Promise.all(
-        unique.map(async (product) => {
-          const imgRes = await axios.get(
-            `http://localhost:5000/api/images?product_id=${product.id}`
-          );
-          const firstImage = imgRes.data?.[0]?.url || null;
-          return { ...product, image: firstImage };
-        })
-      );
-
+      const withImages = await attachImages(unique);
       setProducts(withImages);
+      if (withImages.length === 0) toast.info("Không tìm thấy sản phẩm nào!");
     } catch (err) {
-      console.error("Lỗi khi tìm theo cây danh mục:", err);
+      toast.error("Lỗi khi tìm theo cây danh mục!");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAddToCart = (productId) => {
-    if (!productId) return;
+  const handleAddToCart = (product) => {
+    if (!product.id) return;
+    if (product.stock === 0) {
+      toast.info("Sản phẩm đã hết hàng!");
+      return;
+    }
     try {
-      dispatch(addToCart(productId, 1));
-
-      setAlertMessage(
+      dispatch(addToCart(product.id, 1));
+      toast.success(
         isLoggedIn
           ? "Thêm vào giỏ hàng thành công!"
           : "Sản phẩm đã được thêm vào giỏ hàng tạm thời"
       );
-      setAlertType("success");
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 2000);
     } catch (error) {
-      console.error("Lỗi khi thêm vào giỏ hàng:", error);
-      setAlertMessage("Có lỗi xảy ra khi thêm vào giỏ hàng!");
-      setAlertType("error");
-    } finally {
-      setShowAlert(true);
-      setTimeout(() => {
-        setShowAlert(false);
-      }, 2000);
+      toast.error("Có lỗi xảy ra khi thêm vào giỏ hàng!");
     }
   };
 
@@ -158,7 +145,6 @@ const SearchResults = () => {
     setOffset(0);
     setLimit(20);
     isFirstLoad.current = true;
-
     if (categoryId && allCategories.length > 0) {
       fetchByCategoryTree();
     } else if (query) {
@@ -166,7 +152,6 @@ const SearchResults = () => {
     }
   }, [query, categoryId, allCategories]);
 
-  // Hàm format giá tiền
   const formatPrice = (price) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -174,30 +159,53 @@ const SearchResults = () => {
     }).format(price);
   };
 
+  function findPathInTree(tree, targetId, path = []) {
+    for (const node of tree) {
+      if (node.id === Number(targetId)) {
+        return [...path, node];
+      }
+      if (node.children && node.children.length > 0) {
+        const result = findPathInTree(node.children, targetId, [...path, node]);
+        if (result) return result;
+      }
+    }
+    return null;
+  }
+
   return (
     <div className="home-container" style={{ marginTop: "90px" }}>
+      <ToastContainer position="top-right" autoClose={2200} />
       <div>
         <Header />
       </div>
-
-      {showAlert && (
-        <div
-          className={`alert ${
-            alertType === "success" ? "alert-success" : "alert-error"
-          }`}
-        >
-          {alertMessage}
-        </div>
-      )}
-
-      <h2>
-        {categoryId
-          ? `Kết quả theo danh mục: ${categoryId}`
-          : query
-          ? `Kết quả tìm kiếm cho: "${query}"`
-          : "Tìm kiếm sản phẩm"}
+      <h2 className="search-title">
+        {categoryId ? (
+          <div className="breadcrumb">
+            <Link to="/" className="breadcrumb-home">
+              Trang chủ
+            </Link>
+            {findPathInTree(categoryTree, categoryId)?.map((cat, idx, arr) => (
+              <span key={cat.id}>
+                <span className="breadcrumb-separator">/</span>
+                {idx < arr.length - 1 ? (
+                  <Link
+                    to={`/search?category_id=${cat.id}`}
+                    className="breadcrumb-link"
+                  >
+                    {cat.name}
+                  </Link>
+                ) : (
+                  <span className="breadcrumb-current">{cat.name}</span>
+                )}
+              </span>
+            ))}
+          </div>
+        ) : query ? (
+          `Kết quả tìm kiếm cho: "${query}"`
+        ) : (
+          "Tìm kiếm sản phẩm"
+        )}
       </h2>
-
       <div className="product-list">
         {products.map((product) => (
           <div className="product-card" key={product.id}>
@@ -210,20 +218,27 @@ const SearchResults = () => {
             </div>
             <button
               className="add-to-cart-btn"
-              onClick={() => handleAddToCart(product.id)}
+              onClick={() => handleAddToCart(product)}
+              disabled={product.stock === 0}
+              style={
+                product.stock === 0
+                  ? {
+                      background: "#ccc",
+                      color: "#888",
+                      cursor: "not-allowed",
+                      fontWeight: "bold",
+                    }
+                  : {}
+              }
             >
-              Thêm vào giỏ hàng
+              {product.stock === 0 ? "Hết hàng" : "Thêm vào giỏ hàng"}
             </button>
           </div>
         ))}
-
-        {/* Hiển thị thông báo không tìm thấy sản phẩm */}
         {!loading && products.length === 0 && (
           <div className="no-results">Không tìm thấy sản phẩm</div>
         )}
       </div>
-
-      {/* Nút hiển thị thêm (chỉ khi tìm kiếm bằng từ khóa) */}
       {!categoryId && query && (
         <div className="load-more-container">
           {!loading && products.length > 0 && (
@@ -234,6 +249,9 @@ const SearchResults = () => {
           {loading && <div className="loading">Đang tải...</div>}
         </div>
       )}
+      <div>
+        <Footer />
+      </div>
     </div>
   );
 };

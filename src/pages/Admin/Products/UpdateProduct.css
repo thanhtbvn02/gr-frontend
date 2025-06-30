@@ -234,9 +234,9 @@
     gap: 12px;
   }
   
-  .image-upload-box {
-    width: 120px;
-    height: 100px;
+  .image-upload-update {
+    width: 220px;
+    height: 220px;
     background: #fafbfc;
     border: 1.5px dashed #b8b8b8;
     border-radius: 8px;
@@ -248,7 +248,7 @@
     transition: border 0.2s;
   }
   
-  .image-upload-box:hover {
+  .image-upload-update:hover {
     border: 1.5px solid #3498db;
   }
   

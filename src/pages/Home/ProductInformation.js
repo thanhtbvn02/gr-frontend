@@ -7,6 +7,9 @@ import Footer from "../../components/Footer/Footer";
 import { useSelector, useDispatch } from "react-redux";
 import { addToCart } from "../../redux/addCart";
 import { MdOutlineZoomIn, MdOutlineZoomOut } from "react-icons/md";
+import useProduct from "../../hooks/useProduct";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const MAX_CONTENT_HEIGHT = 500;
 
@@ -18,9 +21,6 @@ const ProductInformation = () => {
   const [details, setDetails] = useState([]);
   const [ingredients, setIngredients] = useState([]);
   const [quantity, setQuantity] = useState(1);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertType, setAlertType] = useState("success");
 
   const [showMoreAll, setShowMoreAll] = useState(false);
   const [contentOverflow, setContentOverflow] = useState(false);
@@ -40,8 +40,9 @@ const ProductInformation = () => {
   const dispatch = useDispatch();
 
   const [activeTab, setActiveTab] = useState("description");
-
   const [fontSizeMode, setFontSizeMode] = useState("default");
+
+  const { getProductById } = useProduct();
 
   useEffect(() => {
     if (!showMoreAll && pendingScrollToDescription) {
@@ -56,9 +57,7 @@ const ProductInformation = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const { data: productData } = await axios.get(
-          `http://localhost:5000/api/products/${id}`
-        );
+        const productData = await getProductById(id);
         setProduct(productData);
 
         const { data: imageData } = await axios.get(
@@ -78,11 +77,11 @@ const ProductInformation = () => {
         );
         setIngredients(ingredientData);
       } catch (error) {
-        console.error("Error fetching product info", error);
+        toast.error("Lỗi khi tải thông tin sản phẩm!");
       }
     };
     fetchProduct();
-  }, [id]);
+  }, [id, getProductById]);
 
   useEffect(() => {
     if (contentWrapRef.current) {
@@ -98,24 +97,29 @@ const ProductInformation = () => {
     if (quantity > 1) setQuantity(quantity - 1);
   };
 
-  const increaseQuantity = () => setQuantity(quantity + 1);
+  const increaseQuantity = () => {
+    const maxStock = product.stock ?? 0;
+    if (quantity >= maxStock) {
+      toast.error(`Không thể mua quá ${maxStock} sản phẩm này!`);
+      return;
+    }
+    setQuantity(quantity + 1);
+  };
 
   const handleAddToCart = () => {
+    if (product.stock === 0) {
+      toast.info("Sản phẩm đã hết hàng!");
+      return;
+    }
     try {
       dispatch(addToCart(id, quantity));
-      setAlertMessage(
+      toast.success(
         isLoggedIn
           ? "Thêm vào giỏ hàng thành công!"
           : "Sản phẩm đã được thêm vào giỏ hàng tạm thời"
       );
-      setAlertType("success");
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 2000);
     } catch (error) {
-      setAlertMessage("Có lỗi xảy ra khi thêm vào giỏ hàng!");
-      setAlertType("error");
-      setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 2000);
+      toast.error("Có lỗi xảy ra khi thêm vào giỏ hàng!");
     }
   };
 
@@ -137,8 +141,7 @@ const ProductInformation = () => {
   const [showImageModal, setShowImageModal] = useState(false);
   const [modalImageIdx, setModalImageIdx] = useState(0);
   const [zoomLevel, setZoomLevel] = useState(1);
-
-  const [imgOffset, setImgOffset] = useState({ x: 0, y: 0 }); 
+  const [imgOffset, setImgOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
@@ -193,17 +196,8 @@ const ProductInformation = () => {
 
   return (
     <div className="product-detail-main-content" style={{ paddingTop: 90 }}>
+      <ToastContainer position="top-right" autoClose={2200} />
       <Header />
-
-      {showAlert && (
-        <div
-          className={`alert ${
-            alertType === "success" ? "alert-success" : "alert-error"
-          }`}
-        >
-          {alertMessage}
-        </div>
-      )}
 
       <div className="product-detail-top">
         <div className="product-detail-images">
@@ -261,14 +255,48 @@ const ProductInformation = () => {
               "Không có thông tin chi tiết"
             )}
           </div>
-          <p>Số lượng</p>
+          <p>
+            Số lượng (Tồn kho:{" "}
+            <span style={{ color: "#d0021b", fontWeight: 500 }}>
+              {product.stock ?? 0}
+            </span>
+            )
+          </p>
           <div className="quantity-selector">
             <button onClick={decreaseQuantity}>-</button>
             <a>{quantity}</a>
-            <button onClick={increaseQuantity}>+</button>
+            <button
+              onClick={increaseQuantity}
+              disabled={product.stock === 0 || quantity >= (product.stock ?? 0)}
+              style={
+                product.stock === 0 || quantity >= (product.stock ?? 0)
+                  ? {
+                      background: "#ccc",
+                      color: "#888",
+                      cursor: "not-allowed",
+                    }
+                  : {}
+              }
+            >
+              +
+            </button>
           </div>
-          <button className="add-to-cart-btn" onClick={handleAddToCart}>
-            Thêm vào giỏ hàng
+          <button
+            className="add-to-cart-btn"
+            onClick={handleAddToCart}
+            disabled={product.stock === 0}
+            style={
+              product.stock === 0
+                ? {
+                    background: "#ccc",
+                    color: "#888",
+                    cursor: "not-allowed",
+                    fontWeight: "bold",
+                  }
+                : {}
+            }
+          >
+            {product.stock === 0 ? "Hết hàng" : "Thêm vào giỏ hàng"}
           </button>
         </div>
       </div>
@@ -320,8 +348,8 @@ const ProductInformation = () => {
         <div
           className="tab-content"
           ref={(el) => {
-            contentWrapRef.current = el; 
-            tabContentRef.current = el; 
+            contentWrapRef.current = el;
+            tabContentRef.current = el;
           }}
           style={{
             ...(!showMoreAll
