@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import "./UpdatePass.css";
+import { LuEye, LuEyeClosed } from "react-icons/lu";
 import useUser from "../../hooks/useUser";
+import { toast } from "react-toastify";
 
 const UpdatePass = () => {
   const { id } = useParams();
@@ -41,12 +43,12 @@ const UpdatePass = () => {
       !passwordData.newPassword ||
       !passwordData.confirmPassword
     ) {
-      alert("Vui lòng nhập đầy đủ các trường.");
+      toast.error("Vui lòng nhập đầy đủ các trường.");
       return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert("Mật khẩu mới và xác nhận không khớp.");
+      toast.error("Mật khẩu mới và xác nhận không khớp.");
       return;
     }
     setLoading(true);
@@ -56,14 +58,16 @@ const UpdatePass = () => {
         oldPassword: passwordData.oldPassword,
         newPassword: passwordData.newPassword,
       });
-      alert("Đổi mật khẩu thành công!");
+      toast.success("Đổi mật khẩu thành công!");
       setPasswordData({
         oldPassword: "",
         newPassword: "",
         confirmPassword: "",
       });
     } catch (err) {
-      alert(err.response?.data?.message || "Có lỗi xảy ra khi đổi mật khẩu.");
+      toast.error(
+        err.response?.data?.message || "Có lỗi xảy ra khi đổi mật khẩu."
+      );
     }
     setLoading(false);
   };
@@ -86,7 +90,7 @@ const UpdatePass = () => {
               className="toggle-icon"
               onClick={() => toggleShowPassword("oldPassword")}
             >
-              {showPassword.oldPassword ? "👁️" : "🙈"}
+              {showPassword.oldPassword ? <LuEye /> : <LuEyeClosed />}
             </span>
           </div>
         </div>
@@ -105,7 +109,7 @@ const UpdatePass = () => {
               className="toggle-icon"
               onClick={() => toggleShowPassword("newPassword")}
             >
-              {showPassword.newPassword ? "👁️" : "🙈"}
+              {showPassword.newPassword ? <LuEye /> : <LuEyeClosed />}
             </span>
           </div>
         </div>
@@ -124,7 +128,7 @@ const UpdatePass = () => {
               className="toggle-icon"
               onClick={() => toggleShowPassword("confirmPassword")}
             >
-              {showPassword.confirmPassword ? "👁️" : "🙈"}
+              {showPassword.confirmPassword ? <LuEye /> : <LuEyeClosed />}
             </span>
           </div>
         </div>

@@ -28,7 +28,7 @@
 .product-list {
   display: flex;
   gap: 16px;
-  justify-content: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
   padding: 16px;
   background-color: #f5f7fa;
@@ -169,4 +169,11 @@
 .breadcrumb-current {
   color: #222;
   font-weight: 500;
+}
+
+.product-list .product-card {
+  width: calc((100% - 64px) / 5);
+  min-width: 200px;
+  max-width: 250px;
+  margin-bottom: 24px;
 }

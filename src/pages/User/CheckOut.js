@@ -8,6 +8,7 @@ import Header from "../../components/Header/Header";
 import Footer from "../../components/Footer/Footer";
 import "./CheckOut.css";
 import useProduct from "../../hooks/useProduct";
+import { toast } from "react-toastify";
 
 function CheckOut() {
   const navigate = useNavigate();
@@ -20,9 +21,6 @@ function CheckOut() {
   const [productImages, setProductImages] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
-  const [alertType, setAlertType] = useState("success");
   const [cartItemIds, setCartItemIds] = useState({});
   const [defaultAddress, setDefaultAddress] = useState(null);
   const [orderNote, setOrderNote] = useState("");
@@ -63,9 +61,7 @@ function CheckOut() {
 
   useEffect(() => {
     if (!isLoggedIn) {
-      setAlertMessage("Vui lòng đăng nhập để thanh toán");
-      setAlertType("error");
-      setShowAlert(true);
+      toast.error("Vui lòng đăng nhập để thanh toán");
       setTimeout(() => {
         navigate("/login");
       }, 2000);
@@ -78,11 +74,7 @@ function CheckOut() {
     console.log("UserId:", userId);
 
     if (!token || !userId) {
-      setAlertMessage(
-        "Thông tin đăng nhập không đầy đủ, vui lòng đăng nhập lại"
-      );
-      setAlertType("error");
-      setShowAlert(true);
+      toast.error("Thông tin đăng nhập không đầy đủ, vui lòng đăng nhập lại");
       setTimeout(() => {
         navigate("/login");
       }, 2000);
@@ -111,11 +103,9 @@ function CheckOut() {
           addresses = addressResponse.data || [];
 
           if (!addresses || addresses.length === 0) {
-            setShowAlert(true);
-            setAlertMessage(
+            toast.warning(
               "Bạn chưa có địa chỉ giao hàng. Bạn muốn thêm địa chỉ ngay bây giờ không?"
             );
-            setAlertType("warning");
 
             const confirmNavigation = window.confirm(
               "Bạn chưa có địa chỉ giao hàng. Bạn muốn thêm địa chỉ ngay bây giờ không?"
@@ -220,11 +210,9 @@ function CheckOut() {
 
   const handleVnpayPayment = async () => {
     if (!isLoggedIn || !defaultAddress) {
-      setAlertMessage(
+      toast.error(
         "Không thể thanh toán: Vui lòng đăng nhập và cung cấp địa chỉ giao hàng"
       );
-      setAlertType("error");
-      setShowAlert(true);
       return;
     }
 
@@ -278,8 +266,10 @@ function CheckOut() {
         err.response?.data?.message ||
           "Không thể kết nối với cổng thanh toán VNPay"
       );
-      setAlertType("error");
-      setShowAlert(true);
+      toast.error(
+        err.response?.data?.message ||
+          "Không thể kết nối với cổng thanh toán VNPay"
+      );
       setLoading(false);
     }
   };
@@ -291,11 +281,9 @@ function CheckOut() {
     }
 
     if (!isLoggedIn || !defaultAddress) {
-      setAlertMessage(
+      toast.error(
         "Không thể đặt hàng: Vui lòng đăng nhập và cung cấp địa chỉ giao hàng"
       );
-      setAlertType("error");
-      setShowAlert(true);
       return;
     }
 
@@ -372,9 +360,7 @@ function CheckOut() {
         }
 
         setLoading(false);
-        setAlertMessage("Đặt hàng thành công!");
-        setAlertType("success");
-        setShowAlert(true);
+        toast.success("Đặt hàng thành công!");
 
         setTimeout(() => {
           localStorage.removeItem("selectedItems");
@@ -384,8 +370,7 @@ function CheckOut() {
     } catch (err) {
       console.error("Lỗi khi đặt hàng:", err);
       setError(err.response?.data?.message || "Không thể hoàn tất đơn hàng");
-      setAlertType("error");
-      setShowAlert(true);
+      toast.error(err.response?.data?.message || "Không thể hoàn tất đơn hàng");
       setLoading(false);
     }
   };
@@ -396,20 +381,6 @@ function CheckOut() {
         <Header />
         <div className="checkout-container">
           <h1 className="checkout-title">Xác nhận đơn hàng</h1>
-
-          {showAlert && (
-            <div
-              className={`alert ${
-                alertType === "error"
-                  ? "alert-error"
-                  : alertType === "warning"
-                  ? "alert-warning"
-                  : "alert-success"
-              }`}
-            >
-              {alertMessage}
-            </div>
-          )}
 
           {error && <div className="error-message">{error}</div>}
 

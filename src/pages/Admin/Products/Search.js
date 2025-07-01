@@ -15,8 +15,9 @@ const SearchResults = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [offset, setOffset] = useState(0);
-  const [limit, setLimit] = useState(20);
+  const [limit, setLimit] = useState(10);
   const [allCategories, setAllCategories] = useState([]);
+  const [isEnd, setIsEnd] = useState(false);
   const isFirstLoad = useRef(true);
 
   const location = useLocation();
@@ -65,29 +66,31 @@ const SearchResults = () => {
     );
   };
 
-  const fetchSearchResults = async () => {
+  const fetchSearchResults = async (append = false) => {
     if (!query) return;
     setLoading(true);
     try {
       const res = await searchProductPaginated({
         keyword: query,
-        offset,
+        offset: append ? offset : 0,
         limit,
       });
       const withImages = await attachImages(res);
-      setProducts((prev) => {
-        const merged = [...prev, ...withImages];
-        const unique = Array.from(
-          new Map(merged.map((p) => [p.id, p])).values()
-        );
-        return unique;
-      });
-      setOffset((prev) => prev + limit);
-      if (isFirstLoad.current) {
-        setLimit(8);
-        isFirstLoad.current = false;
+
+      if (withImages.length < limit) {
+        setIsEnd(true);
       }
-      if (withImages.length === 0) toast.info("Không tìm thấy sản phẩm nào!");
+
+      setProducts((prev) =>
+        append
+          ? [
+              ...prev,
+              ...withImages.filter((p) => !prev.some((pr) => pr.id === p.id)),
+            ]
+          : withImages
+      );
+      if (withImages.length === 0 && !append)
+        toast.info("Không tìm thấy sản phẩm nào!");
     } catch (err) {
       toast.error("Lỗi khi tìm sản phẩm!");
     } finally {
@@ -95,22 +98,32 @@ const SearchResults = () => {
     }
   };
 
-  const fetchByCategoryTree = async () => {
+  const fetchByCategoryTree = async (append = false) => {
     if (!categoryId || allCategories.length === 0) return;
     setLoading(true);
     try {
-      const ids = getAllChildCategoryIds(categoryId);
-      let allProducts = [];
-      for (const id of ids) {
-        const res = await fetchProductsByCategory({ categoryId: id });
-        allProducts.push(...res);
+      const res = await fetchProductsByCategory({
+        categoryId: categoryId,
+        offset: append ? offset : 0,
+        limit,
+      });
+
+      const withImages = await attachImages(res);
+
+      if (withImages.length < limit) {
+        setIsEnd(true);
       }
-      const unique = Array.from(
-        new Map(allProducts.map((p) => [p.id, p])).values()
+
+      setProducts((prev) =>
+        append
+          ? [
+              ...prev,
+              ...withImages.filter((p) => !prev.some((pr) => pr.id === p.id)),
+            ]
+          : withImages
       );
-      const withImages = await attachImages(unique);
-      setProducts(withImages);
-      if (withImages.length === 0) toast.info("Không tìm thấy sản phẩm nào!");
+      if (withImages.length === 0 && !append)
+        toast.info("Không tìm thấy sản phẩm nào!");
     } catch (err) {
       toast.error("Lỗi khi tìm theo cây danh mục!");
     } finally {
@@ -143,20 +156,38 @@ const SearchResults = () => {
   useEffect(() => {
     setProducts([]);
     setOffset(0);
-    setLimit(20);
+    setLimit(10);
+    setIsEnd(false);
     isFirstLoad.current = true;
+  }, [query, categoryId, allCategories]);
+
+  useEffect(() => {
     if (categoryId && allCategories.length > 0) {
-      fetchByCategoryTree();
+      fetchByCategoryTree(false);
     } else if (query) {
-      fetchSearchResults();
+      fetchSearchResults(false);
     }
   }, [query, categoryId, allCategories]);
+
+  useEffect(() => {
+    if (offset === 0) return;
+    if (categoryId && allCategories.length > 0) {
+      fetchByCategoryTree(true);
+    } else if (query) {
+      fetchSearchResults(true);
+    }
+    // eslint-disable-next-line
+  }, [offset]);
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
     }).format(price);
+  };
+
+  const handleLoadMore = () => {
+    setOffset((prev) => prev + limit);
   };
 
   function findPathInTree(tree, targetId, path = []) {
@@ -239,10 +270,10 @@ const SearchResults = () => {
           <div className="no-results">Không tìm thấy sản phẩm</div>
         )}
       </div>
-      {!categoryId && query && (
+      {(categoryId || query) && (
         <div className="load-more-container">
-          {!loading && products.length > 0 && (
-            <button className="load-more-btn" onClick={fetchSearchResults}>
+          {!loading && products.length > 0 && !isEnd && (
+            <button className="load-more-btn" onClick={handleLoadMore}>
               Hiển thị thêm
             </button>
           )}

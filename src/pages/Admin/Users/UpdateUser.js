@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import SideBar from "../../../components/SideBar/SideBar";
 import useUser from "../../../hooks/useUser";
 import "./UpdateUser.css";
+import { toast } from "react-toastify";
 
 const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
@@ -41,7 +42,7 @@ const UpdateUser = () => {
         setStatus(res.status || "active");
         setAvatar(res.image || defaultAvatar);
       } catch (err) {
-        alert("Không thể lấy thông tin người dùng");
+        toast.error("Không thể lấy thông tin người dùng");
       }
     };
     fetchUser();
@@ -69,7 +70,7 @@ const UpdateUser = () => {
     if (!file) return;
     if (file && (file.type === "image/jpeg" || file.type === "image/png")) {
       if (file.size > MAX_IMAGE_SIZE) {
-        alert("Dung lượng file quá lớn. Vui lòng chọn file nhỏ hơn 5MB.");
+        toast.error("Dung lượng file quá lớn. Vui lòng chọn file nhỏ hơn 5MB.");
         return;
       }
       setAvatarUploading(true);
@@ -79,13 +80,13 @@ const UpdateUser = () => {
         const res = await updateAvatar({ id, formData });
         setAvatar(res.url || res.data?.url || defaultAvatar);
         setDisableSave(false);
-        alert("Cập nhật ảnh đại diện thành công!");
+        toast.success("Cập nhật ảnh đại diện thành công!");
       } catch (error) {
-        alert("Lỗi upload ảnh. Vui lòng thử lại.");
+        toast.error("Lỗi upload ảnh. Vui lòng thử lại.");
       }
       setAvatarUploading(false);
     } else {
-      alert("Định dạng không hỗ trợ. Chỉ nhận .JPEG hoặc .PNG");
+      toast.error("Định dạng không hỗ trợ. Chỉ nhận .JPEG hoặc .PNG");
     }
   };
 
@@ -93,10 +94,10 @@ const UpdateUser = () => {
     e.preventDefault();
     try {
       await deleteUser(id);
-      alert("Xóa tài khoản thành công!");
+      toast.success("Xóa tài khoản thành công!");
       navigate("/admin/users");
     } catch (err) {
-      alert("Có lỗi khi xóa tài khoản.");
+      toast.error("Có lỗi khi xóa tài khoản.");
     }
   };
 
@@ -115,10 +116,10 @@ const UpdateUser = () => {
           status: status,
         },
       });
-      alert("Cập nhật thông tin thành công!");
+      toast.success("Cập nhật thông tin thành công!");
       setDisableSave(true);
     } catch (err) {
-      alert("Có lỗi khi cập nhật.");
+      toast.error("Có lỗi khi cập nhật.");
     }
   };
 

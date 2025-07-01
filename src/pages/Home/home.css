@@ -23,12 +23,14 @@
 }
 .home-container {
   margin: 50px;
+  font-family: 'Inter', 'Inter Fallback' !important;
+
 }
 
 .product-list {
   display: flex;
   gap: 16px;
-  justify-content: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
   padding: 16px;
   background-color: #f5f7fa;
@@ -75,7 +77,6 @@
   text-overflow: ellipsis;
   white-space: normal;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   text-align: left;
 }
@@ -105,9 +106,14 @@
   background-color: #0056b3;
 }
 
+.load-more-container {
+  display: flex;
+  justify-content: right;
+}
 
 .load-more-btn {
-  margin-top: 30px;
+  margin-top: 5px;
+  margin-right: 20px;
   padding: 10px 20px;
   background-color: #e22323;
   color: white;
@@ -190,4 +196,17 @@
     transform: translateX(0);
     opacity: 1;
   }
+}
+.product-list.five-per-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: flex-start;
+}
+
+.product-list.five-per-row .product-card {
+  width: calc((100% - 64px) / 5);
+  min-width: 200px;
+  max-width: 250px;
+  margin-bottom: 24px;
 }

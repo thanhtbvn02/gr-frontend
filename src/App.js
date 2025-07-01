@@ -5,6 +5,7 @@ import { useAuth } from "./hooks/useAuth";
 import { useDispatch } from "react-redux";
 import { initCart } from "./redux/addCart";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ScrollToTop } from "./components";
 
 import {
   SearchResults,
@@ -59,6 +60,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <Fragment>
           <BrowserRouter>
+            <ScrollToTop />
             <Routes>
               <Route path="/add" element={<Add />} />
               <Route path="/update/:id" element={<Update />} />

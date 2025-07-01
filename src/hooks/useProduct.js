@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "../utils/axiosConfig";
 
@@ -43,14 +42,14 @@ const fetchProductsByCategory = async ({
   limit = 8,
 }) => {
   const res = await axiosInstance.get(
-    `/products/category/${categoryId}?offset=${offset}&limit=${limit}`
+    `/products/category/${categoryId}/paginated?offset=${offset}&limit=${limit}`
   );
   return Array.isArray(res.data) ? res.data : res.data.products || [];
 };
 
 const searchProductPaginated = async ({ keyword, offset = 0, limit = 8 }) => {
   const res = await axiosInstance.get(
-    `/products/search?query=${keyword}&offset=${offset}&limit=${limit}`
+    `/products/search/paginated?query=${keyword}&offset=${offset}&limit=${limit}`
   );
   return Array.isArray(res.data) ? res.data : res.data.products || [];
 };

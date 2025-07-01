@@ -4,6 +4,8 @@ import ReCAPTCHA from "react-google-recaptcha";
 import axios from "axios";
 import "./Register.css";
 import useUser from "../../hooks/useUser";
+import { toast } from "react-toastify";
+
 const Register = () => {
   const navigate = useNavigate();
 
@@ -20,17 +22,17 @@ const Register = () => {
   const handleRegistration = async (e) => {
     e.preventDefault();
 
-    if (!username || !password) {
-      alert("Bạn cần nhập đầy đủ tài khoản và mật khẩu!");
+    if (!username || !password || !confirmPassword) {
+      toast.error("Bạn cần nhập đầy đủ tài khoản và mật khẩu!");
       return;
     }
 
     if (password !== confirmPassword) {
-      alert("Mật khẩu không khớp!");
+      toast.error("Mật khẩu không khớp!");
       return;
     }
     if (!captchaToken) {
-      alert("Vui lòng xác nhận bạn không phải robot!");
+      toast.error("Vui lòng xác nhận bạn không phải robot!");
       return;
     }
 
@@ -38,7 +40,7 @@ const Register = () => {
       const token = recaptchaRef.current.getValue();
 
       if (!token) {
-        alert("Vui lòng xác nhận bạn không phải robot!");
+        toast.error("Vui lòng xác nhận bạn không phải robot!");
         return;
       }
 
@@ -47,7 +49,7 @@ const Register = () => {
         { token: captchaToken }
       );
       if (!verifyRes.data.success) {
-        alert("Captcha không hợp lệ");
+        toast.error("Captcha không hợp lệ");
         recaptchaRef.current.reset();
         setCaptchaToken(null);
         return;
@@ -56,7 +58,7 @@ const Register = () => {
       const res = await registerUser({ username, password, captchaToken });
 
       if (res.message === "Đăng ký thành công") {
-        alert("Đăng ký thành công! Mời bạn đăng nhập.");
+        toast.success("Đăng ký thành công! Mời bạn đăng nhập.");
         navigate("/login");
       }
     } catch (err) {
@@ -70,7 +72,7 @@ const Register = () => {
         err?.response?.data?.message ||
         err?.message ||
         "Đăng ký thất bại. Vui lòng thử lại.";
-      alert("Đăng ký thất bại: " + errorMessage);
+      toast.error("Đăng ký thất bại: " + errorMessage);
       recaptchaRef.current.reset();
       setCaptchaToken(null);
     }

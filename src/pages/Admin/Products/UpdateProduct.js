@@ -5,6 +5,7 @@ import SideBar from "../../../components/SideBar/SideBar";
 import { MdDelete } from "react-icons/md";
 import "./UpdateProduct.css";
 import useProduct from "../../../hooks/useProduct";
+import { toast } from "react-toastify";
 
 const MAX_IMAGES = 4; // Thay đổi nếu muốn tối đa nhiều/ít hơn
 const TABS = ["Thông tin chung", "Thuộc tính", "Thành phần"];
@@ -172,11 +173,11 @@ const UpdateProduct = () => {
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
-      alert("Cập nhật sản phẩm thành công!");
+      toast.success("Cập nhật sản phẩm thành công!");
       navigate("/admin/products");
     } catch (err) {
       console.error("Error updating product:", err);
-      alert("Lỗi khi cập nhật sản phẩm");
+      toast.error("Lỗi khi cập nhật sản phẩm");
     }
   };
 
@@ -192,7 +193,7 @@ const UpdateProduct = () => {
           >
             {uploadingIdx === idx ? (
               <div
-                style={{  
+                style={{
                   width: "100%",
                   height: "100%",
                   display: "flex",

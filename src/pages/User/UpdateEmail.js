@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import "./UpdateEmail.css";
 import useUser from "../../hooks/useUser";
+import { toast } from "react-toastify";
 
 function UpdateEmail() {
   const { id } = useParams();
@@ -10,7 +11,7 @@ function UpdateEmail() {
   const handleUpdateEmail = async () => {
     try {
       await updateEmail({ id, email });
-      alert("Email đã được cập nhật thành công");
+      toast.success("Email đã được cập nhật thành công");
     } catch (error) {
       console.log(error);
     }

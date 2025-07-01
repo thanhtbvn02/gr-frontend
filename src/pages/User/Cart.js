@@ -64,7 +64,6 @@ function CartPage() {
                 const firstImage = imgRes.data?.[0]?.url || null;
                 imagesData[product.id] = firstImage;
               } catch (productErr) {
-                // Không cần toast ở đây
               }
             }
 
@@ -89,7 +88,7 @@ function CartPage() {
                 const firstImage = imgRes.data?.[0]?.url || null;
                 imagesData[product.id] = firstImage;
               } catch (productErr) {
-                // Không cần toast ở đây
+                console.log(productErr);
               }
             }
 

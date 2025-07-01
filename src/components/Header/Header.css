@@ -25,7 +25,7 @@ button {
   align-items: center;
   justify-content: space-between;
   padding: 0 32px;
-  background: linear-gradient(90deg, #0052a4 40%, #6a11cb 100%);
+  background: linear-gradient(130deg, #595f63 0%, #b2f0e6 65%, #2ec4b6 100%);
   box-shadow: 0 6px 16px rgba(0,0,0,0.18);
   z-index: 120;
 }

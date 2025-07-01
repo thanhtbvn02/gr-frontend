@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:5000/api",
@@ -83,7 +84,7 @@ axiosInstance.interceptors.response.use(
       localStorage.removeItem("accessToken");
       if (!window.forbiddenAlertShown) {
         window.forbiddenAlertShown = true;
-        alert("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
+        toast.error("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
         setTimeout(() => {
           window.forbiddenAlertShown = false;
         }, 2000);

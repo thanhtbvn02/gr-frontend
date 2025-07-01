@@ -8,6 +8,7 @@ import Order from "./Order";
 import OrderDetail from "./OrderDetail";
 import "./Account.css";
 import Header from "../../components/Header/Header";
+import Footer from "../../components/Footer/Footer";
 const Account = () => {
   const [activeTab, setActiveTab] = useState("info");
   const [selectedOrderCode, setSelectedOrderCode] = useState(null);
@@ -77,6 +78,7 @@ const Account = () => {
           )}
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

@@ -1,9 +1,10 @@
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import { toast } from "react-toastify";
 
 export function exportToExcel(data, fileName, sheetName = "Sheet1") {
   if (!data || data.length === 0) {
-    alert("Không có dữ liệu để xuất!");
+    toast.error("Không có dữ liệu để xuất!");
     return;
   }
   const ws = XLSX.utils.json_to_sheet(data);

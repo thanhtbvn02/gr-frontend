@@ -5,3 +5,4 @@ export { default as Footer } from "./Footer/Footer";
 export { default as SideBar } from "./SideBar/SideBar";
 export { default as Contact } from "./Contact";
 export { default as Slider } from "./Slider";
+export { default as ScrollToTop } from "./ScrollToTop";

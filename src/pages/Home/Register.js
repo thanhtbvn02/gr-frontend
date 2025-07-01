@@ -8,6 +8,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import { ToastContainer, toast } from "react-toastify";
 import { LuEye, LuEyeClosed } from "react-icons/lu";
+import { FaClinicMedical } from "react-icons/fa";
 import "react-toastify/dist/ReactToastify.css";
 import "./Register.css";
 
@@ -89,27 +90,28 @@ const Register = () => {
   };
 
   return (
-    <div className="container">
-      <div className="login-box">
-        <div className="panel left-panel">
-          <h2>Chào mừng tới Hust Drug Store</h2>
+    <div className="auth-bg">
+      <div className="auth-box">
+        <div className="auth-aside">
+          <FaClinicMedical size={62} className="pharmacy-icon" />
+          <h2>Đăng ký <br /><span className="store-brand">Hust Drugstore</span></h2>
           <p>
-            Nhập thông tin cá nhân của bạn để sử dụng tất cả các tính năng của
-            trang web
+            Đăng ký tài khoản để quản lý đơn thuốc, nhận ưu đãi và chăm sóc sức khoẻ chủ động cùng chúng tôi.
           </p>
           <button onClick={() => navigate("/login")} className="switch-btn">
-            ĐĂNG NHẬP
+            ĐÃ CÓ TÀI KHOẢN
           </button>
         </div>
         <div className="form-container">
           <form className="form sign-up-form" onSubmit={handleSubmit(onSubmit)}>
-            <h2>Tạo tài khoản</h2>
+            <h2>Tạo tài khoản mới</h2>
 
             <input
               type="text"
               placeholder="Tên tài khoản"
               className="custom-input"
               {...register("username")}
+              autoComplete="username"
             />
             {errors.username && (
               <p className="not-passed">{errors.username.message}</p>
@@ -118,9 +120,10 @@ const Register = () => {
             <div className="input-password-wrapper">
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="Mật khẩu, ví dụ: Abc@123"
+                placeholder="Mật khẩu"
                 className="custom-input"
                 {...register("password")}
+                autoComplete="new-password"
               />
               <span
                 className="toggle-eye"
@@ -139,6 +142,7 @@ const Register = () => {
                 placeholder="Nhập lại mật khẩu"
                 className="custom-input"
                 {...register("confirmPassword")}
+                autoComplete="new-password"
               />
               <span
                 className="toggle-eye"
@@ -151,11 +155,13 @@ const Register = () => {
               <p className="not-passed">{errors.confirmPassword.message}</p>
             )}
 
-            <ReCAPTCHA
-              ref={recaptchaRef}
-              sitekey={process.env.REACT_APP_SITE_KEY}
-              onChange={(token) => setCaptchaToken(token)}
-            />
+            <div className="recaptcha-container">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={process.env.REACT_APP_SITE_KEY}
+                onChange={(token) => setCaptchaToken(token)}
+              />
+            </div>
 
             <button
               type="submit"
@@ -164,17 +170,17 @@ const Register = () => {
             >
               ĐĂNG KÝ
             </button>
-            <a href="/home" className="skip-login">
-              Bỏ qua đăng ký?
+            <a href="/" className="skip-login">
+              Về trang chủ mà không đăng ký
             </a>
             <button
               type="button"
-              className="google-login-btn"
+              className="google-btn"
               onClick={() => {
                 window.location.href = "http://localhost:5000/api/auth/google";
               }}
             >
-              ĐĂNG NHẬP VỚI GOOGLE
+              ĐĂNG KÝ BẰNG GOOGLE
             </button>
           </form>
         </div>

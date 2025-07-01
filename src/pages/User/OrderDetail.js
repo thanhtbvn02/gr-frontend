@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "./OrderDetail.css";
+import { toast } from "react-toastify";
 
 function getStatus(key) {
   const map = {
@@ -121,7 +122,7 @@ function OrderDetail({ orderCode }) {
       });
       setOrder({ ...order, status: newStatus });
     } catch {
-      alert("Cập nhật trạng thái thất bại");
+      toast.error("Cập nhật trạng thái thất bại");
     } finally {
       setIsUpdating(false);
     }

@@ -9,6 +9,7 @@ import {
   MdDelete,
 } from "react-icons/md";
 import useUser from "../../../hooks/useUser";
+import { toast } from "react-toastify";
 
 const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
 
@@ -41,11 +42,11 @@ function ManageUser() {
       return;
     try {
       await deleteUsers(selectedUsers);
-      alert("Xóa tài khoản thành công!");
+      toast.success("Xóa tài khoản thành công!");
       setSelectedUsers([]);
       refetch();
     } catch (err) {
-      alert("Có lỗi khi xóa tài khoản.");
+      toast.error("Có lỗi khi xóa tài khoản.");
     }
   };
 
